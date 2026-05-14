@@ -628,6 +628,67 @@
         justify-content: flex-start;
       }
     }
+
+    @media (max-width: 640px) {
+      nav {
+        height: 72px;
+        padding: 0 1rem;
+      }
+
+      .nav-logo {
+        font-size: 26px;
+      }
+
+      .nav-cta {
+        min-height: 48px;
+        padding: 0 1.05rem;
+        font-size: 13px;
+      }
+
+      main {
+        padding-top: 72px;
+      }
+
+      .media-panel {
+        min-height: 360px;
+        padding: 3.5rem 1rem 2rem;
+      }
+
+      .back-link {
+        left: 1rem;
+        top: 1rem;
+      }
+
+      .copy-panel,
+      .content-band,
+      .offer-band,
+      .category-products {
+        padding: 2.25rem 1rem;
+      }
+
+      h1 {
+        font-size: clamp(2.8rem, 14vw, 4.25rem);
+      }
+
+      .lead {
+        font-size: 14px;
+        line-height: 1.75;
+      }
+
+      .price {
+        font-size: 2.35rem;
+      }
+
+      .set-card {
+        padding: 1.15rem;
+        border-radius: 16px;
+      }
+
+      .set-card img {
+        object-fit: contain;
+        background: var(--white);
+      }
+    }
   </style>
 </head>
 

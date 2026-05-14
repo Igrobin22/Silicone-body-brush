@@ -2116,6 +2116,232 @@
       }
     }
 
+    @media (max-width: 760px) {
+      html,
+      body {
+        overflow-x: hidden;
+      }
+
+      nav {
+        height: 72px;
+        padding: 0 1rem;
+        background: rgba(255, 255, 255, .94);
+      }
+
+      .nav-links {
+        display: none !important;
+      }
+
+      .nav-logo {
+        font-size: 26px;
+      }
+
+      .nav-cta {
+        min-height: 48px;
+        padding: 0 1.05rem;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .hero {
+        display: block;
+        height: auto;
+        min-height: 0;
+        padding: 88px 1rem 1.25rem;
+        overflow: hidden;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, .9) 0%, rgba(255, 255, 255, .74) 44%, rgba(255, 255, 255, .94) 100%),
+          url('https://res.cloudinary.com/dqjilscgl/image/upload/v1778744471/ChatGPT_Image_May_14_2026_11_40_44_AM_jzx8xg.png');
+        background-size: cover;
+        background-position: 44% center;
+      }
+
+      .hero-bg-text,
+      .hero-stage,
+      .hero-scroll-cue {
+        display: none;
+      }
+
+      .hero-left {
+        position: relative;
+        left: auto;
+        top: auto;
+        z-index: 2;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 1.2rem;
+        transform: none;
+        border: 1px solid rgba(255, 255, 255, .76);
+        border-radius: 24px;
+        background: rgba(255, 255, 255, .78);
+        box-shadow: 0 18px 44px rgba(16, 24, 22, .08);
+      }
+
+      .hero-tag {
+        margin-bottom: .75rem;
+        font-size: 8.5px;
+        letter-spacing: .16em;
+      }
+
+      .hero-h1 {
+        max-width: 11ch;
+        margin-bottom: .9rem;
+        font-size: clamp(3.05rem, 14vw, 4.2rem);
+        line-height: .94;
+      }
+
+      .hero-desc {
+        margin-bottom: 1rem;
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .hero-micro {
+        gap: .65rem;
+        margin: 0 0 1.2rem;
+      }
+
+      .hero-micro li {
+        min-height: 22px;
+        padding-left: 1.85rem;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .hero-micro li::before {
+        top: 0;
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+      }
+
+      .hero-price-row {
+        gap: .55rem;
+        margin-bottom: 1rem;
+      }
+
+      .hero-price {
+        font-size: 2.55rem;
+        line-height: .9;
+      }
+
+      .hero-price-note {
+        font-size: 11px;
+      }
+
+      .hero-btns {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: .65rem;
+      }
+
+      .hero-btns .btn-p,
+      .hero-btns .btn-s {
+        width: 100%;
+        min-height: 50px;
+        font-size: 13px;
+      }
+
+      .hero-right-info {
+        position: relative;
+        right: auto;
+        top: auto;
+        z-index: 2;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        margin: .8rem 0 0;
+        padding: 0;
+        transform: none;
+      }
+
+      .hero-spec-group {
+        padding: .85rem .65rem;
+        border: 1px solid rgba(255, 255, 255, .78) !important;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, .82);
+        box-shadow: 0 14px 30px rgba(16, 24, 22, .07);
+      }
+
+      .hero-spec-label {
+        font-size: 8.5px;
+        letter-spacing: .14em;
+      }
+
+      .hero-spec-value {
+        font-size: 1.45rem;
+      }
+
+      .mq-wrap {
+        min-height: 42px;
+      }
+
+      .mq-inner {
+        font-size: 12px;
+      }
+
+      .specs {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      .pgrid,
+      .fgrid,
+      .ogrid,
+      .shade-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+      }
+
+      .sec,
+      .feat-sec,
+      .shade-sec,
+      .off-sec,
+      .cta-sec {
+        padding: 3rem 1rem;
+      }
+
+      .shade-head {
+        align-items: flex-start;
+      }
+
+      .shade-card,
+      .set-builder {
+        border-radius: 22px;
+      }
+
+      .set-includes {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .nav-logo {
+        font-size: 23px;
+      }
+
+      .nav-cta {
+        min-height: 44px;
+        padding: 0 .85rem;
+        font-size: 12px;
+      }
+
+      .hero {
+        padding-inline: .8rem;
+      }
+
+      .hero-left {
+        padding: 1rem;
+      }
+
+      .hero-h1 {
+        font-size: clamp(2.75rem, 13vw, 3.45rem);
+      }
+    }
+
   </style>
 </head>
 
