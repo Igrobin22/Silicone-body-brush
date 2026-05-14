@@ -223,7 +223,7 @@ h1 {
 
 .product-showcase {
   min-height: calc(100vh - 72px);
-  padding-top: clamp(4.6rem, 8vw, 7.5rem);
+  padding-top: 0;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .74), rgba(255, 255, 255, .38)),
     linear-gradient(135deg, rgba(220, 238, 231, .45), rgba(246, 219, 228, .42) 58%, rgba(234, 223, 196, .36));
@@ -636,7 +636,7 @@ h1 {
   }
 
   .product-showcase {
-    padding-top: 4rem;
+    padding-top: 0;
   }
 }
 
