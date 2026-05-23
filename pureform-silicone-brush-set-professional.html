@@ -2174,7 +2174,8 @@
         z-index: 2;
         width: min(100%, 330px);
         max-width: none;
-        margin: 0 auto;
+        justify-self: start;
+        margin: 0;
         padding: .9rem;
         transform: none;
         border: 1px solid rgba(255, 255, 255, .64);
@@ -2347,6 +2348,256 @@
 
       .hero-h1 {
         font-size: clamp(1.62rem, 6.8vw, 1.98rem);
+      }
+    }
+
+    @media (max-width: 760px) {
+      html,
+      body {
+        overflow-x: hidden;
+      }
+
+      nav {
+        display: flex;
+        height: 58px;
+        padding: 0 1rem;
+        align-items: center;
+        justify-content: space-between;
+        gap: .8rem;
+        background: rgba(255, 255, 255, .92);
+        border-bottom: 0.5px solid var(--border);
+        box-shadow: 0 12px 36px rgba(19, 27, 24, .06);
+        overflow: visible;
+      }
+
+      .nav-logo {
+        color: var(--dark);
+        font-size: 21px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .nav-cta {
+        display: none !important;
+      }
+
+      .hero {
+        display: grid;
+        width: 100vw;
+        max-width: 100vw;
+        min-height: auto;
+        padding: 76px .75rem 1.1rem;
+        overflow: hidden;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, .96) 0%, rgba(248, 251, 251, .9) 100%);
+      }
+
+      .hero-bg-text,
+      .hero-stage,
+      .hero-scroll-cue {
+        display: none;
+      }
+
+      .hero-left {
+        position: relative;
+        left: auto;
+        top: auto;
+        z-index: 2;
+        isolation: isolate;
+        overflow: hidden;
+        width: min(calc(100vw - 1.5rem), 330px);
+        max-width: none;
+        justify-self: start;
+        margin: 0 0 0 -2.4rem !important;
+        padding: 1.05rem 1rem 1.1rem;
+        transform: none;
+        border: .5px solid rgba(0, 0, 0, .06);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, .62);
+        box-shadow: 0 14px 32px rgba(28, 35, 32, .08);
+        -webkit-backdrop-filter: blur(18px) saturate(130%);
+        backdrop-filter: blur(18px) saturate(130%);
+      }
+
+      .hero-left::before,
+      .hero-left::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .hero-left::before {
+        z-index: -2;
+        background-image: url('assets/pureform-back-scrubber.png');
+        background-repeat: no-repeat;
+        background-size: 132%;
+        background-position: 76% -48px;
+        opacity: .62;
+        filter: grayscale(.12) contrast(1.04);
+      }
+
+      .hero-left::after {
+        z-index: -1;
+        background:
+          linear-gradient(90deg, rgba(255, 255, 255, .97) 0%, rgba(255, 255, 255, .88) 48%, rgba(255, 255, 255, .24) 100%),
+          linear-gradient(180deg, rgba(255, 255, 255, .42), rgba(255, 255, 255, .92));
+      }
+
+      .hero-left > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-tag {
+        margin-bottom: .65rem;
+        color: var(--light);
+        font-size: 7.5px;
+        letter-spacing: .14em;
+      }
+
+      .hero-h1 {
+        max-width: 13ch;
+        margin-bottom: .65rem;
+        color: var(--dark);
+        font-size: clamp(2rem, 9vw, 2.8rem);
+        font-weight: 400;
+        line-height: .95;
+      }
+
+      .hero-desc {
+        max-width: 31ch;
+        margin-bottom: .85rem;
+        color: var(--mid);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .hero-micro {
+        gap: .4rem;
+        margin: 0 0 .9rem;
+      }
+
+      .hero-micro li {
+        min-height: 17px;
+        padding-left: 1.35rem;
+        font-size: 11px;
+        line-height: 1.3;
+      }
+
+      .hero-micro li::before {
+        top: 0;
+        width: 15px;
+        height: 15px;
+        font-size: 8px;
+      }
+
+      .hero-price-row {
+        margin-bottom: .85rem;
+      }
+
+      .hero-price {
+        color: var(--dark);
+        font-size: 1.55rem;
+      }
+
+      .hero-price-note {
+        color: var(--light);
+        font-size: 8px;
+      }
+
+      .hero-btns {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: .55rem;
+        justify-items: start;
+      }
+
+      .hero-btns .btn-p,
+      .hero-btns .btn-s {
+        display: inline-flex;
+        width: auto;
+        max-width: 100%;
+        min-width: 180px;
+        min-height: 42px;
+        padding: 12px 28px;
+        font-size: 11px;
+      }
+
+      .hero-right-info {
+        position: relative;
+        right: auto;
+        top: auto;
+        z-index: 2;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem;
+        width: min(calc(100vw - 1.5rem), 330px);
+        max-width: none;
+        min-width: 0;
+        justify-self: start;
+        margin: .75rem 0 0 -2.4rem !important;
+        padding: 0;
+        transform: none;
+      }
+
+      .hero-spec-group {
+        min-height: 62px;
+        padding: .62rem .5rem;
+        border: 1px solid rgba(0, 0, 0, .06) !important;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, .76);
+        box-shadow: 0 8px 18px rgba(28, 35, 32, .055);
+      }
+
+      .hero-spec-label {
+        color: var(--light);
+        font-size: 6.5px;
+        letter-spacing: .11em;
+      }
+
+      .hero-spec-value {
+        color: var(--dark);
+        font-size: 1.05rem;
+      }
+
+      .mq-wrap {
+        min-height: 34px;
+      }
+
+      .specs {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      .pgrid,
+      .fgrid,
+      .ogrid,
+      .shade-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      .pcard {
+        border-radius: 22px;
+      }
+
+      .pcard-imgwrap {
+        aspect-ratio: 1 / .82;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .hero {
+        padding-inline: .65rem;
+      }
+
+      .hero-left {
+        padding: .85rem;
+      }
+
+      .hero-h1 {
+        font-size: clamp(1.72rem, 8.2vw, 2.25rem);
       }
     }
 
