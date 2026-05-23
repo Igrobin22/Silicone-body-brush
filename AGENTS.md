@@ -1,5 +1,9 @@
 # Design Standards
 
+## Project design source
+- Read `DESIGN.md` before making visual, layout, typography, color, or component changes.
+- Treat `DESIGN.md` as the source of truth for the PureForm brand system and keep it updated when the visual system changes.
+
 ## Styling
 - Use Tailwind CSS with custom animations
 - Follow a glassmorphism / neomorphism aesthetic
