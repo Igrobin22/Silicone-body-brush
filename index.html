@@ -2126,8 +2126,8 @@
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         height: 54px;
-        width: 100vw;
-        max-width: 100vw;
+        width: 100%;
+        max-width: 100%;
         padding: 0 .95rem;
         align-items: center;
         justify-content: normal;
@@ -2362,8 +2362,8 @@
         grid-template-columns: minmax(0, 1fr);
         height: auto;
         min-height: 94px;
-        width: 100vw;
-        max-width: 100vw;
+        width: 100%;
+        max-width: 100%;
         padding: .62rem .9rem .56rem;
         align-items: center;
         justify-content: normal;
@@ -2424,8 +2424,8 @@
 
       .hero {
         display: grid;
-        width: 100vw;
-        max-width: 100vw;
+        width: 100%;
+        max-width: 100%;
         min-height: auto;
         padding: 112px .75rem 1.1rem;
         overflow: hidden;
@@ -2446,7 +2446,7 @@
         z-index: 2;
         isolation: isolate;
         overflow: hidden;
-        width: min(calc(100vw - 2.2rem), 304px);
+        width: min(calc(100dvw - 2.2rem), 304px);
         max-width: none;
         justify-self: start;
         margin: 0 0 0 -1.35rem !important;
@@ -2470,7 +2470,7 @@
 
       .hero-left::before {
         z-index: -2;
-        background-image: url('assets/pureform-back-scrubber.png');
+        background-image: url('https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png');
         background-repeat: no-repeat;
         background-size: 132%;
         background-position: 76% -48px;
@@ -2573,7 +2573,7 @@
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: .65rem;
-        width: min(calc(100vw - 2.2rem), 304px);
+        width: min(calc(100dvw - 2.2rem), 304px);
         max-width: none;
         min-width: 0;
         justify-self: start;
@@ -2644,7 +2644,7 @@
       }
 
       .hero-left {
-        width: min(calc(100vw - 1.8rem), 292px);
+        width: min(calc(100dvw - 1.8rem), 292px);
         margin-left: -1rem !important;
         padding: .78rem;
       }
@@ -2672,7 +2672,7 @@
       <li><a href="faq.html">FAQ</a></li>
       <li><a href="contact.html">Contact</a></li>
     </ul>
-    <a class="nav-cta Btn buy-pay-button" href="products.html#offers"><span>Buy &amp; Pay</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+    <a class="nav-cta Btn buy-pay-button" href="products.html#offers"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
   </nav>
 
   <section class="hero" id="hero">
@@ -2739,7 +2739,7 @@
         <span class="hero-price-note">VAT incl.</span>
       </div>
       <div class="hero-btns">
-        <button class="btn-p Btn buy-pay-button" type="button" data-scroll="offers"><span>Buy &amp; Pay</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
+        <button class="btn-p Btn buy-pay-button" type="button" data-scroll="offers"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
         <button class="btn-s" type="button" data-scroll="products">Explore Set</button>
       </div>
     </div>
@@ -2810,8 +2810,10 @@
       <a class="pcard reveal" href="pureform-product-detail.html?product=pureform-4pc-set-grey"
         aria-label="View Grey 4-Piece Silicone Brush Set details">
         <div class="pcard-num">01</div>
-        <div class="pcard-imgwrap"><img class="pcard-img" src="assets/pureform-back-scrubber.png"
-            alt="Temporary product photo for the Grey 4-piece silicone brush set" loading="lazy" decoding="async"></div>
+        <div class="pcard-imgwrap"><img class="pcard-img"
+            src="https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png"
+            alt="Grey 4-piece silicone brush set with back, body, scalp, and face tools" loading="lazy"
+            decoding="async"></div>
         <div class="pcard-name">Grey 4-Piece Silicone Brush Set</div>
         <p class="pcard-desc">One complete set in Grey with the back scrubber, body brush, scalp massager, and face brush.</p>
         <span class="pcard-tag">Grey Set</span>
@@ -2976,7 +2978,7 @@
     <p class="cta-sub reveal">Cash on delivery. Available in Smoke Grey and Midnight Black.</p>
     <p class="cta-vat reveal">Bundle options and shade availability are confirmed before checkout.</p>
     <div class="cta-btns reveal">
-      <button class="btn-p Btn buy-pay-button" type="button" data-scroll="offers"><span>Buy &amp; Pay</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
+      <button class="btn-p Btn buy-pay-button" type="button" data-scroll="offers"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
       <button class="btn-s" type="button" data-scroll="offers">View All Offers</button>
     </div>
     <div class="pills reveal">

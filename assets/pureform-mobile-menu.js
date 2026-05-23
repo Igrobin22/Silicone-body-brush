@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  document.documentElement.classList.add('pf-js');
+
   const nav = document.querySelector('body > nav');
 
   if (!nav || document.querySelector('.pf-mobile-sidebar')) {

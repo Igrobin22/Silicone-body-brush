@@ -140,8 +140,10 @@
       min-height: 620px;
       padding: 5rem;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 1.15rem;
       overflow: hidden;
       background:
         radial-gradient(circle at 50% 42%, rgba(255, 255, 255, .95) 0 32%, rgba(231, 240, 240, .85) 33% 47%, transparent 48%),
@@ -191,6 +193,49 @@
       max-height: 70vh;
       object-fit: contain;
       transition: opacity .25s, transform .25s;
+    }
+
+    .product-photo-strip {
+      position: relative;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(42px, 64px));
+      gap: .55rem;
+      width: min(100%, 520px);
+      justify-content: center;
+    }
+
+    .product-photo-strip[hidden] {
+      display: none;
+    }
+
+    .product-photo-thumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 1;
+      padding: .28rem;
+      border: .5px solid rgba(0, 0, 0, .11);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .72);
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s, transform .2s;
+    }
+
+    .product-photo-thumb:hover,
+    .product-photo-thumb:focus-visible,
+    .product-photo-thumb.is-active {
+      border-color: rgba(0, 0, 0, .34);
+      box-shadow: 0 10px 24px rgba(28, 35, 32, .1);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .product-photo-thumb img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     .copy-panel {
@@ -573,8 +618,8 @@
         grid-template-columns: minmax(0, 1fr);
         height: auto;
         min-height: 94px;
-        width: 100vw;
-        max-width: 100vw;
+        width: 100%;
+        max-width: 100%;
         padding: .62rem .9rem .56rem;
         align-items: center;
         justify-content: normal;
@@ -679,8 +724,8 @@
         grid-template-columns: minmax(0, 1fr);
         height: auto;
         min-height: 94px;
-        width: 100vw;
-        max-width: 100vw;
+        width: 100%;
+        max-width: 100%;
         padding: .62rem .9rem .56rem;
         align-items: center;
         gap: .42rem;
@@ -740,6 +785,11 @@
         object-fit: contain;
         background: var(--white);
       }
+
+      .product-photo-strip {
+        grid-template-columns: repeat(3, minmax(48px, 1fr));
+        width: min(100%, 220px);
+      }
     }
   </style>
   <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
@@ -758,7 +808,7 @@
       <li><a href="faq.html">FAQ</a></li>
       <li><a href="contact.html">Contact</a></li>
     </ul>
-    <a class="nav-cta Btn buy-pay-button" href="products.html#offers"><span>Buy &amp; Pay</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+    <a class="nav-cta Btn buy-pay-button" href="products.html#offers"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
   </nav>
 
   <main>
@@ -771,8 +821,10 @@
     <section class="detail-hero" aria-live="polite">
       <div class="media-panel">
         <a class="back-link" href="products.html">Back to collection</a>
-        <img class="product-image" id="productImage" src="assets/pureform-back-scrubber.png"
-          alt="Grey 4-Piece Silicone Brush Set" loading="lazy" decoding="async">
+        <img class="product-image" id="productImage"
+          src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553521/Main_with_background_anlah0.png"
+          alt="Grey 4-piece silicone brush set on a soft background" fetchpriority="high" decoding="async">
+        <div class="product-photo-strip" id="productPhotoStrip" aria-label="Product photos" hidden></div>
       </div>
 
       <div class="copy-panel">
@@ -824,7 +876,7 @@
           </div>
           <div class="offer-action">
             <div class="offer-price">AED 87.78</div>
-            <a class="offer-link Btn buy-pay-button" href="contact.html#message"><span>Buy &amp; Pay</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+            <a class="offer-link Btn buy-pay-button" href="contact.html#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
           </div>
         </div>
         <div class="offer-row">
@@ -834,7 +886,7 @@
           </div>
           <div class="offer-action">
             <div class="offer-price">AED 164.00</div>
-            <a class="offer-link Btn buy-pay-button" href="contact.html#message"><span>Buy &amp; Pay</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+            <a class="offer-link Btn buy-pay-button" href="contact.html#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
           </div>
         </div>
         <div class="offer-row">
@@ -844,7 +896,7 @@
           </div>
           <div class="offer-action">
             <div class="offer-price">AED 228.00</div>
-            <a class="offer-link Btn buy-pay-button" href="contact.html#message"><span>Buy &amp; Pay</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+            <a class="offer-link Btn buy-pay-button" href="contact.html#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
           </div>
         </div>
       </div>
@@ -860,13 +912,44 @@
     (function () {
       'use strict';
 
+      var greyPhotos = [
+        {
+          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553521/Main_with_background_anlah0.png',
+          alt: 'Grey 4-piece silicone brush set on a soft background'
+        },
+        {
+          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png',
+          alt: 'Grey 4-piece silicone brush set with all tools'
+        },
+        {
+          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553513/grey_white_bg_irnzyc.png',
+          alt: 'Grey 4-piece silicone brush set on a white background'
+        },
+        {
+          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553535/grey_Head_h1duwj.png',
+          alt: 'Grey silicone scalp massager head close-up'
+        },
+        {
+          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553529/grey_face_qpwaey.png',
+          alt: 'Grey silicone face brush close-up'
+        },
+        {
+          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553512/grey_Handle_zkieiu.png',
+          alt: 'Grey long handle silicone back scrubber close-up'
+        }
+      ];
+
       var products = {
         'pureform-4pc-set-grey': {
           tag: 'Silicone Brush Set',
           color: 'Grey',
           colorKey: 'grey',
           name: 'Grey 4-Piece Silicone Brush Set',
-          image: 'assets/pureform-back-scrubber.png',
+          image: greyPhotos[0].src,
+          imageAlt: greyPhotos[0].alt,
+          cardImage: greyPhotos[1].src,
+          cardAlt: greyPhotos[1].alt,
+          photos: greyPhotos,
           lead: 'One complete PureForm set in Grey with four separate tools for back, body, scalp, and face care.',
           price: 'AED 87.78',
           compare: 'VAT included',
@@ -959,6 +1042,7 @@
       var productPrice = document.getElementById('productPrice');
       var productCompare = document.getElementById('productCompare');
       var productImage = document.getElementById('productImage');
+      var productPhotoStrip = document.getElementById('productPhotoStrip');
       var categoryGrid = document.getElementById('categoryGrid');
       var specStrip = document.getElementById('specStrip');
       var detailTitle = document.getElementById('detailTitle');
@@ -987,8 +1071,10 @@
         categoryGrid.innerHTML = order.map(function (id) {
           var product = products[id];
           var active = id === activeId ? ' is-active' : '';
+          var cardImage = product.cardImage || product.image;
+          var cardAlt = product.cardAlt || product.imageAlt || ('Product photo for ' + product.name);
           return '<a class="set-card' + active + '" href="pureform-product-detail.html?product=' + encodeURIComponent(id) + '" data-product="' + id + '">'
-            + '<img src="' + product.image + '" alt="Temporary product photo for ' + product.name + '" decoding="async">'
+            + '<img src="' + cardImage + '" alt="' + cardAlt + '" decoding="async">'
             + '<div class="set-color"><span class="set-swatch set-swatch-' + product.colorKey + '" aria-hidden="true"></span><span>' + product.color + ' Set</span></div>'
             + '<h3>' + product.name + '</h3>'
             + '<p>' + product.cardText + '</p>'
@@ -1003,6 +1089,55 @@
         });
       }
 
+      function setMainImage(src, alt) {
+        productImage.style.opacity = '0';
+        productImage.style.transform = 'translateY(12px)';
+
+        window.setTimeout(function () {
+          productImage.src = src;
+          productImage.alt = alt;
+          productImage.style.opacity = '1';
+          productImage.style.transform = 'translateY(0)';
+        }, 120);
+      }
+
+      function renderProductPhotos(product) {
+        var photos = product.photos || [];
+        productPhotoStrip.innerHTML = '';
+        productPhotoStrip.setAttribute('aria-label', product.color + ' product photos');
+
+        if (photos.length < 2) {
+          productPhotoStrip.hidden = true;
+          return;
+        }
+
+        productPhotoStrip.hidden = false;
+        productPhotoStrip.innerHTML = photos.map(function (photo, index) {
+          var active = index === 0 ? ' is-active' : '';
+          return '<button class="product-photo-thumb' + active + '" type="button" data-photo-index="' + index + '" aria-label="View photo ' + (index + 1) + ' of ' + product.name + '">'
+            + '<img src="' + photo.src + '" alt="' + photo.alt + '" loading="lazy" decoding="async">'
+            + '</button>';
+        }).join('');
+
+        productPhotoStrip.querySelectorAll('[data-photo-index]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            var index = parseInt(button.getAttribute('data-photo-index'), 10);
+            var photo = photos[index];
+
+            if (!photo) {
+              return;
+            }
+
+            productPhotoStrip.querySelectorAll('.product-photo-thumb').forEach(function (thumb) {
+              thumb.classList.remove('is-active');
+            });
+
+            button.classList.add('is-active');
+            setMainImage(photo.src, photo.alt);
+          });
+        });
+      }
+
       function renderProduct(id, pushState) {
         var product = products[id] || products[order[0]];
         productName.textContent = product.name;
@@ -1011,15 +1146,8 @@
         productPrice.textContent = product.price;
         productCompare.textContent = product.compare;
         detailTitle.textContent = product.detailTitle;
-        productImage.style.opacity = '0';
-        productImage.style.transform = 'translateY(12px)';
-
-        window.setTimeout(function () {
-          productImage.src = product.image;
-          productImage.alt = product.name;
-          productImage.style.opacity = '1';
-          productImage.style.transform = 'translateY(0)';
-        }, 120);
+        setMainImage(product.image, product.imageAlt || product.name);
+        renderProductPhotos(product);
 
         setSpecs(product.specs);
         setList(detailList, product.details);
