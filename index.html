@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PureForm sells 4-piece silicone brush sets for back, body, scalp, and face care in Grey, Black, and Pink with order support, COD availability, and a 15-day return window.">
   <title>PureForm - Silicone Body Brush Set</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -705,6 +706,10 @@
       height: 42px;
       background: linear-gradient(to bottom, rgba(0, 0, 0, .22), transparent);
       animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    .hero-mobile-product {
+      display: none;
     }
 
     /* MARQUEE */
@@ -2654,9 +2659,694 @@
       }
     }
 
+    /* Taste Skill pass: calmer materiality, cleaner reviews, better rhythm */
+    :where(.hero-h1, .sec-title, .cta-title, .pcard-name, .shade-card h3, .review-title) {
+      text-wrap: balance;
+    }
+
+    :where(.hero-desc, .pcard-desc, .ftext, .shade-copy, .review-copy, .cta-sub) {
+      text-wrap: pretty;
+    }
+
+    :where(.btn-p, .btn-s, .nav-cta, .shade-select, .pcard, .review-card-home):active {
+      transform: translateY(1px) scale(.99);
+    }
+
+    .pcard,
+    .shade-card,
+    .ocard,
+    .review-card-home {
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 18px 44px rgba(34, 43, 40, .07);
+    }
+
+    .pcard:hover,
+    .shade-card:hover,
+    .ocard:hover,
+    .review-card-home:hover {
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .78), 0 24px 58px rgba(34, 43, 40, .11);
+    }
+
+    .review-sec {
+      padding: 5.5rem 5rem 6rem;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(220, 238, 231, .52), transparent 30%),
+        radial-gradient(circle at 88% 16%, rgba(246, 219, 228, .42), transparent 28%),
+        linear-gradient(180deg, #fff, #f8f8f6);
+    }
+
+    .review-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 2rem;
+      align-items: end;
+      margin-bottom: 2.2rem;
+    }
+
+    .review-title {
+      max-width: 620px;
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(2.2rem, 4vw, 4.4rem);
+      font-weight: 300;
+      line-height: .98;
+      letter-spacing: -.015em;
+    }
+
+    .review-score {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1rem;
+      align-items: center;
+      min-width: 230px;
+      padding: 1rem 1.15rem;
+      border: .5px solid rgba(28, 32, 30, .08);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .68);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .76), 0 16px 38px rgba(34, 43, 40, .07);
+    }
+
+    .review-score strong {
+      font-family: var(--serif);
+      font-size: 3rem;
+      font-weight: 300;
+      line-height: .9;
+      letter-spacing: -.04em;
+    }
+
+    .review-stars {
+      color: #111;
+      font-size: 12px;
+      letter-spacing: .14em;
+    }
+
+    .review-score span {
+      display: block;
+      margin-top: .35rem;
+      color: var(--light);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      border: .5px solid rgba(28, 32, 30, .08);
+      background: rgba(28, 32, 30, .08);
+    }
+
+    .review-card-home {
+      min-height: 280px;
+      padding: 1.65rem;
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, .78);
+      transition: transform .28s cubic-bezier(.22, 1, .36, 1), background .28s, box-shadow .28s;
+    }
+
+    .review-card-home:nth-child(even) {
+      transform: translateY(1.2rem);
+    }
+
+    .review-card-home:hover {
+      background: #fff;
+      transform: translateY(-4px);
+    }
+
+    .review-card-home:nth-child(even):hover {
+      transform: translateY(.75rem);
+    }
+
+    .review-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .review-meta strong {
+      display: block;
+      margin-bottom: .2rem;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .review-meta small,
+    .review-date {
+      color: var(--light);
+      font-size: 10px;
+      letter-spacing: .04em;
+    }
+
+    .review-rating {
+      flex: 0 0 auto;
+      color: var(--dark);
+      font-size: 11px;
+      letter-spacing: .08em;
+    }
+
+    .review-copy {
+      flex: 1;
+      margin: 0;
+      color: var(--mid);
+      font-size: 13px;
+      font-weight: 300;
+      line-height: 1.85;
+    }
+
+    .review-card-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1.35rem;
+    }
+
+    .review-badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(220, 238, 231, .72);
+      color: #46675a;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .site-footer-home {
+      padding: 4rem 5rem 2.5rem;
+      background:
+        radial-gradient(circle at 22% 0%, rgba(220, 238, 231, .12), transparent 28%),
+        linear-gradient(135deg, #101211, #1b1d1b);
+      color: rgba(255, 255, 255, .36);
+    }
+
+    .site-footer-home-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.8rem;
+      text-align: center;
+    }
+
+    .site-footer-home .footer-logo {
+      color: rgba(255, 255, 255, .78);
+      font-size: 23px;
+    }
+
+    .site-footer-home ul {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem 1.5rem;
+      list-style: none;
+    }
+
+    .site-footer-home a {
+      color: rgba(255, 255, 255, .38);
+      text-decoration: none;
+      font-size: 12px;
+      transition: color .2s, transform .2s;
+    }
+
+    .site-footer-home a:hover,
+    .site-footer-home a:focus-visible {
+      color: rgba(255, 255, 255, .78);
+      transform: translateY(-1px);
+    }
+
+    .site-footer-rule {
+      width: 100%;
+      height: 1px;
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .site-footer-copy {
+      color: rgba(255, 255, 255, .2);
+      font-size: 11px;
+      letter-spacing: .03em;
+    }
+
+    .store-proof {
+      padding: 1rem 5rem;
+      background: rgba(248, 248, 246, .86);
+      border-bottom: .5px solid rgba(28, 32, 30, .08);
+    }
+
+    .store-proof-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      overflow: hidden;
+      border: .5px solid rgba(28, 32, 30, .08);
+      border-radius: 18px;
+      background: rgba(28, 32, 30, .08);
+      box-shadow: 0 18px 44px rgba(34, 43, 40, .06);
+    }
+
+    .store-proof-item {
+      min-height: 112px;
+      padding: 1.15rem;
+      background: rgba(255, 255, 255, .8);
+    }
+
+    .store-proof-item span {
+      display: block;
+      margin-bottom: .55rem;
+      color: var(--light);
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .store-proof-item strong {
+      display: block;
+      margin-bottom: .35rem;
+      font-family: var(--serif);
+      font-size: 1.45rem;
+      font-weight: 300;
+      line-height: 1.05;
+    }
+
+    .store-proof-item p {
+      color: var(--mid);
+      font-size: 12px;
+      font-weight: 300;
+      line-height: 1.55;
+    }
+
+    .order-steps {
+      padding: 5rem;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(220, 238, 231, .48), transparent 32%),
+        linear-gradient(180deg, #fff, #f8f8f6);
+    }
+
+    .order-steps-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 440px);
+      gap: 2rem;
+      align-items: end;
+      margin-bottom: 2rem;
+    }
+
+    .order-steps-copy {
+      color: var(--mid);
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.8;
+    }
+
+    .order-step-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      border: .5px solid rgba(28, 32, 30, .08);
+      background: rgba(28, 32, 30, .08);
+    }
+
+    .order-step {
+      min-height: 220px;
+      padding: 1.6rem;
+      background: rgba(255, 255, 255, .82);
+    }
+
+    .order-step span {
+      display: block;
+      margin-bottom: 1.5rem;
+      color: var(--light);
+      font-family: var(--serif);
+      font-size: 2.15rem;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    .order-step h3 {
+      margin-bottom: .7rem;
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 300;
+      line-height: 1.05;
+    }
+
+    .order-step p {
+      color: var(--mid);
+      font-size: 13px;
+      font-weight: 300;
+      line-height: 1.75;
+    }
+
+    @media (max-width: 960px) {
+      .store-proof {
+        padding-inline: 1.5rem;
+      }
+
+      .store-proof-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .order-steps {
+        padding: 4rem 1.5rem;
+      }
+
+      .order-steps-head {
+        grid-template-columns: 1fr;
+      }
+
+      .order-step-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .review-sec,
+      .site-footer-home {
+        padding-inline: 1.5rem;
+      }
+
+      .review-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .review-card-home:nth-child(even) {
+        transform: none;
+      }
+
+      .review-card-home:nth-child(even):hover {
+        transform: translateY(-4px);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .store-proof {
+        padding: .85rem;
+      }
+
+      .store-proof-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .store-proof-item {
+        min-height: auto;
+      }
+
+      .order-steps {
+        padding: 3.5rem 1rem;
+      }
+
+      .review-sec {
+        padding: 3.5rem 1rem 4rem;
+      }
+
+      .review-head,
+      .review-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .review-score {
+        min-width: 0;
+      }
+
+      .site-footer-home {
+        padding: 3rem 1rem 2rem;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        display: grid !important;
+        grid-template-columns: 1fr;
+        gap: .85rem;
+        min-height: auto !important;
+        padding: 108px .95rem 1.25rem !important;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(248, 251, 251, .92)) !important;
+      }
+
+      .hero-mobile-product {
+        position: relative;
+        order: 1;
+        display: flex;
+        width: 100%;
+        min-height: 260px;
+        aspect-ratio: 1 / .82;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: .5px solid rgba(0, 0, 0, .07);
+        border-radius: 26px;
+        background:
+          radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .96) 0 32%, rgba(220, 238, 231, .62) 33% 55%, transparent 56%),
+          linear-gradient(135deg, rgba(255, 255, 255, .92), rgba(246, 219, 228, .2));
+        box-shadow: 0 18px 46px rgba(28, 35, 32, .08);
+      }
+
+      .hero-mobile-product::before,
+      .hero-mobile-product::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        border: 1px solid rgba(0, 0, 0, .045);
+        pointer-events: none;
+      }
+
+      .hero-mobile-product::before {
+        width: min(82vw, 360px);
+        height: min(82vw, 360px);
+      }
+
+      .hero-mobile-product::after {
+        width: min(58vw, 260px);
+        height: min(58vw, 260px);
+        border-color: rgba(0, 0, 0, .03);
+      }
+
+      .hero-mobile-product img {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: min(96%, 380px);
+        max-height: 300px;
+        object-fit: contain;
+        filter: drop-shadow(0 24px 44px rgba(28, 35, 32, .12));
+      }
+
+      .hero-left {
+        order: 2;
+        width: 100% !important;
+        max-width: none !important;
+        justify-self: stretch !important;
+        margin: 0 !important;
+        padding: 1.1rem !important;
+        overflow: visible !important;
+        border-radius: 22px !important;
+        background: rgba(255, 255, 255, .82) !important;
+        box-shadow: 0 14px 32px rgba(28, 35, 32, .08) !important;
+      }
+
+      .hero-left::before,
+      .hero-left::after {
+        display: none !important;
+      }
+
+      .hero-h1 {
+        max-width: 12ch !important;
+        font-size: clamp(2rem, 9vw, 2.75rem) !important;
+      }
+
+      .hero-desc {
+        max-width: 36ch !important;
+        font-size: 12.5px !important;
+      }
+
+      .hero-right-info {
+        order: 3;
+        width: 100% !important;
+        max-width: none !important;
+        justify-self: stretch !important;
+        margin: 0 !important;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .hero-mobile-product {
+        min-height: 232px;
+        border-radius: 22px;
+      }
+
+      .hero-mobile-product img {
+        max-height: 270px;
+      }
+
+      .hero-left {
+        padding: .95rem !important;
+      }
+    }
+
+    @keyframes mobileHeroFloat {
+      0%,
+      100% {
+        transform: translateY(8px) rotate(-2deg) scale(1);
+      }
+
+      50% {
+        transform: translateY(-4px) rotate(-1deg) scale(1.025);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        padding: 104px .9rem 1.35rem !important;
+        gap: .9rem !important;
+        background:
+          radial-gradient(circle at 18% 12%, rgba(246, 219, 228, .55), transparent 34%),
+          radial-gradient(circle at 88% 18%, rgba(220, 238, 231, .75), transparent 35%),
+          linear-gradient(180deg, #fff 0%, #f8fbf8 100%) !important;
+      }
+
+      .hero-mobile-product {
+        min-height: 340px !important;
+        aspect-ratio: 1 / .98 !important;
+        border-radius: 30px !important;
+        background:
+          radial-gradient(circle at 50% 48%, rgba(255, 255, 255, .98) 0 28%, rgba(220, 238, 231, .82) 29% 48%, rgba(246, 219, 228, .5) 49% 64%, transparent 65%),
+          linear-gradient(145deg, rgba(255, 255, 255, .96), rgba(248, 248, 246, .72)) !important;
+        box-shadow: 0 28px 70px rgba(24, 35, 32, .16), inset 0 1px 0 rgba(255, 255, 255, .85) !important;
+      }
+
+      .hero-mobile-product::before {
+        width: min(92vw, 410px) !important;
+        height: min(92vw, 410px) !important;
+        border-color: rgba(0, 0, 0, .07) !important;
+      }
+
+      .hero-mobile-product::after {
+        width: min(66vw, 310px) !important;
+        height: min(66vw, 310px) !important;
+        border-color: rgba(0, 0, 0, .04) !important;
+        background: radial-gradient(circle, rgba(234, 223, 196, .28), transparent 62%);
+      }
+
+      .hero-mobile-product img {
+        width: min(112%, 430px) !important;
+        max-height: 360px !important;
+        transform: translateY(8px) rotate(-2deg);
+        animation: mobileHeroFloat 5s ease-in-out infinite;
+        filter: drop-shadow(0 34px 52px rgba(21, 28, 26, .18)) !important;
+      }
+
+      .mobile-hero-badge,
+      .mobile-hero-price,
+      .mobile-hero-swatches {
+        position: absolute;
+        z-index: 2;
+      }
+
+      .mobile-hero-badge {
+        top: 1rem;
+        left: 1rem;
+        padding: .5rem .72rem;
+        border-radius: 999px;
+        background: rgba(17, 17, 17, .9);
+        color: #fff;
+        box-shadow: 0 12px 28px rgba(17, 17, 17, .18);
+        font-size: 10px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+
+      .mobile-hero-price {
+        right: .95rem;
+        bottom: .95rem;
+        min-width: 116px;
+        padding: .72rem .82rem;
+        border: .5px solid rgba(0, 0, 0, .08);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, .86);
+        box-shadow: 0 16px 34px rgba(24, 35, 32, .12);
+        color: var(--dark);
+        font-family: var(--serif);
+        font-size: 1.45rem;
+        line-height: 1;
+      }
+
+      .mobile-hero-price span {
+        display: block;
+        margin-top: .28rem;
+        color: var(--light);
+        font-family: var(--sans);
+        font-size: 9px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+
+      .mobile-hero-swatches {
+        left: 1rem;
+        bottom: 1rem;
+        display: flex;
+        gap: .45rem;
+        padding: .45rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .78);
+        box-shadow: 0 12px 28px rgba(24, 35, 32, .1);
+      }
+
+      .mobile-swatch {
+        display: block;
+        width: 18px;
+        height: 18px;
+        border: .5px solid rgba(0, 0, 0, .12);
+        border-radius: 50%;
+      }
+
+      .mobile-swatch-grey {
+        background: linear-gradient(135deg, #eeeeea, #868681);
+      }
+
+      .mobile-swatch-black {
+        background: linear-gradient(135deg, #5b5b5b, #070707);
+      }
+
+      .mobile-swatch-pink {
+        background: linear-gradient(135deg, #ffd8e2, #d28ca1);
+      }
+
+      .hero-left {
+        border-radius: 24px !important;
+        background: rgba(255, 255, 255, .9) !important;
+      }
+
+      .hero-h1 {
+        max-width: 11ch !important;
+        font-size: clamp(2.25rem, 10.5vw, 3.25rem) !important;
+        line-height: .9 !important;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .hero-mobile-product {
+        min-height: 302px !important;
+        border-radius: 26px !important;
+      }
+
+      .hero-mobile-product img {
+        max-height: 330px !important;
+      }
+
+      .mobile-hero-price {
+        font-size: 1.25rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-mobile-product img {
+        animation: none !important;
+        transform: translateY(8px) rotate(-2deg);
+      }
+    }
+
   </style>
   <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
   <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
+  <link rel="stylesheet" href="assets/pureform-store-flow.css">
 </head>
 
 <body>
@@ -2725,6 +3415,19 @@
       <div class="hero-img-wrap" id="heroImgWrap" aria-hidden="true"></div>
     </div>
 
+    <div class="hero-mobile-product" aria-label="Grey PureForm 4-piece silicone brush set">
+      <div class="mobile-hero-badge">4-piece shower ritual</div>
+      <img src="https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png"
+        alt="Grey 4-piece PureForm silicone brush set with back scrubber, body brush, scalp massager, and face brush"
+        fetchpriority="high" decoding="async">
+      <div class="mobile-hero-swatches" aria-label="Available colors">
+        <span class="mobile-swatch mobile-swatch-grey"></span>
+        <span class="mobile-swatch mobile-swatch-black"></span>
+        <span class="mobile-swatch mobile-swatch-pink"></span>
+      </div>
+      <div class="mobile-hero-price">AED 87.78 <span>VAT incl.</span></div>
+    </div>
+
     <div class="hero-left" id="heroLeft">
       <span class="hero-tag">A cleaner daily shower &middot; 4-piece set</span>
       <h1 class="hero-h1">Soft touch.<br><em>Deep clean.</em><br>Every day.</h1>
@@ -2739,7 +3442,7 @@
         <span class="hero-price-note">VAT incl.</span>
       </div>
       <div class="hero-btns">
-        <button class="btn-p Btn buy-pay-button" type="button" data-scroll="offers"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
+        <a class="btn-p Btn buy-pay-button" href="products.html#offers"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
         <button class="btn-s" type="button" data-scroll="products">Explore Set</button>
       </div>
     </div>
@@ -2778,11 +3481,36 @@
         Delivery</span><span class="sep">&middot;</span><span>Back Scrubber</span><span class="sep">&middot;</span><span>Body
         Brush</span><span class="sep">&middot;</span><span>Scalp Massager</span><span class="sep">&middot;</span><span>Face
         Brush</span><span class="sep">&middot;</span><span>Premium Silicone</span><span class="sep">&middot;</span><span>Deep
-        Exfoliation</span><span class="sep">&middot;</span><span>Easy Rinse</span><span class="sep">&middot;</span><span>Made in
-        UAE</span><span class="sep">&middot;</span><span>4 Piece Set</span><span class="sep">&middot;</span><span>15-Day
+        Exfoliation</span><span class="sep">&middot;</span><span>Easy Rinse</span><span class="sep">&middot;</span><span>Delivery
+        Confirmed</span><span class="sep">&middot;</span><span>4 Piece Set</span><span class="sep">&middot;</span><span>15-Day
         Returns</span><span class="sep">&middot;</span><span>Cash on Delivery</span><span class="sep">&middot;</span>
     </div>
   </div>
+
+  <section class="store-proof reveal" aria-label="PureForm store promises">
+    <div class="store-proof-grid">
+      <div class="store-proof-item">
+        <span>Delivery</span>
+        <strong>Confirmed by city</strong>
+        <p>Timing and availability are checked before the order is finalized.</p>
+      </div>
+      <div class="store-proof-item">
+        <span>Payment</span>
+        <strong>Cash on delivery</strong>
+        <p>COD is handled where available, with details confirmed by support.</p>
+      </div>
+      <div class="store-proof-item">
+        <span>Returns</span>
+        <strong>15-day window</strong>
+        <p>Unused sets can be returned in original condition and packaging.</p>
+      </div>
+      <div class="store-proof-item">
+        <span>Support</span>
+        <strong>Human reply</strong>
+        <p>Ask about color, bundles, delivery, or product care before buying.</p>
+      </div>
+    </div>
+  </section>
 
   <div class="specs reveal">
     <div class="spec">
@@ -2824,7 +3552,7 @@
         aria-label="View Black 4-Piece Silicone Brush Set details">
         <div class="pcard-num">02</div>
         <div class="pcard-imgwrap"><img class="pcard-img" src="assets/pureform-body-brush.png"
-            alt="Temporary product photo for the Black 4-piece silicone brush set" loading="lazy" decoding="async"></div>
+            alt="Black PureForm silicone body brush from the 4-piece set" loading="lazy" decoding="async"></div>
         <div class="pcard-name">Black 4-Piece Silicone Brush Set</div>
         <p class="pcard-desc">The same four-piece PureForm routine in Black, listed as its own product in this category.</p>
         <span class="pcard-tag">Black Set</span>
@@ -2835,9 +3563,9 @@
         aria-label="View Pink 4-Piece Silicone Brush Set details">
         <div class="pcard-num">03</div>
         <div class="pcard-imgwrap"><img class="pcard-img" src="assets/pureform-face-brush.png"
-            alt="Temporary product photo for the Pink 4-piece silicone brush set" loading="lazy" decoding="async"></div>
+            alt="Pink PureForm silicone face brush from the 4-piece set" loading="lazy" decoding="async"></div>
         <div class="pcard-name">Pink 4-Piece Silicone Brush Set</div>
-        <p class="pcard-desc">A separate Pink set product page, ready for your cloud-hosted product photos later.</p>
+        <p class="pcard-desc">A softer Pink finish for the same four-piece face, scalp, body, and back routine.</p>
         <span class="pcard-tag">Pink Set</span>
         <span class="pcard-link">Open product page</span>
       </a>
@@ -2975,88 +3703,113 @@
   <section class="cta-sec">
     <p class="eyebrow reveal">Ready to upgrade?</p>
     <h2 class="cta-title reveal">Your complete<br><em>shower ritual</em><br>starts here.</h2>
-    <p class="cta-sub reveal">Cash on delivery. Available in Smoke Grey and Midnight Black.</p>
+    <p class="cta-sub reveal">Cash on delivery. Available in Grey, Black, and Pink.</p>
     <p class="cta-vat reveal">Bundle options and shade availability are confirmed before checkout.</p>
     <div class="cta-btns reveal">
-      <button class="btn-p Btn buy-pay-button" type="button" data-scroll="offers"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
-      <button class="btn-s" type="button" data-scroll="offers">View All Offers</button>
+      <a class="btn-p Btn buy-pay-button" href="products.html#offers"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+      <a class="btn-s" href="products.html#offers">View Set Offers</a>
     </div>
     <div class="pills reveal">
       <span class="pill">Cash on Delivery</span>
       <span class="pill">15-Day Returns</span>
-      <span class="pill">Grey &amp; Black</span>
+      <span class="pill">Grey, Black, Pink</span>
     </div>
   </section>
 
-  <!-- ===== REVIEWS SECTION ===== -->
-  <section id="reviews" style="padding:5rem 5%;background:#fff;">
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;margin-bottom:2rem;flex-wrap:wrap;">
+  <section class="order-steps" aria-labelledby="orderStepsTitle">
+    <div class="order-steps-head">
       <div>
-        <p style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#aaa;margin-bottom:.7rem;">Customer Reviews</p>
-        <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:300;letter-spacing:-.02em;margin:0;">What customers notice <em>first.</em></h2>
+        <p class="eyebrow reveal">How Ordering Works</p>
+        <h2 class="sec-title reveal" id="orderStepsTitle">A simple path from choice to shower.</h2>
       </div>
-      <div style="display:flex;align-items:center;gap:1.1rem;">
-        <span style="font-family:'Playfair Display',Georgia,serif;font-size:3.5rem;font-weight:300;line-height:1;">4.9</span>
-        <div>
-          <div style="font-size:13px;letter-spacing:2px;color:#1a1a1a;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-          <span style="font-size:11px;color:#aaa;">Customer notes from daily routines</span>
-        </div>
-      </div>
+      <p class="order-steps-copy reveal">Your color, bundle, delivery city, and payment preference are confirmed before the order is finalized.</p>
     </div>
-
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:#eee;border:1px solid #eee;">
-      <div style="background:#fff;padding:1.8rem;display:flex;flex-direction:column;transition:background .2s;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background='#fff'">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;gap:1rem;">
-          <div><div style="font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:2px;">Mariam A.</div><div style="font-size:10px;color:#bbb;letter-spacing:.04em;">Dubai, UAE</div></div>
-          <div style="font-size:11px;letter-spacing:1px;color:#1a1a1a;flex-shrink:0;">5/5</div>
-        </div>
-        <p style="font-size:13px;line-height:1.8;color:#666;font-weight:300;flex:1;margin:0;">The long handle makes the back brush useful every day. It rinses quickly and feels cleaner than my old sponge.</p>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.2rem;gap:1rem;"><span style="font-size:10px;color:#bbb;">March 2026</span><span style="font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#2c7a3e;background:#e8f5ee;padding:3px 8px;border-radius:100px;">Customer</span></div>
-      </div>
-
-      <div style="background:#fff;padding:1.8rem;display:flex;flex-direction:column;transition:background .2s;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background='#fff'">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;gap:1rem;">
-          <div><div style="font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:2px;">Sara J.</div><div style="font-size:10px;color:#bbb;letter-spacing:.04em;">London, UK</div></div>
-          <div style="font-size:11px;letter-spacing:1px;color:#1a1a1a;flex-shrink:0;">5/5</div>
-        </div>
-        <p style="font-size:13px;line-height:1.8;color:#666;font-weight:300;flex:1;margin:0;">The silicone bristles are gentle but still effective. The face brush and body brush are the pieces I use most.</p>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.2rem;gap:1rem;"><span style="font-size:10px;color:#bbb;">February 2026</span><span style="font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#2c7a3e;background:#e8f5ee;padding:3px 8px;border-radius:100px;">Customer</span></div>
-      </div>
-
-      <div style="background:#fff;padding:1.8rem;display:flex;flex-direction:column;transition:background .2s;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background='#fff'">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;gap:1rem;">
-          <div><div style="font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:2px;">Priya S.</div><div style="font-size:10px;color:#bbb;letter-spacing:.04em;">Mumbai, India</div></div>
-          <div style="font-size:11px;letter-spacing:1px;color:#1a1a1a;flex-shrink:0;">5/5</div>
-        </div>
-        <p style="font-size:13px;line-height:1.8;color:#666;font-weight:300;flex:1;margin:0;">I like that each brush has a clear job. The scalp massager is relaxing and the set dries fast after use.</p>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.2rem;gap:1rem;"><span style="font-size:10px;color:#bbb;">January 2026</span><span style="font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#2c7a3e;background:#e8f5ee;padding:3px 8px;border-radius:100px;">Customer</span></div>
-      </div>
-
-      <div style="background:#fff;padding:1.8rem;display:flex;flex-direction:column;transition:background .2s;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background='#fff'">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;gap:1rem;">
-          <div><div style="font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:2px;">James C.</div><div style="font-size:10px;color:#bbb;letter-spacing:.04em;">Singapore</div></div>
-          <div style="font-size:11px;letter-spacing:1px;color:#1a1a1a;flex-shrink:0;">5/5</div>
-        </div>
-        <p style="font-size:13px;line-height:1.8;color:#666;font-weight:300;flex:1;margin:0;">Simple, practical, and easy to keep clean. The grip strap on the body brush helps when my hands are wet.</p>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.2rem;gap:1rem;"><span style="font-size:10px;color:#bbb;">January 2026</span><span style="font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#2c7a3e;background:#e8f5ee;padding:3px 8px;border-radius:100px;">Customer</span></div>
-      </div>
+    <div class="order-step-grid">
+      <article class="order-step reveal">
+        <span>01</span>
+        <h3>Choose color and bundle</h3>
+        <p>Start with Grey, Black, Pink, or mixed sets. Every color includes the same four silicone tools.</p>
+      </article>
+      <article class="order-step reveal">
+        <span>02</span>
+        <h3>Confirm delivery details</h3>
+        <p>Share your city, phone number, and preferred payment method so availability can be confirmed.</p>
+      </article>
+      <article class="order-step reveal">
+        <span>03</span>
+        <h3>Use, rinse, and hang</h3>
+        <p>The set is designed for daily face, scalp, body, and back care with quick-rinse silicone.</p>
+      </article>
     </div>
   </section>
 
-  <!-- ===== FOOTER ===== -->
-  <footer style="background:#1a1a1a;color:rgba(255,255,255,.3);padding:4rem 5% 2.5rem;">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:1.8rem;text-align:center;">
-      <div style="font-family:'Playfair Display',Georgia,serif;font-size:22px;color:rgba(255,255,255,.75);letter-spacing:.06em;">PureForm</div>
-      <ul style="display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem;list-style:none;padding:0;margin:0;">
-        <li><a href="products.html" style="font-size:12px;color:rgba(255,255,255,.32);text-decoration:none;letter-spacing:.03em;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.7)'" onmouseout="this.style.color='rgba(255,255,255,.32)'">Products</a></li>
-        <li><a href="about.html" style="font-size:12px;color:rgba(255,255,255,.32);text-decoration:none;letter-spacing:.03em;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.7)'" onmouseout="this.style.color='rgba(255,255,255,.32)'">About</a></li>
-        <li><a href="reviews.html" style="font-size:12px;color:rgba(255,255,255,.32);text-decoration:none;letter-spacing:.03em;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.7)'" onmouseout="this.style.color='rgba(255,255,255,.32)'">Reviews</a></li>
-        <li><a href="policy.html" style="font-size:12px;color:rgba(255,255,255,.32);text-decoration:none;letter-spacing:.03em;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.7)'" onmouseout="this.style.color='rgba(255,255,255,.32)'">Policy</a></li>
-        <li><a href="faq.html" style="font-size:12px;color:rgba(255,255,255,.32);text-decoration:none;letter-spacing:.03em;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.7)'" onmouseout="this.style.color='rgba(255,255,255,.32)'">FAQ</a></li>
-        <li><a href="contact.html" style="font-size:12px;color:rgba(255,255,255,.32);text-decoration:none;letter-spacing:.03em;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.7)'" onmouseout="this.style.color='rgba(255,255,255,.32)'">Contact</a></li>
+  <section class="review-sec" id="reviews">
+    <div class="review-head">
+      <div>
+        <p class="eyebrow reveal">Customer Reviews</p>
+        <h2 class="review-title reveal">What customers notice <em>first.</em></h2>
+      </div>
+      <div class="review-score reveal" aria-label="Average customer rating 4.9 out of 5">
+        <strong>4.9</strong>
+        <div>
+          <div class="review-stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <span>Customer notes from daily routines</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-grid">
+      <article class="review-card-home reveal">
+        <div class="review-meta">
+          <div><strong>Mariam A.</strong><small>Dubai, UAE</small></div>
+          <div class="review-rating">5/5</div>
+        </div>
+        <p class="review-copy">The long handle makes the back brush useful every day. It rinses quickly and feels cleaner than my old sponge.</p>
+        <div class="review-card-foot"><span class="review-date">March 2026</span><span class="review-badge">Customer</span></div>
+      </article>
+
+      <article class="review-card-home reveal">
+        <div class="review-meta">
+          <div><strong>Sara J.</strong><small>London, UK</small></div>
+          <div class="review-rating">5/5</div>
+        </div>
+        <p class="review-copy">The silicone bristles are gentle but still effective. The face brush and body brush are the pieces I use most.</p>
+        <div class="review-card-foot"><span class="review-date">February 2026</span><span class="review-badge">Customer</span></div>
+      </article>
+
+      <article class="review-card-home reveal">
+        <div class="review-meta">
+          <div><strong>Priya S.</strong><small>Mumbai, India</small></div>
+          <div class="review-rating">5/5</div>
+        </div>
+        <p class="review-copy">I like that each brush has a clear job. The scalp massager is relaxing and the set dries fast after use.</p>
+        <div class="review-card-foot"><span class="review-date">January 2026</span><span class="review-badge">Customer</span></div>
+      </article>
+
+      <article class="review-card-home reveal">
+        <div class="review-meta">
+          <div><strong>James C.</strong><small>Singapore</small></div>
+          <div class="review-rating">5/5</div>
+        </div>
+        <p class="review-copy">Simple, practical, and easy to keep clean. The grip strap on the body brush helps when my hands are wet.</p>
+        <div class="review-card-foot"><span class="review-date">January 2026</span><span class="review-badge">Customer</span></div>
+      </article>
+    </div>
+  </section>
+
+  <footer class="site-footer-home">
+    <div class="site-footer-home-inner">
+      <div class="footer-logo">PureForm</div>
+      <ul>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="reviews.html">Reviews</a></li>
+        <li><a href="policy.html">Policy</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="contact.html">Contact</a></li>
       </ul>
-      <div style="width:100%;height:1px;background:rgba(255,255,255,.08);"></div>
-      <div style="font-size:11px;color:rgba(255,255,255,.2);letter-spacing:.03em;">&copy; 2026 PureForm. All rights reserved.</div>
+      <div class="site-footer-rule"></div>
+      <div class="site-footer-copy">&copy; 2026 PureForm. All rights reserved.</div>
     </div>
   </footer>
 
@@ -3105,5 +3858,6 @@
     })();
   </script>
   <script src="assets/pureform-mobile-menu.js" defer></script>
+  <script src="assets/pureform-store-flow.js" defer></script>
 </body>
 </html>

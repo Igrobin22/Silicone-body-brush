@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contact PureForm for silicone brush set orders, delivery support, product questions, returns, or help choosing Grey, Black, Pink, or mixed set bundles.">
   <title>Contact | PureForm</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +14,7 @@
   <link rel="stylesheet" href="assets/pureform-pages.css">
   <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
   <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
+  <link rel="stylesheet" href="assets/pureform-store-flow.css">
 </head>
 
 <body>
@@ -48,33 +50,87 @@
           <p class="eyebrow">Message PureForm</p>
           <h2 class="section-title">We will help with the next step.</h2>
           <ul class="detail-list">
+            <li><strong>Email</strong> Send order and support messages to hello@pureform.ae.</li>
+            <li><strong>Start an order</strong> Choose a set color, bundle size, and delivery city so the first reply can be specific.</li>
             <li><strong>Order support</strong> Include the order name, phone number, and delivery city.</li>
             <li><strong>Product help</strong> Ask about which brush to use for body, scalp, face, or back care.</li>
             <li><strong>Returns</strong> Send a clear photo if the product arrived damaged or incorrect.</li>
           </ul>
         </div>
         <form class="form-grid" id="message" action="mailto:hello@pureform.ae" method="post" enctype="text/plain">
-          <label for="customer-name">Name</label>
-          <input id="customer-name" type="text" name="name" autocomplete="name" placeholder="Your name" enterkeyhint="next" required>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="customer-name">Name</label>
+              <input id="customer-name" type="text" name="name" autocomplete="name" placeholder="Your name" enterkeyhint="next" required>
+            </div>
 
-          <label for="customer-email">Email</label>
-          <input id="customer-email" type="email" name="email" autocomplete="email" placeholder="you@example.com" enterkeyhint="next" required>
+            <div class="form-field">
+              <label for="customer-email">Email</label>
+              <input id="customer-email" type="email" name="email" autocomplete="email" placeholder="you@example.com" enterkeyhint="next" required>
+            </div>
+          </div>
 
-          <label for="customer-phone">Phone</label>
-          <input id="customer-phone" type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+971 50 000 0000" enterkeyhint="next">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="customer-phone">Phone</label>
+              <input id="customer-phone" type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+971 50 000 0000" enterkeyhint="next">
+            </div>
 
-          <label for="message-topic">Topic</label>
-          <select id="message-topic" name="topic" autocomplete="off">
-              <option>Start an order</option>
-              <option>Product question</option>
-              <option>Order support</option>
-              <option>Delivery</option>
-              <option>Return or refund</option>
-          </select>
+            <div class="form-field">
+              <label for="delivery-city">Delivery city</label>
+              <input id="delivery-city" type="text" name="delivery_city" autocomplete="address-level2" placeholder="Dubai, Abu Dhabi..." enterkeyhint="next">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="message-topic">Topic</label>
+              <select id="message-topic" name="topic" autocomplete="off">
+                <option value="start-order">Start an order</option>
+                <option value="product-question">Product question</option>
+                <option value="order-support">Order support</option>
+                <option value="delivery">Delivery</option>
+                <option value="return-refund">Return or refund</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="order-product">Set color</label>
+              <select id="order-product" name="product" autocomplete="off">
+                <option value="not-sure">Not sure yet</option>
+                <option value="pureform-4pc-set-grey">Grey 4-Piece Silicone Brush Set</option>
+                <option value="pureform-4pc-set-black">Black 4-Piece Silicone Brush Set</option>
+                <option value="pureform-4pc-set-pink">Pink 4-Piece Silicone Brush Set</option>
+                <option value="mixed-colors">Mixed colors</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="order-bundle">Bundle</label>
+              <select id="order-bundle" name="bundle" autocomplete="off">
+                <option value="single">Single Set - AED 87.78</option>
+                <option value="two">Two Sets - AED 164.00</option>
+                <option value="three">Three Sets - AED 228.00</option>
+                <option value="question">Not sure yet</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="payment-preference">Payment</label>
+              <select id="payment-preference" name="payment_preference" autocomplete="off">
+                <option value="cash-on-delivery">Cash on delivery</option>
+                <option value="confirm-options">Confirm payment options</option>
+                <option value="card-transfer">Card or transfer if available</option>
+              </select>
+            </div>
+          </div>
 
           <label for="customer-message">Message</label>
           <textarea id="customer-message" name="message" autocomplete="off" placeholder="Write your message" enterkeyhint="done" required></textarea>
           <button class="btn-p" type="submit">Send message by email</button>
+          <p class="form-note">Your email app will open with these order details prefilled. You can review everything before sending.</p>
         </form>
       </div>
     </section>
@@ -95,7 +151,117 @@
       </ul>
     </div>
   </footer>
+  <script>
+    (function () {
+      'use strict';
+
+      var form = document.getElementById('message');
+      if (!form) {
+        return;
+      }
+
+      var params = new URLSearchParams(window.location.search);
+      var topic = document.getElementById('message-topic');
+      var product = document.getElementById('order-product');
+      var bundle = document.getElementById('order-bundle');
+      var message = document.getElementById('customer-message');
+
+      var productAliases = {
+        grey: 'pureform-4pc-set-grey',
+        black: 'pureform-4pc-set-black',
+        pink: 'pureform-4pc-set-pink',
+        mixed: 'mixed-colors'
+      };
+
+      var topicAliases = {
+        order: 'start-order',
+        support: 'order-support',
+        returns: 'return-refund'
+      };
+
+      function setSelectValue(select, value) {
+        if (!select || !value) {
+          return false;
+        }
+
+        var normalized = value.toLowerCase();
+        normalized = productAliases[normalized] || topicAliases[normalized] || normalized;
+
+        var option = Array.prototype.find.call(select.options, function (item) {
+          return item.value === normalized;
+        });
+
+        if (!option) {
+          return false;
+        }
+
+        select.value = option.value;
+        return true;
+      }
+
+      function getSelectedText(select) {
+        return select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : '';
+      }
+
+      function updateMessageHint(shouldWrite) {
+        var productText = getSelectedText(product);
+        var bundleText = getSelectedText(bundle);
+        var draft = 'Hi PureForm, I would like to start an order for the ' + productText + ' with the ' + bundleText + '.';
+
+        message.placeholder = draft + ' Please confirm availability and delivery.';
+
+        if (shouldWrite && !message.value.trim()) {
+          message.value = draft;
+        }
+      }
+
+      setSelectValue(topic, params.get('topic'));
+      setSelectValue(product, params.get('product'));
+      setSelectValue(bundle, params.get('bundle'));
+      updateMessageHint(Boolean(params.get('product') || params.get('bundle')));
+
+      product.addEventListener('change', function () {
+        updateMessageHint(false);
+      });
+
+      bundle.addEventListener('change', function () {
+        updateMessageHint(false);
+      });
+
+      form.addEventListener('submit', function (event) {
+        var data;
+        var lines;
+        var subject;
+        var body;
+
+        if (!form.checkValidity()) {
+          return;
+        }
+
+        event.preventDefault();
+        data = new FormData(form);
+        subject = 'PureForm - ' + getSelectedText(topic);
+        lines = [
+          'Name: ' + (data.get('name') || ''),
+          'Email: ' + (data.get('email') || ''),
+          'Phone: ' + (data.get('phone') || ''),
+          'Delivery city: ' + (data.get('delivery_city') || ''),
+          'Topic: ' + getSelectedText(topic),
+          'Set color: ' + getSelectedText(product),
+          'Bundle: ' + getSelectedText(bundle),
+          'Payment: ' + getSelectedText(document.getElementById('payment-preference')),
+          '',
+          'Message:',
+          data.get('message') || ''
+        ];
+        body = lines.join('\n');
+
+        window.location.href = 'mailto:hello@pureform.ae?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      });
+    })();
+  </script>
   <script src="assets/pureform-mobile-menu.js" defer></script>
+  <script src="assets/pureform-store-flow.js" defer></script>
 </body>
 
 </html>

@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View PureForm 4-piece silicone brush set details, price, included tools, care notes, returns, delivery confirmation, and set bundle offers.">
   <title>PureForm Product Detail</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -302,6 +303,98 @@
       margin-bottom: 2rem;
     }
 
+    .pdp-proof-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .7rem;
+      margin: -.7rem 0 1.6rem;
+    }
+
+    .pdp-proof-item {
+      min-height: 86px;
+      padding: .9rem;
+      border: .5px solid rgba(0, 0, 0, .08);
+      border-radius: 12px;
+      background: rgba(248, 248, 246, .82);
+    }
+
+    .pdp-proof-item span {
+      display: block;
+      margin-bottom: .45rem;
+      color: var(--light);
+      font-size: 9px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .pdp-proof-item strong {
+      display: block;
+      margin-bottom: .25rem;
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    .pdp-proof-item p {
+      color: var(--mid);
+      font-size: 11.5px;
+      font-weight: 300;
+      line-height: 1.5;
+    }
+
+    .pdp-accordion {
+      display: grid;
+      gap: .65rem;
+      max-width: 560px;
+    }
+
+    .pdp-accordion details {
+      border: .5px solid rgba(0, 0, 0, .08);
+      border-radius: 12px;
+      background: rgba(248, 248, 246, .82);
+      overflow: hidden;
+    }
+
+    .pdp-accordion summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      min-height: 46px;
+      padding: 0 1rem;
+      cursor: pointer;
+      color: var(--dark);
+      font-size: 11px;
+      letter-spacing: .12em;
+      list-style: none;
+      text-transform: uppercase;
+    }
+
+    .pdp-accordion summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .pdp-accordion summary::after {
+      content: '+';
+      color: var(--light);
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .pdp-accordion details[open] summary::after {
+      content: '-';
+    }
+
+    .pdp-accordion p {
+      padding: 0 1rem 1rem;
+      color: var(--mid);
+      font-size: 13px;
+      font-weight: 300;
+      line-height: 1.75;
+    }
+
     .btn-p,
     .btn-s {
       display: inline-flex;
@@ -454,6 +547,10 @@
       grid-template-columns: .8fr 1.2fr;
       gap: 5rem;
       align-items: start;
+    }
+
+    .content-band-soft {
+      background: var(--off);
     }
 
     .section-title {
@@ -703,6 +800,10 @@
         flex-direction: column;
       }
 
+      .pdp-proof-row {
+        grid-template-columns: 1fr;
+      }
+
       .btn-p,
       .btn-s {
         width: 100%;
@@ -794,6 +895,39 @@
   </style>
   <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
   <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
+  <link rel="stylesheet" href="assets/pureform-store-flow.css">
+  <script type="application/ld+json" id="productJsonLd">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "Grey 4-Piece Silicone Brush Set",
+      "brand": {
+        "@type": "Brand",
+        "name": "PureForm"
+      },
+      "description": "One complete PureForm set in Grey with four separate tools for back, body, scalp, and face care.",
+      "image": "https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553521/Main_with_background_anlah0.png",
+      "sku": "pureform-4pc-set-grey",
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "AED",
+        "price": "87.78",
+        "availability": "https://schema.org/InStock",
+        "itemCondition": "https://schema.org/NewCondition",
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "AE",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+          "merchantReturnDays": 15
+        }
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "6"
+      }
+    }
+  </script>
 </head>
 
 <body>
@@ -836,9 +970,45 @@
           <span class="price" id="productPrice">AED 87.78</span>
           <span class="compare" id="productCompare">VAT included</span>
         </div>
+        <div class="pdp-proof-row" aria-label="Product confidence details">
+          <div class="pdp-proof-item">
+            <span>Proof</span>
+            <strong>4.9 rating</strong>
+            <p>Review notes are available before ordering.</p>
+          </div>
+          <div class="pdp-proof-item">
+            <span>Delivery</span>
+            <strong>City check</strong>
+            <p>Timing and payment options are confirmed by support.</p>
+          </div>
+          <div class="pdp-proof-item">
+            <span>Returns</span>
+            <strong>15 days</strong>
+            <p>Unused sets can be returned in original packaging.</p>
+          </div>
+          <div class="pdp-proof-item">
+            <span>Set</span>
+            <strong>4 tools</strong>
+            <p>Back, body, scalp, and face pieces in every color.</p>
+          </div>
+        </div>
         <div class="button-row">
-          <a class="btn-p" href="#offers">View offers</a>
-          <a class="btn-s" href="products.html#set-colors">View all colors</a>
+          <a class="btn-p Btn buy-pay-button" id="productOrderLink" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=single#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+          <a class="btn-s" href="#offers">View offers</a>
+        </div>
+        <div class="pdp-accordion">
+          <details open>
+            <summary>Shipping and delivery</summary>
+            <p>Delivery timing varies by city. Add your city and phone number in the order form so availability, payment options, and next steps can be confirmed before purchase.</p>
+          </details>
+          <details>
+            <summary>Returns and support</summary>
+            <p>Unused sets may be returned within 15 days in original condition and packaging. If the delivery is damaged or incorrect, contact support with clear photos.</p>
+          </details>
+          <details>
+            <summary>What is included</summary>
+            <p>Every set includes the long handle back scrubber, body brush, scalp massager, and hexagonal face brush.</p>
+          </details>
         </div>
       </div>
     </section>
@@ -853,7 +1023,7 @@
       <ul class="detail-list" id="detailList"></ul>
     </section>
 
-    <section class="content-band" style="background: var(--off);">
+    <section class="content-band content-band-soft">
       <div>
         <p class="eyebrow">Care Notes</p>
         <h2 class="section-title">Simple to rinse, quick to dry.</h2>
@@ -865,8 +1035,8 @@
       <div>
         <p class="eyebrow">Set Offers</p>
         <h2 class="section-title">Pick a color set bundle.</h2>
-        <p class="offer-copy">Grey, Black, and Pink are separate product listings in the same silicone brush set
-          category, so each color can have its own photos and product page.</p>
+        <p class="offer-copy">Grey, Black, and Pink are separate set choices in the same silicone brush set category.
+          Pick one color or combine multiple sets before confirming the order.</p>
       </div>
       <div class="offer-list">
         <div class="offer-row">
@@ -876,7 +1046,7 @@
           </div>
           <div class="offer-action">
             <div class="offer-price">AED 87.78</div>
-            <a class="offer-link Btn buy-pay-button" href="contact.html#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+            <a class="offer-link Btn buy-pay-button" data-order-link data-bundle="single" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=single#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
           </div>
         </div>
         <div class="offer-row">
@@ -886,7 +1056,7 @@
           </div>
           <div class="offer-action">
             <div class="offer-price">AED 164.00</div>
-            <a class="offer-link Btn buy-pay-button" href="contact.html#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+            <a class="offer-link Btn buy-pay-button" data-order-link data-bundle="two" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=two#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
           </div>
         </div>
         <div class="offer-row">
@@ -896,7 +1066,7 @@
           </div>
           <div class="offer-action">
             <div class="offer-price">AED 228.00</div>
-            <a class="offer-link Btn buy-pay-button" href="contact.html#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+            <a class="offer-link Btn buy-pay-button" data-order-link data-bundle="three" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=three#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
           </div>
         </div>
       </div>
@@ -963,7 +1133,7 @@
           ],
           details: [
             ['Complete 4-piece set', 'Includes the long handle back scrubber, bath body brush, scalp massager, and hexagonal face brush.'],
-            ['Separate product listing', 'Grey is treated as its own product so it can have its own photos, link, stock, and listing content.'],
+            ['Separate color choice', 'Grey has its own product link so customers can order the exact set finish they want.'],
             ['Full shower routine', 'The set covers back reach, body cleansing, scalp massage, and gentle face cleansing in one box.']
           ],
           care: [
@@ -982,7 +1152,7 @@
           price: 'AED 87.78',
           compare: 'VAT included',
           detailTitle: 'A separate Black set listing.',
-          cardText: 'A bold black set listed separately for dedicated photos, product details, and ordering.',
+          cardText: 'A bold black finish for the same complete four-piece silicone brush routine.',
           specs: [
             ['Color', 'Black'],
             ['Pieces', '4 tools'],
@@ -991,8 +1161,8 @@
           ],
           details: [
             ['Complete 4-piece set', 'Includes the long handle back scrubber, bath body brush, scalp massager, and hexagonal face brush.'],
-            ['Own product card', 'Black is not a color option inside another product; it is a separate product in the silicone brush set category.'],
-            ['Ready for photos', 'The current image is temporary and can be replaced with Black set photos after you upload them.']
+            ['Own color choice', 'Black has its own product link so customers can order this exact set finish.'],
+            ['Color-specific ordering', 'Use the Black product link when you want the complete set in a darker finish.']
           ],
           care: [
             ['Rinse after use', 'Run each silicone tool under warm water after every shower.'],
@@ -1019,8 +1189,8 @@
           ],
           details: [
             ['Complete 4-piece set', 'Includes the long handle back scrubber, bath body brush, scalp massager, and hexagonal face brush.'],
-            ['Own product card', 'Pink is listed separately so it can have its own cloud images and product link.'],
-            ['Ready for photos', 'The current image is temporary and can be replaced with Pink set photos after you upload them.']
+            ['Own color choice', 'Pink is listed separately so customers can order this exact set finish.'],
+            ['Soft routine finish', 'Use the Pink product link when you want the complete set in a softer bath-care tone.']
           ],
           care: [
             ['Rinse after use', 'Run each silicone tool under warm water after every shower.'],
@@ -1043,6 +1213,8 @@
       var productCompare = document.getElementById('productCompare');
       var productImage = document.getElementById('productImage');
       var productPhotoStrip = document.getElementById('productPhotoStrip');
+      var productOrderLink = document.getElementById('productOrderLink');
+      var productJsonLd = document.getElementById('productJsonLd');
       var categoryGrid = document.getElementById('categoryGrid');
       var specStrip = document.getElementById('specStrip');
       var detailTitle = document.getElementById('detailTitle');
@@ -1086,6 +1258,47 @@
             event.preventDefault();
             renderProduct(card.getAttribute('data-product'), true);
           });
+        });
+      }
+
+      function getOrderUrl(id, bundle) {
+        return 'contact.html?topic=start-order&product=' + encodeURIComponent(id) + '&bundle=' + encodeURIComponent(bundle || 'single') + '#message';
+      }
+
+      function updateProductStructuredData(id, product) {
+        if (!productJsonLd) {
+          return;
+        }
+
+        productJsonLd.textContent = JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: product.name,
+          brand: {
+            '@type': 'Brand',
+            name: 'PureForm'
+          },
+          description: product.lead,
+          image: product.image,
+          sku: id,
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: 'AED',
+            price: product.price.replace(/[^0-9.]/g, ''),
+            availability: 'https://schema.org/InStock',
+            itemCondition: 'https://schema.org/NewCondition',
+            hasMerchantReturnPolicy: {
+              '@type': 'MerchantReturnPolicy',
+              applicableCountry: 'AE',
+              returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+              merchantReturnDays: 15
+            }
+          },
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '4.9',
+            reviewCount: '6'
+          }
         });
       }
 
@@ -1153,6 +1366,13 @@
         setList(detailList, product.details);
         setList(careList, product.care);
         renderCategoryCards(id);
+        if (productOrderLink) {
+          productOrderLink.href = getOrderUrl(id, 'single');
+        }
+        document.querySelectorAll('[data-order-link]').forEach(function (link) {
+          link.href = getOrderUrl(id, link.getAttribute('data-bundle'));
+        });
+        updateProductStructuredData(id, product);
         document.title = product.name + ' | PureForm';
 
         if (pushState) {
@@ -1170,6 +1390,7 @@
     })();
   </script>
   <script src="assets/pureform-mobile-menu.js" defer></script>
+  <script src="assets/pureform-store-flow.js" defer></script>
 </body>
 
 </html>
