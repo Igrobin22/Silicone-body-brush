@@ -6,12 +6,13 @@
 
 body > nav.site-header {
   position: fixed;
-  inset: 0 0 auto;
+  inset: 0 auto auto 0;
   z-index: 200;
   display: grid;
-  grid-template-rows: 40px 86px;
-  width: 100%;
-  height: 126px;
+  grid-template-rows: 34px 72px;
+  width: 100vw !important;
+  max-width: none !important;
+  height: 106px;
   padding: 0 !important;
   border: 0;
   background: transparent;
@@ -26,10 +27,14 @@ body > nav.site-header {
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   padding: 0 clamp(1rem, 3vw, 3rem);
-  background: #854235;
-  color: rgba(255, 255, 255, .88);
-  font-size: 13px;
-  font-weight: 500;
+  border-bottom: 0.5px solid rgba(28, 32, 30, .08);
+  background:
+    linear-gradient(90deg, rgba(220, 238, 231, .72), rgba(246, 219, 228, .62)),
+    rgba(255, 255, 255, .78);
+  color: var(--mid);
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: .03em;
 }
 
 .promo-message {
@@ -42,7 +47,7 @@ body > nav.site-header {
   display: flex;
   align-items: center;
   gap: 1.4rem;
-  color: rgba(255, 255, 255, .82);
+  color: var(--mid);
   font-size: 12px;
   text-transform: uppercase;
 }
@@ -55,7 +60,7 @@ body > nav.site-header {
 
 .promo-links a:hover,
 .promo-links a:focus-visible {
-  color: #fff;
+  color: var(--dark);
 }
 
 .nav-main {
@@ -63,11 +68,13 @@ body > nav.site-header {
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 1.5rem;
-  min-height: 86px;
+  min-height: 72px;
   padding: 0 clamp(1.2rem, 3.8vw, 3.2rem);
   border-bottom: 0.5px solid rgba(28, 32, 30, .08);
-  background: rgba(248, 248, 246, .98);
-  box-shadow: 0 12px 32px rgba(19, 27, 24, .045);
+  background: rgba(255, 255, 255, .72);
+  box-shadow: 0 18px 70px rgba(19, 27, 24, .06);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
 }
 
 .site-header .nav-links {
@@ -81,10 +88,10 @@ body > nav.site-header {
 
 .site-header .nav-links a,
 .nav-action-link {
-  color: var(--dark);
+  color: var(--mid);
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .02em;
+  font-weight: 300;
+  letter-spacing: .04em;
   text-transform: uppercase;
   text-decoration: none;
   transition: color .2s ease, transform .2s ease;
@@ -97,20 +104,20 @@ body > nav.site-header {
 .nav-action-link:focus-visible,
 .nav-action-link.is-active,
 .promo-links a.is-active {
-  color: #42725b;
+  color: var(--dark);
   transform: translateY(-1px);
 }
 
 .site-header .nav-logo {
   justify-self: center;
-  color: #9b634e !important;
+  color: var(--dark) !important;
   font-family: var(--serif);
-  font-size: clamp(32px, 3.4vw, 48px) !important;
+  font-size: 24px !important;
   font-weight: 400;
-  letter-spacing: .32em !important;
+  letter-spacing: .05em !important;
   line-height: 1;
   text-decoration: none;
-  text-transform: uppercase;
+  text-transform: none;
   white-space: nowrap;
 }
 
@@ -124,8 +131,8 @@ body > nav.site-header {
 .nav-icon {
   position: relative;
   display: inline-flex;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
@@ -134,8 +141,8 @@ body > nav.site-header {
 }
 
 .nav-icon svg {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -147,7 +154,7 @@ body > nav.site-header {
 .nav-icon:focus-visible,
 .nav-icon.is-active {
   background: rgba(17, 17, 17, .06);
-  color: #42725b;
+  color: var(--dark);
   transform: translateY(-1px);
 }
 
@@ -167,11 +174,11 @@ body > nav.site-header {
 }
 
 body > nav.site-header + main {
-  padding-top: 126px;
+  padding-top: 106px;
 }
 
 body > nav.site-header + .hero {
-  padding-top: 126px;
+  padding-top: 106px;
 }
 
 @media (max-width: 1040px) {
@@ -185,8 +192,8 @@ body > nav.site-header + .hero {
   }
 
   .site-header .nav-logo {
-    font-size: 30px !important;
-    letter-spacing: .24em !important;
+    font-size: 23px !important;
+    letter-spacing: .05em !important;
   }
 
   .nav-actions {
