@@ -12,9 +12,6 @@
   <link rel="preload" as="image"
     href="https://res.cloudinary.com/dqjilscgl/image/upload/v1778744471/ChatGPT_Image_May_14_2026_11_40_44_AM_jzx8xg.png"
     fetchpriority="high">
-  <link rel="preload" as="image"
-    href="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553519/grey_transparent_all_4_piece_med27b.png"
-    fetchpriority="high">
   <link
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"
     rel="stylesheet">
@@ -3291,18 +3288,7 @@
       }
 
       .mobile-hero-price {
-        right: .95rem;
-        bottom: .95rem;
-        min-width: 116px;
-        padding: .72rem .82rem;
-        border: .5px solid rgba(0, 0, 0, .08);
-        border-radius: 18px;
-        background: rgba(255, 255, 255, .86);
-        box-shadow: 0 16px 34px rgba(24, 35, 32, .12);
-        color: var(--dark);
-        font-family: var(--serif);
-        font-size: 1.45rem;
-        line-height: 1;
+        display: none;
       }
 
       .mobile-hero-price span {
@@ -3369,7 +3355,7 @@
       }
 
       .mobile-hero-price {
-        font-size: 1.25rem;
+        font-size: 1.04rem;
       }
     }
 
@@ -3465,11 +3451,6 @@
       <div class="spark sp5"></div>
       <div class="spark sp6"></div>
 
-      <div class="hero-img-wrap" id="heroImgWrap">
-        <img src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553519/grey_transparent_all_4_piece_med27b.png"
-          alt="Grey 4-piece PureForm silicone brush set with back scrubber, body brush, scalp massager, and face brush"
-          fetchpriority="high" decoding="async">
-      </div>
     </div>
 
     <div class="hero-mobile-product" aria-label="Grey PureForm 4-piece silicone brush set">
@@ -3875,7 +3856,6 @@
     (function () {
       'use strict';
       var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var heroImgWrap = document.getElementById('heroImgWrap');
       function scrollToId(id) {
         var target = document.getElementById(id);
         if (!target) return;
@@ -3886,7 +3866,6 @@
       });
       function revealHero() {
         var heroBits = [];
-        if (heroImgWrap) heroBits.push(heroImgWrap);
         var left = document.getElementById('heroLeft');
         if (left) heroBits = heroBits.concat(Array.prototype.slice.call(left.children));
         var right = document.getElementById('heroRight');

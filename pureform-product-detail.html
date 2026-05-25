@@ -32,6 +32,7 @@
       --light: #b8b8b8;
       --serif: 'Cormorant Garamond', Georgia, serif;
       --sans: 'DM Sans', Arial, sans-serif;
+      --pdp-header-height: 106px;
     }
 
     html {
@@ -46,85 +47,8 @@
       overflow-x: hidden;
     }
 
-    body.is-gallery-locked {
-      overflow: hidden;
-    }
-
     a {
       color: inherit;
-    }
-
-    body.pdp-reference-page > nav.site-header {
-      grid-template-rows: 76px;
-      height: 76px;
-    }
-
-    body.pdp-reference-page .promo-bar {
-      display: none;
-    }
-
-    body.pdp-reference-page .nav-main {
-      min-height: 76px;
-      border-bottom: 0;
-      background: rgba(255, 255, 255, .98);
-      box-shadow: none;
-    }
-
-    body.pdp-reference-page .site-header .nav-links {
-      gap: clamp(2rem, 4vw, 4.2rem);
-    }
-
-    body.pdp-reference-page .site-header .nav-links a,
-    body.pdp-reference-page .nav-action-link {
-      color: var(--mid);
-      font-size: 13px;
-      font-weight: 300;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-    }
-
-    body.pdp-reference-page .site-header .nav-logo {
-      color: var(--dark) !important;
-      font-family: var(--serif);
-      font-size: 24px !important;
-      font-weight: 400;
-      letter-spacing: .05em !important;
-      text-transform: none;
-    }
-
-    body.pdp-reference-page .nav-actions {
-      gap: clamp(1rem, 2vw, 2rem);
-    }
-
-    body.pdp-reference-page .nav-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 0;
-    }
-
-    body.pdp-reference-page .nav-icon svg {
-      width: 27px;
-      height: 27px;
-      stroke-width: 1.5;
-    }
-
-    .country-link {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      color: #000;
-      font-size: 14px;
-      font-weight: 700;
-      text-decoration: none;
-      white-space: nowrap;
-    }
-
-    .country-link svg {
-      width: 22px;
-      height: 22px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 1.6;
     }
 
     main {
@@ -137,15 +61,18 @@
       gap: clamp(2rem, 3vw, 4rem);
       align-items: start;
       padding: 0 clamp(.8rem, 1.2vw, 1.5rem);
-      min-height: calc(100vh - 76px);
+      min-height: calc(100vh - var(--pdp-header-height));
+      min-height: calc(100dvh - var(--pdp-header-height));
     }
 
     .pdp-copy,
     .pdp-buy {
       position: sticky;
-      top: 76px;
-      height: calc(100vh - 76px);
-      min-height: calc(100vh - 76px);
+      top: var(--pdp-header-height);
+      height: calc(100vh - var(--pdp-header-height));
+      height: calc(100dvh - var(--pdp-header-height));
+      min-height: calc(100vh - var(--pdp-header-height));
+      min-height: calc(100dvh - var(--pdp-header-height));
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -228,12 +155,13 @@
 
     .pdp-gallery {
       position: sticky;
-      top: 76px;
-      height: calc(100vh - 76px);
+      top: var(--pdp-header-height);
+      height: calc(100vh - var(--pdp-header-height));
+      height: calc(100dvh - var(--pdp-header-height));
       overflow: hidden;
       background: var(--panel);
       isolation: isolate;
-      touch-action: pan-y;
+      outline: none;
     }
 
     .pdp-gallery-frame {
@@ -292,6 +220,7 @@
       color: #111;
       font-size: 13px;
       letter-spacing: .06em;
+      -webkit-backdrop-filter: blur(12px);
       backdrop-filter: blur(12px);
     }
 
@@ -531,11 +460,24 @@
         order: -1;
         position: relative;
         top: auto;
-        height: min(82vh, 680px);
+        display: grid;
+        gap: 1.1rem;
+        height: auto;
+        overflow: visible;
+        background: transparent;
       }
 
       .pdp-gallery-frame {
-        min-height: 0;
+        position: relative;
+        inset: auto;
+        min-height: min(82vh, 680px);
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+      }
+
+      .pdp-gallery-ui {
+        display: none;
       }
 
       .pdp-normal-content {
@@ -544,17 +486,8 @@
     }
 
     @media (max-width: 820px) {
-      body.pdp-reference-page > nav.site-header {
-        height: 72px;
-      }
-
-      body.pdp-reference-page .site-header .nav-links a {
-        font-size: 12px;
-        text-transform: uppercase;
-      }
-
-      body.pdp-reference-page .country-link {
-        display: none;
+      :root {
+        --pdp-header-height: 72px;
       }
 
       main {
@@ -566,7 +499,7 @@
       }
 
       .pdp-gallery-frame {
-        min-height: 0;
+        min-height: 64vh;
       }
 
       .pdp-gallery-frame img {
@@ -581,30 +514,47 @@
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .pdp-gallery-frame {
+        transition: none;
+        transform: none;
+      }
+    }
   </style>
   <script type="application/ld+json" id="productJsonLd"></script>
 </head>
 
 <body class="pdp-reference-page">
   <nav class="site-header" aria-label="Primary navigation">
-    <div class="promo-bar"></div>
+    <div class="promo-bar">
+      <div class="promo-message">Free delivery checks and 15-day returns on PureForm orders</div>
+      <div class="promo-links">
+        <a href="policy.html#delivery">UAE (AED) - EN</a>
+        <a href="contact.html">Support</a>
+      </div>
+    </div>
     <div class="nav-main">
       <ul class="nav-links">
-        <li><a class="is-active" href="products.html">Shop</a></li>
+        <li><a class="is-active" href="products.html">Products</a></li>
         <li><a href="about.html">About</a></li>
+        <li><a href="reviews.html">Reviews</a></li>
+        <li><a href="policy.html">Policy</a></li>
+        <li><a href="faq.html">FAQ</a></li>
       </ul>
       <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
       <div class="nav-actions" aria-label="Shop utilities">
+        <a class="nav-action-link" href="contact.html">Support</a>
         <a class="nav-icon nav-search" href="products.html#set-colors" aria-label="Search products">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
         </a>
         <a class="nav-icon nav-cart" href="cart.html" aria-label="Open cart">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 8.5h11l-.8 11h-9.4l-.8-11Z"></path><path d="M9 8.5V6.8a3 3 0 0 1 6 0v1.7"></path></svg>
           <span class="nav-cart-count" aria-label="0 items in cart">0</span>
-        </a>
-        <a class="country-link" href="policy.html#delivery" aria-label="United Arab Emirates AED English">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.4 2.3 3.6 5.3 3.6 9s-1.2 6.7-3.6 9M12 3C9.6 5.3 8.4 8.3 8.4 12S9.6 18.7 12 21"></path></svg>
-          <span>United Arab Emirates - AED / EN</span>
         </a>
       </div>
     </div>
@@ -696,10 +646,10 @@
       'use strict';
 
       var greyPhotos = [
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553521/Main_with_background_anlah0.png',
+        'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553521/Main_with_background_anlah0.png',
         'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553513/grey_white_bg_irnzyc.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553535/grey_Head_h1duwj.png'
+        'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553513/grey_white_bg_irnzyc.png',
+        'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553535/grey_Head_h1duwj.png'
       ];
 
       var products = {
@@ -805,6 +755,8 @@
       var lastWheelStep = 0;
       var touchStartY = 0;
       var touchStartX = 0;
+      var galleryMedia = window.matchMedia('(min-width: 1101px)');
+      var reducedMotionMedia = window.matchMedia('(prefers-reduced-motion: reduce)');
 
       function getRequestedProduct() {
         var params = new URLSearchParams(window.location.search);
@@ -823,8 +775,8 @@
         return Math.min(Math.max(value, min), max);
       }
 
-      function setGalleryLock(locked) {
-        document.body.classList.toggle('is-gallery-locked', Boolean(locked));
+      function shouldUseStepGallery() {
+        return galleryMedia.matches && !reducedMotionMedia.matches && galleryFrames.length > 1;
       }
 
       function isInGalleryZone() {
@@ -839,12 +791,13 @@
 
       function showGalleryImage(nextIndex) {
         var max = galleryFrames.length - 1;
+        var isStepLayout = galleryMedia.matches;
         galleryIndex = clamp(nextIndex, 0, max);
 
         galleryFrames.forEach(function (frame, index) {
-          var active = index === galleryIndex;
-          frame.classList.toggle('is-active', active);
-          frame.setAttribute('aria-hidden', active ? 'false' : 'true');
+          var selected = index === galleryIndex;
+          frame.classList.toggle('is-active', !isStepLayout || selected);
+          frame.setAttribute('aria-hidden', isStepLayout && !selected ? 'true' : 'false');
         });
 
         galleryDots.forEach(function (dot, index) {
@@ -859,18 +812,12 @@
       }
 
       function canStepGallery(direction) {
-        if (!isInGalleryZone() || galleryFrames.length < 2) {
-          setGalleryLock(false);
+        if (!shouldUseStepGallery() || !isInGalleryZone()) {
           return false;
         }
 
         var max = galleryFrames.length - 1;
-        if ((direction > 0 && galleryIndex >= max) || (direction < 0 && galleryIndex <= 0)) {
-          setGalleryLock(false);
-          return false;
-        }
-
-        return true;
+        return !((direction > 0 && galleryIndex >= max) || (direction < 0 && galleryIndex <= 0));
       }
 
       function stepGallery(direction) {
@@ -878,28 +825,17 @@
           return false;
         }
 
-        setGalleryLock(true);
         showGalleryImage(galleryIndex + direction);
         return true;
       }
 
       function onGalleryWheel(event) {
         var direction = Math.sign(event.deltaY);
-        if (!direction) {
-          return;
-        }
-
-        if (!isInGalleryZone()) {
-          setGalleryLock(false);
-          return;
-        }
-
-        if (!canStepGallery(direction)) {
+        if (!direction || !canStepGallery(direction)) {
           return;
         }
 
         event.preventDefault();
-        setGalleryLock(true);
 
         var now = Date.now();
         if (now - lastWheelStep < 260) {
@@ -910,21 +846,25 @@
         showGalleryImage(galleryIndex + direction);
       }
 
+      function isTextControl(target) {
+        return target && target.closest && target.closest('a, button, summary, input, textarea, select, [contenteditable="true"]');
+      }
+
       function onGalleryKeydown(event) {
         var direction = 0;
+
+        if (isTextControl(event.target)) {
+          return;
+        }
+
         if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === ' ') {
           direction = 1;
         } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
           direction = -1;
         }
 
-        if (!direction || !isInGalleryZone()) {
-          return;
-        }
-
-        if (canStepGallery(direction)) {
+        if (direction && stepGallery(direction)) {
           event.preventDefault();
-          stepGallery(direction);
         }
       }
 
@@ -938,7 +878,7 @@
       }
 
       function onGalleryTouchMove(event) {
-        if (!event.touches.length || !isInGalleryZone()) {
+        if (!event.touches.length || !shouldUseStepGallery() || !isInGalleryZone()) {
           return;
         }
 
@@ -948,14 +888,12 @@
 
         if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 12 && canStepGallery(direction)) {
           event.preventDefault();
-          setGalleryLock(true);
         }
       }
 
       function onGalleryTouchEnd(event) {
         var touch = event.changedTouches && event.changedTouches[0];
-        if (!touch || !isInGalleryZone()) {
-          setGalleryLock(false);
+        if (!touch || !shouldUseStepGallery() || !isInGalleryZone()) {
           return;
         }
 
@@ -1054,26 +992,23 @@
         document.title = product.name + ' | PureForm';
 
         if (pushState) {
-          setGalleryLock(false);
           history.pushState({ product: id }, '', 'pureform-product-detail.html?product=' + encodeURIComponent(id));
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }
 
+      window.addEventListener('popstate', function () {
+        renderProduct(getRequestedProduct(), false);
+      });
+
       window.addEventListener('wheel', onGalleryWheel, { passive: false });
       window.addEventListener('keydown', onGalleryKeydown);
-      window.addEventListener('scroll', function () {
-        if (!isInGalleryZone()) {
-          setGalleryLock(false);
-        }
+      window.addEventListener('resize', function () {
+        showGalleryImage(galleryIndex);
       }, { passive: true });
       productGallery.addEventListener('touchstart', onGalleryTouchStart, { passive: true });
       productGallery.addEventListener('touchmove', onGalleryTouchMove, { passive: false });
       productGallery.addEventListener('touchend', onGalleryTouchEnd, { passive: true });
-
-      window.addEventListener('popstate', function () {
-        renderProduct(getRequestedProduct(), false);
-      });
 
       renderProduct(getRequestedProduct(), false);
     })();

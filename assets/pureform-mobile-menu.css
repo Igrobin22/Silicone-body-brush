@@ -636,3 +636,19 @@ body > nav.site-header + .hero,
     display: none !important;
   }
 }
+
+@media (min-width: 821px) {
+  body > nav.site-header {
+    inset: 0 0 auto 0 !important;
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: none !important;
+  }
+
+  body > nav.site-header .promo-bar,
+  body > nav.site-header .nav-main {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: none !important;
+  }
+}

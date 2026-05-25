@@ -239,14 +239,14 @@ h1 {
 
 .collection-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.2rem;
   align-items: start;
   margin-bottom: 1.55rem;
 }
 
 .collection-tabs {
-  display: flex;
+  display: none;
   min-width: 0;
   align-items: center;
   gap: clamp(1rem, 1.55vw, 1.75rem);
@@ -297,6 +297,8 @@ h1 {
   grid-template-columns: auto auto auto;
   gap: 1.6rem;
   align-items: start;
+  width: 100%;
+  justify-content: space-between;
   color: var(--dark);
 }
 
@@ -1014,6 +1016,11 @@ h1 {
   transform: translateY(0);
 }
 
+.collection-listing[data-animate] {
+  opacity: 1;
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1209,27 +1216,45 @@ h1 {
     position: sticky;
     top: 72px;
     z-index: 20;
+    display: flex;
+    flex-direction: column;
     margin: 0 -.75rem 1rem;
     padding: .75rem;
+    gap: .65rem;
     border-bottom: 0.5px solid var(--border);
     background: rgba(255, 255, 255, .96);
   }
 
   .collection-tabs {
+    order: 1;
+    display: none;
+    min-height: 30px;
+    width: 100%;
+    max-width: 100%;
     gap: 1rem;
-    padding-bottom: .45rem;
+    padding: .1rem 0 .42rem;
+    overflow-x: auto;
   }
 
   .collection-tabs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
     font-size: 13px;
   }
 
   .collection-controls {
-    grid-template-columns: 1fr auto;
-    gap: .8rem;
+    order: 2;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    min-width: 0;
+    gap: .65rem .8rem;
+    justify-content: stretch;
   }
 
   .collection-filter summary {
+    width: min(100%, 160px);
+    justify-content: space-between;
     gap: 1.2rem;
     font-size: 12px;
   }
@@ -1239,8 +1264,17 @@ h1 {
     right: auto;
   }
 
+  .collection-sort {
+    justify-self: start;
+    width: min(160px, 100%);
+    min-width: 0;
+    overflow: hidden;
+  }
+
   .collection-sort select {
-    min-width: 118px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     font-size: 12px;
   }
 
@@ -1251,7 +1285,7 @@ h1 {
   }
 
   .collection-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: .55rem;
   }
 
@@ -1285,6 +1319,7 @@ h1 {
     gap: .35rem;
     padding: .75rem .2rem .25rem;
     font-size: 13px;
+    min-width: 0;
   }
 
   .collection-card-meta {
@@ -1302,6 +1337,13 @@ h1 {
 
   .page-hero {
     min-height: auto;
+    min-width: 0;
+  }
+
+  .page-hero > *,
+  .lead {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .hero-media {
@@ -1429,6 +1471,16 @@ h1 {
   .page-hero {
     padding: 2rem .9rem 1.75rem;
     gap: 1.5rem;
+    overflow: hidden;
+  }
+
+  .page-hero > div:first-child {
+    width: 100%;
+    max-width: min(100%, 360px);
+  }
+
+  .page-hero .lead {
+    overflow-wrap: break-word;
   }
 
   .hero-media {
