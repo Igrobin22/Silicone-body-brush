@@ -5,14 +5,18 @@
 }
 
 body > nav.site-header {
-  position: fixed;
-  inset: 0 auto auto 0;
+  position: sticky !important;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 200;
   display: grid;
   grid-template-rows: 34px 72px;
   width: 100vw !important;
   max-width: none !important;
+  margin-inline: calc(50% - 50vw) !important;
   height: 106px;
+  overflow: visible;
   padding: 0 !important;
   border: 0;
   background: transparent;
@@ -28,10 +32,8 @@ body > nav.site-header {
   align-items: center;
   padding: 0 clamp(1rem, 3vw, 3rem);
   border-bottom: 0.5px solid rgba(28, 32, 30, .08);
-  background:
-    linear-gradient(90deg, rgba(220, 238, 231, .72), rgba(246, 219, 228, .62)),
-    rgba(255, 255, 255, .78);
-  color: var(--mid);
+  background: #000;
+  color: #fff;
   font-size: 12px;
   font-weight: 300;
   letter-spacing: .03em;
@@ -47,7 +49,7 @@ body > nav.site-header {
   display: flex;
   align-items: center;
   gap: 1.4rem;
-  color: var(--mid);
+  color: #fff;
   font-size: 12px;
   text-transform: uppercase;
 }
@@ -55,12 +57,14 @@ body > nav.site-header {
 .promo-links a,
 .nav-action-link,
 .nav-icon {
+  color: inherit;
   text-decoration: none;
 }
 
 .promo-links a:hover,
 .promo-links a:focus-visible {
-  color: var(--dark);
+  color: #fff;
+  text-decoration: underline;
 }
 
 .nav-main {
@@ -106,6 +110,10 @@ body > nav.site-header {
 .promo-links a.is-active {
   color: var(--dark);
   transform: translateY(-1px);
+}
+
+.promo-links a.is-active {
+  color: #fff;
 }
 
 .site-header .nav-logo {
@@ -174,11 +182,11 @@ body > nav.site-header {
 }
 
 body > nav.site-header + main {
-  padding-top: 106px;
+  padding-top: 0;
 }
 
 body > nav.site-header + .hero {
-  padding-top: 106px;
+  padding-top: 0;
 }
 
 @media (max-width: 1040px) {
@@ -208,10 +216,15 @@ body > nav.site-header + .hero {
 
   body > nav.site-header {
     display: block !important;
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     height: 72px !important;
     min-height: 72px !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    width: 100vw !important;
+    max-width: none !important;
+    margin-inline: calc(50% - 50vw) !important;
     padding: 0 !important;
     overflow: visible !important;
   }
@@ -308,11 +321,11 @@ body > nav.site-header + .hero {
   }
 
   body > nav.site-header + main {
-    padding-top: 72px !important;
+    padding-top: 0 !important;
   }
 
   body > nav.site-header + .hero {
-    padding-top: 88px !important;
+    padding-top: 0 !important;
   }
 
   html.pf-js body > nav.site-header {
@@ -325,11 +338,11 @@ body > nav.site-header + .hero {
   }
 
   html.pf-js main {
-    padding-top: 72px !important;
+    padding-top: 0 !important;
   }
 
   html.pf-js body > nav.site-header + .hero {
-    padding-top: 88px !important;
+    padding-top: 0 !important;
   }
 
   .pf-mobile-menu-button {
