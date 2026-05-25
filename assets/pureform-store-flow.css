@@ -148,12 +148,7 @@
 
 @media (max-width: 760px) {
   .pf-flow-rail {
-    right: .65rem;
-    bottom: .65rem;
-    left: .65rem;
-    justify-content: space-between;
-    overflow-x: auto;
-    border-radius: 16px;
+    display: none !important;
   }
 
   .pf-flow-rail a {

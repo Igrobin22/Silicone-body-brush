@@ -54,6 +54,10 @@
   }
 
   function setupFlowRail() {
+    if (window.matchMedia('(max-width: 760px)').matches) {
+      return;
+    }
+
     var sections = [
       ['products', 'Sets'],
       ['colors', 'Colors'],
