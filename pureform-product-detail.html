@@ -4,13 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="View PureForm 4-piece silicone brush set details, price, included tools, care notes, returns, delivery confirmation, and set bundle offers.">
+  <meta name="description" content="View PureForm product details, gallery, color choices, set information, availability, delivery, returns, and order support.">
   <title>PureForm Product Detail</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"
     rel="stylesheet">
+  <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
+  <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
   <style>
     *,
     *::before,
@@ -22,17 +24,14 @@
 
     :root {
       --white: #ffffff;
-      --off: #f8f8f6;
-      --lg: #eeeeec;
-      --mg: #c4c4c0;
-      --border: rgba(0, 0, 0, 0.07);
-      --dark: #111111;
-      --mid: #666660;
-      --light: #aaa9a4;
-      --wash: #e7f0f0;
-      --sage: #dbe5df;
+      --off: #f6f6f4;
+      --panel: #efefee;
+      --border: rgba(0, 0, 0, .18);
+      --dark: #050505;
+      --mid: #505050;
+      --light: #b8b8b8;
       --serif: 'Cormorant Garamond', Georgia, serif;
-      --sans: 'DM Sans', sans-serif;
+      --sans: 'DM Sans', Arial, sans-serif;
     }
 
     html {
@@ -40,334 +39,160 @@
     }
 
     body {
-      font-family: var(--sans);
+      min-width: 320px;
       background: var(--white);
       color: var(--dark);
+      font-family: var(--sans);
       overflow-x: hidden;
+    }
+
+    body.is-gallery-locked {
+      overflow: hidden;
     }
 
     a {
       color: inherit;
     }
 
-    nav {
-      position: fixed;
-      inset: 0 0 auto;
-      z-index: 200;
-      height: 68px;
-      padding: 0 5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(255, 255, 255, 0.96);
-      border-bottom: 0.5px solid var(--border);
+    body.pdp-reference-page > nav.site-header {
+      grid-template-rows: 76px;
+      height: 76px;
     }
 
-    .nav-logo {
-      font-family: var(--serif);
-      font-size: 24px;
-      font-weight: 400;
-      letter-spacing: .05em;
-      text-decoration: none;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 1.45rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 300;
-      color: var(--mid);
-      letter-spacing: .04em;
-      transition: color .2s;
-    }
-
-    .nav-links a:hover,
-    .nav-links a:focus-visible,
-    .nav-links a.is-active {
-      color: var(--dark);
-    }
-
-    .nav-cta,
-    .btn-p,
-    .btn-s {
-      font-family: var(--sans);
-      border-radius: 100px;
-      cursor: pointer;
-      transition: all .25s;
-    }
-
-    .nav-cta {
-      background: var(--dark);
-      color: var(--white);
-      border: none;
-      padding: 10px 26px;
-      font-size: 13px;
-      letter-spacing: .04em;
-      text-decoration: none;
-    }
-
-    .nav-cta:hover,
-    .btn-p:hover {
-      background: #2a2a2a;
-      transform: translateY(-1px);
-    }
-
-    main {
-      padding-top: 68px;
-    }
-
-    @supports (content-visibility: auto) {
-      main > section:not(:first-child),
-      footer {
-        content-visibility: auto;
-        contain-intrinsic-size: 720px;
-      }
-    }
-
-    .detail-hero {
-      min-height: calc(100vh - 68px);
-      display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
-      background: var(--off);
-    }
-
-    .media-panel {
-      position: relative;
-      min-height: 620px;
-      padding: 5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1.15rem;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 50% 42%, rgba(255, 255, 255, .95) 0 32%, rgba(231, 240, 240, .85) 33% 47%, transparent 48%),
-        linear-gradient(135deg, var(--off), var(--wash));
-    }
-
-    .media-panel::before,
-    .media-panel::after {
-      content: '';
-      position: absolute;
-      border-radius: 50%;
-      border: 1px solid rgba(0, 0, 0, .05);
-      pointer-events: none;
-    }
-
-    .media-panel::before {
-      width: min(62vw, 720px);
-      height: min(62vw, 720px);
-    }
-
-    .media-panel::after {
-      width: min(42vw, 520px);
-      height: min(42vw, 520px);
-      border-color: rgba(0, 0, 0, .035);
-    }
-
-    .back-link {
-      position: absolute;
-      top: 2rem;
-      left: 5rem;
-      z-index: 3;
-      font-size: 11px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      text-decoration: none;
-      color: var(--mid);
-    }
-
-    .back-link::before {
-      content: '<- ';
-    }
-
-    .product-image {
-      position: relative;
-      z-index: 2;
-      width: min(68%, 520px);
-      max-height: 70vh;
-      object-fit: contain;
-      transition: opacity .25s, transform .25s;
-    }
-
-    .product-photo-strip {
-      position: relative;
-      z-index: 3;
-      display: grid;
-      grid-template-columns: repeat(6, minmax(42px, 64px));
-      gap: .55rem;
-      width: min(100%, 520px);
-      justify-content: center;
-    }
-
-    .product-photo-strip[hidden] {
+    body.pdp-reference-page .promo-bar {
       display: none;
     }
 
-    .product-photo-thumb {
-      display: flex;
+    body.pdp-reference-page .nav-main {
+      min-height: 76px;
+      border-bottom: 0;
+      background: rgba(255, 255, 255, .98);
+      box-shadow: none;
+    }
+
+    body.pdp-reference-page .site-header .nav-links {
+      gap: clamp(2rem, 4vw, 4.2rem);
+    }
+
+    body.pdp-reference-page .site-header .nav-links a,
+    body.pdp-reference-page .nav-action-link {
+      color: #000;
+      font-size: clamp(18px, 1.5vw, 28px);
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    body.pdp-reference-page .site-header .nav-logo {
+      color: #000 !important;
+      font-family: var(--sans);
+      font-size: clamp(30px, 3.4vw, 48px) !important;
+      font-weight: 700;
+      letter-spacing: .28em !important;
+    }
+
+    body.pdp-reference-page .nav-actions {
+      gap: clamp(1rem, 2vw, 2rem);
+    }
+
+    body.pdp-reference-page .nav-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 0;
+    }
+
+    body.pdp-reference-page .nav-icon svg {
+      width: 27px;
+      height: 27px;
+      stroke-width: 1.5;
+    }
+
+    .country-link {
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      aspect-ratio: 1;
-      padding: .28rem;
-      border: .5px solid rgba(0, 0, 0, .11);
-      border-radius: 12px;
-      background: rgba(255, 255, 255, .72);
-      cursor: pointer;
-      transition: border-color .2s, box-shadow .2s, transform .2s;
+      gap: .5rem;
+      color: #000;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
     }
 
-    .product-photo-thumb:hover,
-    .product-photo-thumb:focus-visible,
-    .product-photo-thumb.is-active {
-      border-color: rgba(0, 0, 0, .34);
-      box-shadow: 0 10px 24px rgba(28, 35, 32, .1);
-      transform: translateY(-1px);
-      outline: none;
+    .country-link svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.6;
     }
 
-    .product-photo-thumb img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+    main {
+      padding-top: 76px;
     }
 
-    .copy-panel {
-      background: var(--white);
-      padding: clamp(3rem, 6vw, 6rem) 5rem;
+    .pdp-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, .9fr) minmax(420px, 1.06fr) minmax(320px, .88fr);
+      gap: clamp(2rem, 3vw, 4rem);
+      align-items: start;
+      padding: 0 clamp(.8rem, 1.2vw, 1.5rem);
+      min-height: calc(100vh - 76px);
+    }
+
+    .pdp-copy,
+    .pdp-buy {
+      position: sticky;
+      top: 76px;
+      height: calc(100vh - 76px);
+      min-height: calc(100vh - 76px);
       display: flex;
       flex-direction: column;
       justify-content: center;
-      border-left: 0.5px solid var(--border);
+      overflow-y: auto;
+      padding-bottom: 1rem;
+      scrollbar-width: thin;
     }
 
-    .eyebrow {
-      font-size: 11px;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: var(--light);
-      font-weight: 300;
-      margin-bottom: 1.2rem;
+    .pdp-status {
+      margin-bottom: 1.25rem;
+      font-size: 16px;
+      letter-spacing: .02em;
     }
 
-    h1 {
-      font-family: var(--serif);
-      font-size: clamp(3rem, 5.5vw, 5.8rem);
-      font-weight: 300;
-      line-height: .94;
-      letter-spacing: -.01em;
-      margin-bottom: 1.35rem;
-    }
-
-    .lead {
-      max-width: 520px;
-      color: var(--mid);
-      font-size: 15px;
-      font-weight: 300;
-      line-height: 1.9;
+    .pdp-copy h1 {
+      max-width: 13.5em;
+      font-size: clamp(2rem, 2vw, 2.55rem);
+      font-weight: 400;
+      letter-spacing: .01em;
+      line-height: 1.08;
       margin-bottom: 2rem;
     }
 
-    .price-row {
-      display: flex;
-      align-items: baseline;
-      gap: .8rem;
-      margin-bottom: 2rem;
+    .pdp-lead {
+      max-width: 31rem;
+      margin-bottom: 2.25rem;
+      font-size: 15.5px;
+      letter-spacing: .02em;
+      line-height: 1.2;
     }
 
-    .price {
-      font-family: var(--serif);
-      font-size: 2.5rem;
-      font-weight: 300;
-      letter-spacing: -.02em;
-    }
-
-    .compare {
-      color: var(--light);
-      font-size: 13px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .75rem;
-      margin-bottom: 2rem;
-    }
-
-    .pdp-proof-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: .7rem;
-      margin: -.7rem 0 1.6rem;
-    }
-
-    .pdp-proof-item {
-      min-height: 86px;
-      padding: .9rem;
-      border: .5px solid rgba(0, 0, 0, .08);
-      border-radius: 12px;
-      background: rgba(248, 248, 246, .82);
-    }
-
-    .pdp-proof-item span {
-      display: block;
-      margin-bottom: .45rem;
-      color: var(--light);
-      font-size: 9px;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-    }
-
-    .pdp-proof-item strong {
-      display: block;
-      margin-bottom: .25rem;
-      font-family: var(--serif);
-      font-size: 1.35rem;
-      font-weight: 300;
-      line-height: 1;
-    }
-
-    .pdp-proof-item p {
-      color: var(--mid);
-      font-size: 11.5px;
-      font-weight: 300;
-      line-height: 1.5;
-    }
-
-    .pdp-accordion {
-      display: grid;
-      gap: .65rem;
-      max-width: 560px;
-    }
-
+    .pdp-detail-block,
     .pdp-accordion details {
-      border: .5px solid rgba(0, 0, 0, .08);
-      border-radius: 12px;
-      background: rgba(248, 248, 246, .82);
-      overflow: hidden;
+      border-bottom: 1px solid #111;
+      padding: 0 0 .95rem;
+      margin-bottom: .95rem;
     }
 
+    .pdp-detail-head,
     .pdp-accordion summary {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      min-height: 46px;
-      padding: 0 1rem;
-      cursor: pointer;
-      color: var(--dark);
-      font-size: 11px;
-      letter-spacing: .12em;
       list-style: none;
+      cursor: pointer;
+      font-size: 15.5px;
+      letter-spacing: .02em;
       text-transform: uppercase;
     }
 
@@ -375,11 +200,10 @@
       display: none;
     }
 
+    .pdp-detail-head span:last-child,
     .pdp-accordion summary::after {
       content: '+';
-      color: var(--light);
-      font-family: var(--serif);
-      font-size: 1.5rem;
+      font-size: 18px;
       line-height: 1;
     }
 
@@ -387,912 +211,822 @@
       content: '-';
     }
 
+    .pdp-fit-body,
     .pdp-accordion p {
-      padding: 0 1rem 1rem;
       color: var(--mid);
-      font-size: 13px;
-      font-weight: 300;
-      line-height: 1.75;
+      font-size: 15px;
+      line-height: 1.45;
+      padding-top: .95rem;
     }
 
-    .btn-p,
-    .btn-s {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 44px;
-      padding: 12px 28px;
-      font-size: 12px;
-      letter-spacing: .05em;
-      text-decoration: none;
-    }
-
-    .btn-p {
-      background: var(--dark);
-      color: var(--white);
-      border: none;
-    }
-
-    .btn-s {
-      background: transparent;
-      color: var(--dark);
-      border: 0.5px solid rgba(0, 0, 0, .2);
-    }
-
-    .btn-s:hover {
-      background: var(--off);
-    }
-
-    .category-products {
-      padding: 4rem 5rem;
-      background: var(--white);
-      border-bottom: 0.5px solid var(--border);
-    }
-
-    .category-grid {
+    .pdp-fit-body ul {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 2px;
+      gap: .7rem;
+      margin: 1.45rem 0 0 2rem;
     }
 
-    .set-card {
-      display: block;
-      min-height: 100%;
-      padding: 1.7rem;
-      background: var(--off);
-      border: 0.5px solid var(--border);
-      color: inherit;
-      text-decoration: none;
-      transition: background .25s, transform .25s, border-color .25s;
+    .pdp-gallery {
+      position: sticky;
+      top: 76px;
+      height: calc(100vh - 76px);
+      overflow: hidden;
+      background: var(--panel);
+      isolation: isolate;
+      touch-action: pan-y;
     }
 
-    .set-card:hover,
-    .set-card.is-active {
-      background: #eaeae8;
-      border-color: rgba(0, 0, 0, .18);
-      transform: translateY(-2px);
-    }
-
-    .set-card img {
-      display: block;
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      border-radius: 16px;
-      margin-bottom: 1.25rem;
-    }
-
-    .set-color {
+    .pdp-gallery-frame {
+      position: absolute;
+      inset: 0;
       display: flex;
       align-items: center;
-      gap: .55rem;
-      color: var(--light);
-      font-size: 10px;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      margin-bottom: .8rem;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--panel);
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(1.018);
+      transition: opacity .34s ease, transform .34s ease;
+      will-change: opacity, transform;
     }
 
-    .set-swatch {
-      width: 18px;
-      height: 18px;
+    .pdp-gallery-frame.is-active {
+      z-index: 1;
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    .pdp-gallery-frame img {
+      display: block;
+      width: min(80%, 620px);
+      max-height: 76vh;
+      object-fit: contain;
+    }
+
+    .pdp-gallery-frame.is-lifestyle img {
+      width: min(92%, 680px);
+      max-height: 86vh;
+    }
+
+    .pdp-gallery-ui {
+      position: absolute;
+      right: 1.1rem;
+      bottom: 1.1rem;
+      left: 1.1rem;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      pointer-events: none;
+    }
+
+    .pdp-gallery-counter {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0 .85rem;
+      background: rgba(255, 255, 255, .72);
+      color: #111;
+      font-size: 13px;
+      letter-spacing: .06em;
+      backdrop-filter: blur(12px);
+    }
+
+    .pdp-gallery-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: .48rem;
+      pointer-events: auto;
+    }
+
+    .pdp-gallery-dot {
+      width: 9px;
+      height: 9px;
+      border: 1px solid rgba(17, 17, 17, .58);
       border-radius: 50%;
-      border: 0.5px solid rgba(0, 0, 0, .1);
-      box-shadow: inset 0 1px 4px rgba(255, 255, 255, .45);
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .pdp-gallery-dot.is-active {
+      background: #111;
+    }
+
+    .pdp-buy {
+      padding-inline: clamp(.5rem, 1.5vw, 2rem);
+    }
+
+    .pdp-price-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      border-bottom: 1px solid #111;
+      padding-bottom: 1.2rem;
+      margin-bottom: .9rem;
+    }
+
+    .pdp-price {
+      font-size: clamp(1.7rem, 1.8vw, 2rem);
+      font-weight: 500;
+      letter-spacing: .01em;
+    }
+
+    .pdp-stars {
+      font-size: 16px;
+      letter-spacing: .08em;
+    }
+
+    .pdp-option-section {
+      border-bottom: 1px solid #111;
+      padding: .8rem 0 1.35rem;
+    }
+
+    .pdp-option-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: .75rem;
+      font-size: 15px;
+      letter-spacing: .02em;
+    }
+
+    .pdp-size-guide {
+      border: 0;
+      background: #f3f3f2;
+      color: #111;
+      cursor: pointer;
+      font: inherit;
+      padding: .7rem 1.35rem;
+    }
+
+    .pdp-swatches {
+      display: flex;
+      gap: .8rem;
+      align-items: center;
+      min-height: 39px;
+    }
+
+    .pdp-swatch {
+      width: 31px;
+      height: 31px;
+      border: 1.5px solid #111;
+      border-radius: 999px;
+      background: var(--swatch, #eee);
+      cursor: pointer;
+    }
+
+    .pdp-swatch.is-active {
+      box-shadow: 0 0 0 3px #fff, 0 0 0 5px #111;
+    }
+
+    .pdp-size-row {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: .55rem;
+      align-items: end;
+    }
+
+    .pdp-size {
+      display: grid;
+      gap: .15rem;
+      justify-items: center;
+      color: #c4c4c4;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .pdp-size strong {
+      display: inline-flex;
+      min-width: 40px;
+      min-height: 40px;
+      align-items: center;
+      justify-content: center;
+      color: inherit;
+      font-size: 17px;
+      font-weight: 400;
+    }
+
+    .pdp-size.is-active strong {
+      background: #050505;
+      color: #fff;
+    }
+
+    .pdp-size span {
+      color: #111;
+      font-size: 12px;
+      text-decoration: underline;
+    }
+
+    .pdp-alerts {
+      display: grid;
+      gap: .55rem;
+      border-bottom: 1px solid #111;
+      padding: 1.05rem 0 1.25rem;
+      font-size: 15.5px;
+    }
+
+    .pdp-alerts p {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .pdp-alerts p::before {
+      width: 11px;
+      height: 11px;
+      border-radius: 999px;
+      background: #f04444;
+      content: '';
       flex: 0 0 auto;
     }
 
-    .set-swatch-grey {
-      background: linear-gradient(135deg, #eeeeea, #868681);
+    .pdp-alerts a {
+      text-decoration: underline;
     }
 
-    .set-swatch-black {
-      background: linear-gradient(135deg, #5b5b5b, #070707);
+    .pdp-shipping {
+      border-bottom: 1px solid #111;
+      padding: 1rem 0 1.25rem;
+      font-size: 15.5px;
+      line-height: 1.35;
     }
 
-    .set-swatch-pink {
-      background: linear-gradient(135deg, #ffd8e2, #d28ca1);
-    }
-
-    .set-card h3 {
-      font-family: var(--serif);
-      font-size: 1.75rem;
-      font-weight: 300;
-      line-height: 1.08;
-      margin-bottom: .75rem;
-    }
-
-    .set-card p {
-      color: var(--mid);
-      font-size: 14px;
-      line-height: 1.75;
-      font-weight: 300;
-    }
-
-    .spec-strip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      border-top: 0.5px solid var(--border);
-      border-bottom: 0.5px solid var(--border);
-      background: var(--white);
-    }
-
-    .spec-item {
-      padding: 1.8rem 1.5rem;
-      border-right: 0.5px solid var(--border);
-    }
-
-    .spec-item:last-child {
-      border-right: none;
-    }
-
-    .spec-label {
-      font-size: 10px;
-      color: var(--light);
-      letter-spacing: .16em;
+    .pdp-order-button {
+      display: flex;
+      width: 100%;
+      min-height: 43px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1.65rem;
+      border: 0;
+      background: #f4f4f3;
+      color: #777;
+      font-size: 15px;
+      letter-spacing: .03em;
+      text-decoration: none;
       text-transform: uppercase;
-      margin-bottom: .45rem;
     }
 
-    .spec-value {
-      font-family: var(--serif);
-      font-size: 1.55rem;
-      font-weight: 300;
-      line-height: 1.15;
-    }
-
-    .content-band {
-      padding: 5rem;
+    .pdp-normal-content {
       display: grid;
-      grid-template-columns: .8fr 1.2fr;
-      gap: 5rem;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 520px);
+      gap: clamp(2rem, 5vw, 6rem);
       align-items: start;
+      min-height: 70vh;
+      padding: clamp(4rem, 8vw, 8rem) clamp(1rem, 5vw, 5rem);
+      border-top: 1px solid rgba(17, 17, 17, .1);
+      background: #fafaf8;
     }
 
-    .content-band-soft {
-      background: var(--off);
+    .pdp-normal-content h2 {
+      max-width: 10em;
+      font-size: clamp(2.4rem, 5vw, 5.3rem);
+      font-weight: 400;
+      letter-spacing: .01em;
+      line-height: .96;
     }
 
-    .section-title {
-      font-family: var(--serif);
-      font-size: clamp(2.3rem, 3.8vw, 4rem);
-      font-weight: 300;
-      line-height: 1;
-      letter-spacing: -.01em;
-    }
-
-    .detail-list {
+    .pdp-normal-list {
       display: grid;
-      gap: 1rem;
+      gap: 1.4rem;
       list-style: none;
     }
 
-    .detail-list li {
-      padding: 1.15rem 0;
-      border-top: 0.5px solid var(--border);
+    .pdp-normal-list li {
+      border-bottom: 1px solid rgba(17, 17, 17, .18);
+      padding-bottom: 1.15rem;
       color: var(--mid);
-      font-weight: 300;
-      line-height: 1.7;
+      font-size: 15px;
+      line-height: 1.55;
     }
 
-    .detail-list strong {
+    .pdp-normal-list strong {
       display: block;
+      margin-bottom: .45rem;
       color: var(--dark);
-      font-weight: 400;
-      margin-bottom: .3rem;
-    }
-
-    .offer-band {
-      background: #111;
-      color: var(--white);
-      padding: 5rem;
-      display: grid;
-      grid-template-columns: minmax(0, .9fr) minmax(320px, 1.1fr);
-      gap: 5rem;
-      align-items: center;
-    }
-
-    .offer-band .eyebrow {
-      color: rgba(255, 255, 255, .25);
-    }
-
-    .offer-band .section-title {
-      color: var(--white);
-      margin-bottom: 1.3rem;
-    }
-
-    .offer-copy {
-      color: rgba(255, 255, 255, .48);
-      font-weight: 300;
-      line-height: 1.8;
-    }
-
-    .offer-list {
-      display: grid;
-      gap: 1px;
-      background: rgba(255, 255, 255, .1);
-    }
-
-    .offer-row {
-      background: #171717;
-      padding: 1.4rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-
-    .offer-name {
-      font-family: var(--serif);
-      font-size: 1.6rem;
-      font-weight: 300;
-    }
-
-    .offer-note {
-      color: rgba(255, 255, 255, .42);
-      font-size: 12px;
-      margin-top: .35rem;
-    }
-
-    .offer-price {
-      font-family: var(--serif);
-      font-size: 1.8rem;
-      white-space: nowrap;
-    }
-
-    .offer-action {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .offer-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 36px;
-      padding: 9px 18px;
-      border-radius: 100px;
-      background: var(--white);
-      color: var(--dark);
-      font-size: 11px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      text-decoration: none;
-      white-space: nowrap;
-    }
-
-    footer {
-      padding: 2.5rem 5rem;
-      display: flex;
-      justify-content: space-between;
-      color: var(--light);
-      font-size: 12px;
-      border-top: 0.5px solid var(--border);
+      font-weight: 500;
     }
 
     @media (max-width: 1100px) {
-      nav {
-        padding: 0 2rem;
-      }
-
-      .detail-hero,
-      .content-band,
-      .offer-band {
+      .pdp-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
       }
 
-      .category-products {
-        padding: 3rem 2rem;
+      .pdp-copy,
+      .pdp-buy {
+        position: static;
+        height: auto;
+        min-height: auto;
+        overflow: visible;
+        padding: 1rem 0;
       }
 
-      .media-panel {
-        min-height: 560px;
-        padding: 5rem 2rem 3rem;
+      .pdp-gallery {
+        order: -1;
+        position: relative;
+        top: auto;
+        height: min(82vh, 680px);
       }
 
-      .back-link {
-        left: 2rem;
+      .pdp-gallery-frame {
+        min-height: 0;
       }
 
-      .copy-panel,
-      .content-band,
-      .offer-band {
-        padding: 3rem 2rem;
-      }
-
-      .copy-panel {
-        border-left: none;
-        border-top: 0.5px solid var(--border);
+      .pdp-normal-content {
+        grid-template-columns: 1fr;
       }
     }
 
-    @media (max-width: 760px) {
-      nav {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        height: auto;
-        min-height: 94px;
-        width: 100%;
-        max-width: 100%;
-        padding: .62rem .9rem .56rem;
-        align-items: center;
-        justify-content: normal;
-        gap: .42rem;
-        overflow: hidden;
+    @media (max-width: 820px) {
+      body.pdp-reference-page > nav.site-header {
+        height: 72px;
       }
 
-      .nav-links {
-        display: flex;
-        width: 100%;
-        max-width: 100%;
-        gap: .45rem;
-        padding: .05rem 0 .12rem;
-        overflow-x: auto;
-        list-style: none;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+      body.pdp-reference-page .site-header .nav-links a {
+        font-size: 12px;
+        text-transform: uppercase;
       }
 
-      .nav-links::-webkit-scrollbar {
-        display: none;
-      }
-
-      .nav-links a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 28px;
-        padding: 0 .62rem;
-        border: .5px solid rgba(0, 0, 0, .08);
-        border-radius: 999px;
-        background: rgba(255, 255, 255, .66);
-        color: var(--mid);
-        font-size: 10.5px;
-        letter-spacing: .04em;
-        white-space: nowrap;
-      }
-
-      .nav-links a:hover,
-      .nav-links a:focus-visible,
-      .nav-links a.is-active {
-        background: var(--dark);
-        color: var(--white);
-        transform: none;
-      }
-
-      .nav-cta {
+      body.pdp-reference-page .country-link {
         display: none;
       }
 
       main {
-        padding-top: 94px;
+        padding-top: 72px;
       }
 
-      .media-panel {
-        min-height: 420px;
+      .pdp-grid {
+        padding: 0 .9rem 2rem;
       }
 
-      .product-image {
-        width: min(82%, 360px);
+      .pdp-gallery-frame {
+        min-height: 0;
       }
 
-      .category-grid {
-        grid-template-columns: 1fr;
+      .pdp-gallery-frame img {
+        width: min(90%, 420px);
       }
 
-      .spec-strip {
-        grid-template-columns: repeat(2, 1fr);
+      .pdp-copy h1 {
+        font-size: clamp(1.9rem, 8vw, 2.55rem);
       }
 
-      .spec-item:nth-child(2) {
-        border-right: none;
-      }
-
-      .spec-item:nth-child(-n+2) {
-        border-bottom: 0.5px solid var(--border);
-      }
-
-      .button-row,
-      footer {
-        flex-direction: column;
-      }
-
-      .pdp-proof-row {
-        grid-template-columns: 1fr;
-      }
-
-      .btn-p,
-      .btn-s {
-        width: 100%;
-      }
-
-      .offer-row {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .offer-action {
-        justify-content: flex-start;
-      }
-    }
-
-    @media (max-width: 640px) {
-      nav {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        height: auto;
-        min-height: 94px;
-        width: 100%;
-        max-width: 100%;
-        padding: .62rem .9rem .56rem;
-        align-items: center;
-        gap: .42rem;
-        justify-content: normal;
-        overflow: hidden;
-      }
-
-      .nav-logo {
-        font-size: 22px;
-        min-width: 0;
-      }
-
-      .nav-cta {
-        display: none;
-      }
-
-      main {
-        padding-top: 94px;
-      }
-
-      .media-panel {
-        min-height: 300px;
-        padding: 3rem .9rem 1.6rem;
-      }
-
-      .back-link {
-        left: 1rem;
-        top: 1rem;
-      }
-
-      .copy-panel,
-      .content-band,
-      .offer-band,
-      .category-products {
-        padding: 2rem .9rem;
-      }
-
-      h1 {
-        font-size: clamp(2.15rem, 10vw, 3.05rem);
-      }
-
-      .lead {
-        font-size: 14px;
-        line-height: 1.75;
-      }
-
-      .price {
-        font-size: 2rem;
-      }
-
-      .set-card {
-        padding: 1rem;
-        border-radius: 14px;
-      }
-
-      .set-card img {
-        object-fit: contain;
-        background: var(--white);
-      }
-
-      .product-photo-strip {
-        grid-template-columns: repeat(3, minmax(48px, 1fr));
-        width: min(100%, 220px);
+      .pdp-size-row {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
       }
     }
   </style>
-  <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
-  <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
-  <link rel="stylesheet" href="assets/pureform-store-flow.css">
-  <script type="application/ld+json" id="productJsonLd">
-    {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      "name": "Grey 4-Piece Silicone Brush Set",
-      "brand": {
-        "@type": "Brand",
-        "name": "PureForm"
-      },
-      "description": "One complete PureForm set in Grey with four separate tools for back, body, scalp, and face care.",
-      "image": "https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553521/Main_with_background_anlah0.png",
-      "sku": "pureform-4pc-set-grey",
-      "offers": {
-        "@type": "Offer",
-        "priceCurrency": "AED",
-        "price": "87.78",
-        "availability": "https://schema.org/InStock",
-        "itemCondition": "https://schema.org/NewCondition",
-        "hasMerchantReturnPolicy": {
-          "@type": "MerchantReturnPolicy",
-          "applicableCountry": "AE",
-          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-          "merchantReturnDays": 15
-        }
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "reviewCount": "6"
-      }
-    }
-  </script>
+  <script type="application/ld+json" id="productJsonLd"></script>
 </head>
 
-<body>
-  <nav>
-    <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
-    <ul class="nav-links">
-      <li><a href="index.html">Home</a></li>
-      <li><a class="is-active" href="products.html">Products</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="reviews.html">Reviews</a></li>
-      <li><a href="policy.html">Policy</a></li>
-      <li><a href="faq.html">FAQ</a></li>
-      <li><a href="contact.html">Contact</a></li>
-    </ul>
-    <a class="nav-cta Btn buy-pay-button" href="products.html#offers"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+<body class="pdp-reference-page">
+  <nav class="site-header" aria-label="Primary navigation">
+    <div class="promo-bar"></div>
+    <div class="nav-main">
+      <ul class="nav-links">
+        <li><a class="is-active" href="products.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+      <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
+      <div class="nav-actions" aria-label="Shop utilities">
+        <a class="nav-icon nav-search" href="products.html#set-colors" aria-label="Search products">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
+        </a>
+        <a class="nav-icon nav-cart" href="cart.html" aria-label="Open cart">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 8.5h11l-.8 11h-9.4l-.8-11Z"></path><path d="M9 8.5V6.8a3 3 0 0 1 6 0v1.7"></path></svg>
+          <span class="nav-cart-count" aria-label="0 items in cart">0</span>
+        </a>
+        <a class="country-link" href="policy.html#delivery" aria-label="United Arab Emirates AED English">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.4 2.3 3.6 5.3 3.6 9s-1.2 6.7-3.6 9M12 3C9.6 5.3 8.4 8.3 8.4 12S9.6 18.7 12 21"></path></svg>
+          <span>United Arab Emirates - AED / EN</span>
+        </a>
+      </div>
+    </div>
   </nav>
 
   <main>
-    <section class="category-products" aria-labelledby="categoryTitle">
-      <p class="eyebrow">Same Category</p>
-      <h2 class="section-title" id="categoryTitle">All 4-piece set colors.</h2>
-      <div class="category-grid" id="categoryGrid"></div>
-    </section>
-
-    <section class="detail-hero" aria-live="polite">
-      <div class="media-panel">
-        <a class="back-link" href="products.html">Back to collection</a>
-        <img class="product-image" id="productImage"
-          src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553521/Main_with_background_anlah0.png"
-          alt="Grey 4-piece silicone brush set on a soft background" fetchpriority="high" decoding="async">
-        <div class="product-photo-strip" id="productPhotoStrip" aria-label="Product photos" hidden></div>
-      </div>
-
-      <div class="copy-panel">
-        <p class="eyebrow" id="productTag">Silicone Brush Set</p>
+    <section class="pdp-grid" aria-live="polite">
+      <aside class="pdp-copy">
+        <p class="pdp-status">Available</p>
         <h1 id="productName">Grey 4-Piece Silicone Brush Set</h1>
-        <p class="lead" id="productLead">One complete PureForm set in Grey with four separate tools for back, body,
-          scalp, and face care.</p>
-        <div class="price-row">
-          <span class="price" id="productPrice">AED 87.78</span>
-          <span class="compare" id="productCompare">VAT included</span>
-        </div>
-        <div class="pdp-proof-row" aria-label="Product confidence details">
-          <div class="pdp-proof-item">
-            <span>Proof</span>
-            <strong>4.9 rating</strong>
-            <p>Review notes are available before ordering.</p>
-          </div>
-          <div class="pdp-proof-item">
-            <span>Delivery</span>
-            <strong>City check</strong>
-            <p>Timing and payment options are confirmed by support.</p>
-          </div>
-          <div class="pdp-proof-item">
-            <span>Returns</span>
-            <strong>15 days</strong>
-            <p>Unused sets can be returned in original packaging.</p>
-          </div>
-          <div class="pdp-proof-item">
-            <span>Set</span>
-            <strong>4 tools</strong>
-            <p>Back, body, scalp, and face pieces in every color.</p>
+        <p class="pdp-lead" id="productLead">A complete PureForm silicone brush set made for smoother cleansing, easier reach, and a fresher post-shower feel.</p>
+
+        <div class="pdp-detail-block">
+          <div class="pdp-detail-head"><span>Fit notes</span><span>-</span></div>
+          <div class="pdp-fit-body">
+            <p id="productFitIntro">Includes four daily-use tools for face, scalp, body, and back care.</p>
+            <ul id="productFitList">
+              <li>Flexible silicone bristles for a gentle cleanse.</li>
+              <li>Long handle piece helps reach the back.</li>
+              <li>Rinses clean and dries quickly after use.</li>
+            </ul>
           </div>
         </div>
-        <div class="button-row">
-          <a class="btn-p Btn buy-pay-button" id="productOrderLink" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=single#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
-          <a class="btn-s" href="#offers">View offers</a>
-        </div>
+
         <div class="pdp-accordion">
-          <details open>
-            <summary>Shipping and delivery</summary>
-            <p>Delivery timing varies by city. Add your city and phone number in the order form so availability, payment options, and next steps can be confirmed before purchase.</p>
+          <details>
+            <summary>Materials &amp; Care</summary>
+            <p id="productCare">Rinse each silicone tool with warm water after use, shake off excess water, and let it air dry in an open place.</p>
           </details>
           <details>
-            <summary>Returns and support</summary>
-            <p>Unused sets may be returned within 15 days in original condition and packaging. If the delivery is damaged or incorrect, contact support with clear photos.</p>
-          </details>
-          <details>
-            <summary>What is included</summary>
-            <p>Every set includes the long handle back scrubber, body brush, scalp massager, and hexagonal face brush.</p>
+            <summary>Transparent Price</summary>
+            <p id="productPriceNote">Price includes VAT. Delivery timing and COD availability are confirmed by support before finalizing the order.</p>
           </details>
         </div>
-      </div>
-    </section>
+      </aside>
 
-    <section class="spec-strip" id="specStrip"></section>
+      <div class="pdp-gallery" id="productGallery" aria-label="Product gallery"></div>
 
-    <section class="content-band">
-      <div>
-        <p class="eyebrow">Product Details</p>
-        <h2 class="section-title" id="detailTitle">One box, four daily-use tools.</h2>
-      </div>
-      <ul class="detail-list" id="detailList"></ul>
-    </section>
+      <aside class="pdp-buy">
+        <div class="pdp-price-row">
+          <span class="pdp-price" id="productPrice">AED 87.78</span>
+          <span class="pdp-stars" aria-label="Rating 4.9 out of 5">☆☆☆☆☆</span>
+        </div>
 
-    <section class="content-band content-band-soft">
-      <div>
-        <p class="eyebrow">Care Notes</p>
-        <h2 class="section-title">Simple to rinse, quick to dry.</h2>
-      </div>
-      <ul class="detail-list" id="careList"></ul>
-    </section>
+        <div class="pdp-option-section">
+          <div class="pdp-option-label-row"><span>Color</span></div>
+          <div class="pdp-swatches" id="productSwatches" aria-label="Color options"></div>
+        </div>
 
-    <section class="offer-band" id="offers">
-      <div>
-        <p class="eyebrow">Set Offers</p>
-        <h2 class="section-title">Pick a color set bundle.</h2>
-        <p class="offer-copy">Grey, Black, and Pink are separate set choices in the same silicone brush set category.
-          Pick one color or combine multiple sets before confirming the order.</p>
-      </div>
-      <div class="offer-list">
-        <div class="offer-row">
-          <div>
-            <div class="offer-name">Single Set</div>
-            <div class="offer-note">One complete four-piece silicone brush set.</div>
+        <div class="pdp-option-section">
+          <div class="pdp-option-label-row">
+            <span>Set</span>
+            <button class="pdp-size-guide" type="button">Set Guide</button>
           </div>
-          <div class="offer-action">
-            <div class="offer-price">AED 87.78</div>
-            <a class="offer-link Btn buy-pay-button" data-order-link data-bundle="single" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=single#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+          <div class="pdp-size-row" aria-label="Set options">
+            <span class="pdp-size is-active"><strong>1</strong><span>Single</span></span>
+            <span class="pdp-size"><strong>2</strong><span>Two</span></span>
+            <span class="pdp-size"><strong>3</strong><span>Bundle</span></span>
+            <span class="pdp-size"><strong>4</strong><span>Tools</span></span>
+            <span class="pdp-size"><strong>15</strong><span>Returns</span></span>
+            <span class="pdp-size"><strong>COD</strong><span>Check</span></span>
+            <span class="pdp-size"><strong>UAE</strong><span>Delivery</span></span>
+            <span class="pdp-size"><strong>Care</strong><span>Guide</span></span>
           </div>
         </div>
-        <div class="offer-row">
-          <div>
-            <div class="offer-name">Two Sets</div>
-            <div class="offer-note">Keep one in each bathroom or gift one.</div>
-          </div>
-          <div class="offer-action">
-            <div class="offer-price">AED 164.00</div>
-            <a class="offer-link Btn buy-pay-button" data-order-link data-bundle="two" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=two#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
-          </div>
+
+        <div class="pdp-alerts">
+          <p id="availabilityLine">Available / delivery confirmed by city</p>
+          <p><a href="contact.html#message">Check availability with support</a></p>
         </div>
-        <div class="offer-row">
-          <div>
-            <div class="offer-name">Three Sets</div>
-            <div class="offer-note">Best value for family use.</div>
-          </div>
-          <div class="offer-action">
-            <div class="offer-price">AED 228.00</div>
-            <a class="offer-link Btn buy-pay-button" data-order-link data-bundle="three" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=three#message"><span>Start Order</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
-          </div>
-        </div>
-      </div>
+
+        <p class="pdp-shipping">Free delivery checks before order confirmation<br>15-day return policy for unused sets</p>
+        <a class="pdp-order-button" id="productOrderLink" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=single#message">Start order</a>
+      </aside>
+    </section>
+
+    <section class="pdp-normal-content" aria-label="PureForm routine details">
+      <h2>Build a cleaner shower routine.</h2>
+      <ul class="pdp-normal-list">
+        <li><strong>Separate tools for separate moments.</strong>Use the face brush, scalp massager, body brush, and back scrubber without mixing delicate and body care.</li>
+        <li><strong>Quick-rinse silicone.</strong>The flexible bristles rinse clean after use and dry faster than absorbent shower tools.</li>
+        <li><strong>Order support before checkout.</strong>Delivery city, COD availability, and preferred color are confirmed before the order is finalized.</li>
+      </ul>
     </section>
   </main>
-
-  <footer>
-    <span>PureForm Silicone Brush Set</span>
-    <span>Soft silicone. Daily clean. Better reach.</span>
-  </footer>
 
   <script>
     (function () {
       'use strict';
 
       var greyPhotos = [
-        {
-          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553521/Main_with_background_anlah0.png',
-          alt: 'Grey 4-piece silicone brush set on a soft background'
-        },
-        {
-          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png',
-          alt: 'Grey 4-piece silicone brush set with all tools'
-        },
-        {
-          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553513/grey_white_bg_irnzyc.png',
-          alt: 'Grey 4-piece silicone brush set on a white background'
-        },
-        {
-          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553535/grey_Head_h1duwj.png',
-          alt: 'Grey silicone scalp massager head close-up'
-        },
-        {
-          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553529/grey_face_qpwaey.png',
-          alt: 'Grey silicone face brush close-up'
-        },
-        {
-          src: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553512/grey_Handle_zkieiu.png',
-          alt: 'Grey long handle silicone back scrubber close-up'
-        }
+        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553521/Main_with_background_anlah0.png',
+        'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png',
+        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553513/grey_white_bg_irnzyc.png',
+        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1779553535/grey_Head_h1duwj.png'
       ];
 
       var products = {
         'pureform-4pc-set-grey': {
-          tag: 'Silicone Brush Set',
-          color: 'Grey',
-          colorKey: 'grey',
           name: 'Grey 4-Piece Silicone Brush Set',
-          image: greyPhotos[0].src,
-          imageAlt: greyPhotos[0].alt,
-          cardImage: greyPhotos[1].src,
-          cardAlt: greyPhotos[1].alt,
-          photos: greyPhotos,
-          lead: 'One complete PureForm set in Grey with four separate tools for back, body, scalp, and face care.',
+          lead: 'A complete PureForm silicone brush set in Grey, made for smoother cleansing, easier reach, and a fresher post-shower feel.',
           price: 'AED 87.78',
-          compare: 'VAT included',
-          detailTitle: 'One Grey box, four daily-use tools.',
-          cardText: 'A clean neutral set with the back scrubber, body brush, scalp massager, and face brush included.',
-          specs: [
-            ['Color', 'Grey'],
-            ['Pieces', '4 tools'],
-            ['Material', 'Soft silicone'],
-            ['Category', 'Bath & body']
-          ],
-          details: [
-            ['Complete 4-piece set', 'Includes the long handle back scrubber, bath body brush, scalp massager, and hexagonal face brush.'],
-            ['Separate color choice', 'Grey has its own product link so customers can order the exact set finish they want.'],
-            ['Full shower routine', 'The set covers back reach, body cleansing, scalp massage, and gentle face cleansing in one box.']
-          ],
-          care: [
-            ['Rinse after use', 'Run each silicone tool under warm water after every shower.'],
-            ['Dry in open air', 'Store the pieces where water can drain away from the bristles.'],
-            ['Keep face tool separate', 'Store the face brush away from body tools for a cleaner daily routine.']
-          ]
+          color: 'Grey',
+          swatch: 'linear-gradient(135deg, #eeeeea, #868681)',
+          images: greyPhotos,
+          fit: ['Flexible silicone bristles for a gentle cleanse.', 'Long handle piece helps reach the back.', 'Rinses clean and dries quickly after use.']
         },
         'pureform-4pc-set-black': {
-          tag: 'Silicone Brush Set',
-          color: 'Black',
-          colorKey: 'black',
           name: 'Black 4-Piece Silicone Brush Set',
-          image: 'assets/pureform-body-brush.png',
-          lead: 'One complete PureForm set in Black with the same four-piece routine and its own product page.',
+          lead: 'The same four-piece PureForm shower routine in a clean Black finish, including back, body, scalp, and face tools.',
           price: 'AED 87.78',
-          compare: 'VAT included',
-          detailTitle: 'A separate Black set listing.',
-          cardText: 'A bold black finish for the same complete four-piece silicone brush routine.',
-          specs: [
-            ['Color', 'Black'],
-            ['Pieces', '4 tools'],
-            ['Material', 'Soft silicone'],
-            ['Category', 'Bath & body']
-          ],
-          details: [
-            ['Complete 4-piece set', 'Includes the long handle back scrubber, bath body brush, scalp massager, and hexagonal face brush.'],
-            ['Own color choice', 'Black has its own product link so customers can order this exact set finish.'],
-            ['Color-specific ordering', 'Use the Black product link when you want the complete set in a darker finish.']
-          ],
-          care: [
-            ['Rinse after use', 'Run each silicone tool under warm water after every shower.'],
-            ['Dry in open air', 'Store the pieces where water can drain away from the bristles.'],
-            ['Keep face tool separate', 'Store the face brush away from body tools for a cleaner daily routine.']
-          ]
+          color: 'Black',
+          swatch: 'linear-gradient(135deg, #5b5b5b, #070707)',
+          images: ['assets/pureform-body-brush.png', 'assets/pureform-back-scrubber.png', 'assets/pureform-scalp-massager.png', 'assets/pureform-face-brush.png'],
+          fit: ['Complete set with four dedicated tools.', 'Best for a minimal bathroom setup.', 'Easy-rinse silicone for daily use.']
         },
         'pureform-4pc-set-pink': {
-          tag: 'Silicone Brush Set',
-          color: 'Pink',
-          colorKey: 'pink',
           name: 'Pink 4-Piece Silicone Brush Set',
-          image: 'assets/pureform-face-brush.png',
-          lead: 'One complete PureForm set in Pink, listed as its own product in the same category.',
+          lead: 'A softer Pink finish for the same complete face, scalp, body, and back silicone cleansing routine.',
           price: 'AED 87.78',
-          compare: 'VAT included',
-          detailTitle: 'A separate Pink set listing.',
-          cardText: 'A soft pink set with the same four tools and a dedicated product detail page.',
-          specs: [
-            ['Color', 'Pink'],
-            ['Pieces', '4 tools'],
-            ['Material', 'Soft silicone'],
-            ['Category', 'Bath & body']
-          ],
-          details: [
-            ['Complete 4-piece set', 'Includes the long handle back scrubber, bath body brush, scalp massager, and hexagonal face brush.'],
-            ['Own color choice', 'Pink is listed separately so customers can order this exact set finish.'],
-            ['Soft routine finish', 'Use the Pink product link when you want the complete set in a softer bath-care tone.']
-          ],
-          care: [
-            ['Rinse after use', 'Run each silicone tool under warm water after every shower.'],
-            ['Dry in open air', 'Store the pieces where water can drain away from the bristles.'],
-            ['Keep face tool separate', 'Store the face brush away from body tools for a cleaner daily routine.']
-          ]
+          color: 'Pink',
+          swatch: 'linear-gradient(135deg, #ffd8e2, #d28ca1)',
+          images: ['assets/pureform-face-brush.png', 'assets/pureform-body-brush.png', 'assets/pureform-scalp-massager.png', 'assets/pureform-back-scrubber.png'],
+          fit: ['Gentle finish with the same four tool routine.', 'Face and scalp tools support softer care moments.', 'Rinses clean and stores easily.']
+        },
+        'back-scrubber': {
+          name: 'Long Handle Back Scrubber',
+          lead: 'A flexible silicone back scrubber designed to make hard-to-reach cleansing easier in the shower.',
+          price: 'AED 39.00',
+          color: 'Grey',
+          swatch: 'linear-gradient(135deg, #eeeeea, #868681)',
+          images: ['assets/pureform-back-scrubber.png', greyPhotos[1], greyPhotos[2]],
+          fit: ['Long handle reach for back cleansing.', 'Flexible silicone bristles.', 'Rinse and hang after use.']
+        },
+        'body-brush': {
+          name: 'Silicone Body Brush',
+          lead: 'A soft silicone body brush for daily cleansing with a comfortable grip strap.',
+          price: 'AED 29.00',
+          color: 'Black',
+          swatch: 'linear-gradient(135deg, #5b5b5b, #070707)',
+          images: ['assets/pureform-body-brush.png', greyPhotos[1], greyPhotos[2]],
+          fit: ['Palm-friendly body cleansing.', 'Grip strap helps when hands are wet.', 'Non-absorbent silicone rinses quickly.']
+        },
+        'scalp-massager': {
+          name: 'Silicone Scalp Massager',
+          lead: 'A silicone scalp massager for shampoo days, made to feel relaxing while helping distribute product.',
+          price: 'AED 24.00',
+          color: 'Grey',
+          swatch: 'linear-gradient(135deg, #eeeeea, #868681)',
+          images: ['assets/pureform-scalp-massager.png', greyPhotos[3], greyPhotos[1]],
+          fit: ['Soft bristles for shampoo massage.', 'Easy to hold in the shower.', 'Rinses clean after use.']
+        },
+        'face-brush': {
+          name: 'Gentle Silicone Face Brush',
+          lead: 'A compact silicone face brush for gentle daily cleansing around delicate areas.',
+          price: 'AED 22.00',
+          color: 'Pink',
+          swatch: 'linear-gradient(135deg, #ffd8e2, #d28ca1)',
+          images: ['assets/pureform-face-brush.png', greyPhotos[1], greyPhotos[2]],
+          fit: ['Compact tool for face cleansing.', 'Gentle silicone touch.', 'Store separately from body tools.']
+        },
+        'family-bundle': {
+          name: 'Three Set Family Bundle',
+          lead: 'One Grey, one Black, and one Pink 4-piece silicone brush set for separate routines or gifting.',
+          price: 'AED 228.00',
+          color: 'Mixed',
+          swatch: 'linear-gradient(135deg, #eeeeea, #ffd8e2 50%, #111)',
+          images: [greyPhotos[2], greyPhotos[1], 'assets/pureform-body-brush.png', 'assets/pureform-face-brush.png'],
+          fit: ['Three complete color sets.', 'Best value for family bathrooms.', 'Includes 12 total silicone tools.']
         }
       };
 
-      var order = [
-        'pureform-4pc-set-grey',
-        'pureform-4pc-set-black',
-        'pureform-4pc-set-pink'
+      var colorOptions = [
+        ['pureform-4pc-set-grey', products['pureform-4pc-set-grey'].swatch, 'Grey set'],
+        ['pureform-4pc-set-pink', products['pureform-4pc-set-pink'].swatch, 'Pink set'],
+        ['pureform-4pc-set-black', products['pureform-4pc-set-black'].swatch, 'Black set'],
+        ['family-bundle', products['family-bundle'].swatch, 'Mixed bundle'],
+        ['body-brush', 'linear-gradient(135deg, #fbfbf8, #e9e9e4)', 'Individual tools']
       ];
 
+      var fallbackId = 'pureform-4pc-set-grey';
       var productName = document.getElementById('productName');
-      var productTag = document.getElementById('productTag');
       var productLead = document.getElementById('productLead');
       var productPrice = document.getElementById('productPrice');
-      var productCompare = document.getElementById('productCompare');
-      var productImage = document.getElementById('productImage');
-      var productPhotoStrip = document.getElementById('productPhotoStrip');
+      var productGallery = document.getElementById('productGallery');
+      var productFitList = document.getElementById('productFitList');
+      var productFitIntro = document.getElementById('productFitIntro');
+      var productCare = document.getElementById('productCare');
+      var productPriceNote = document.getElementById('productPriceNote');
+      var productSwatches = document.getElementById('productSwatches');
       var productOrderLink = document.getElementById('productOrderLink');
+      var availabilityLine = document.getElementById('availabilityLine');
       var productJsonLd = document.getElementById('productJsonLd');
-      var categoryGrid = document.getElementById('categoryGrid');
-      var specStrip = document.getElementById('specStrip');
-      var detailTitle = document.getElementById('detailTitle');
-      var detailList = document.getElementById('detailList');
-      var careList = document.getElementById('careList');
+      var galleryIndex = 0;
+      var galleryFrames = [];
+      var galleryDots = [];
+      var galleryCounter = null;
+      var lastWheelStep = 0;
+      var touchStartY = 0;
+      var touchStartX = 0;
 
       function getRequestedProduct() {
         var params = new URLSearchParams(window.location.search);
-        var requested = params.get('product');
-        return products[requested] ? requested : order[0];
+        var id = params.get('product') || params.get('bundle');
+        if (id === 'three' || id === 'mixed-colors') {
+          id = 'family-bundle';
+        }
+        return products[id] ? id : fallbackId;
       }
 
-      function setList(target, rows) {
-        target.innerHTML = rows.map(function (row) {
-          return '<li><strong>' + row[0] + '</strong>' + row[1] + '</li>';
-        }).join('');
+      function orderUrl(id) {
+        return 'contact.html?topic=start-order&product=' + encodeURIComponent(id) + '&bundle=single#message';
       }
 
-      function setSpecs(rows) {
-        specStrip.innerHTML = rows.map(function (row) {
-          return '<div class="spec-item"><div class="spec-label">' + row[0] + '</div><div class="spec-value">' + row[1] + '</div></div>';
-        }).join('');
+      function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
       }
 
-      function renderCategoryCards(activeId) {
-        categoryGrid.innerHTML = order.map(function (id) {
-          var product = products[id];
-          var active = id === activeId ? ' is-active' : '';
-          var cardImage = product.cardImage || product.image;
-          var cardAlt = product.cardAlt || product.imageAlt || ('Product photo for ' + product.name);
-          return '<a class="set-card' + active + '" href="pureform-product-detail.html?product=' + encodeURIComponent(id) + '" data-product="' + id + '">'
-            + '<img src="' + cardImage + '" alt="' + cardAlt + '" decoding="async">'
-            + '<div class="set-color"><span class="set-swatch set-swatch-' + product.colorKey + '" aria-hidden="true"></span><span>' + product.color + ' Set</span></div>'
-            + '<h3>' + product.name + '</h3>'
-            + '<p>' + product.cardText + '</p>'
-            + '</a>';
+      function setGalleryLock(locked) {
+        document.body.classList.toggle('is-gallery-locked', Boolean(locked));
+      }
+
+      function isInGalleryZone() {
+        if (!productGallery || !galleryFrames.length) {
+          return false;
+        }
+
+        var rect = productGallery.getBoundingClientRect();
+        var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        return rect.top < viewportHeight * 0.86 && rect.bottom > viewportHeight * 0.14;
+      }
+
+      function showGalleryImage(nextIndex) {
+        var max = galleryFrames.length - 1;
+        galleryIndex = clamp(nextIndex, 0, max);
+
+        galleryFrames.forEach(function (frame, index) {
+          var active = index === galleryIndex;
+          frame.classList.toggle('is-active', active);
+          frame.setAttribute('aria-hidden', active ? 'false' : 'true');
+        });
+
+        galleryDots.forEach(function (dot, index) {
+          var active = index === galleryIndex;
+          dot.classList.toggle('is-active', active);
+          dot.setAttribute('aria-current', active ? 'true' : 'false');
+        });
+
+        if (galleryCounter) {
+          galleryCounter.textContent = (galleryIndex + 1) + ' / ' + galleryFrames.length;
+        }
+      }
+
+      function canStepGallery(direction) {
+        if (!isInGalleryZone() || galleryFrames.length < 2) {
+          setGalleryLock(false);
+          return false;
+        }
+
+        var max = galleryFrames.length - 1;
+        if ((direction > 0 && galleryIndex >= max) || (direction < 0 && galleryIndex <= 0)) {
+          setGalleryLock(false);
+          return false;
+        }
+
+        return true;
+      }
+
+      function stepGallery(direction) {
+        if (!canStepGallery(direction)) {
+          return false;
+        }
+
+        setGalleryLock(true);
+        showGalleryImage(galleryIndex + direction);
+        return true;
+      }
+
+      function onGalleryWheel(event) {
+        var direction = Math.sign(event.deltaY);
+        if (!direction) {
+          return;
+        }
+
+        if (!isInGalleryZone()) {
+          setGalleryLock(false);
+          return;
+        }
+
+        if (!canStepGallery(direction)) {
+          return;
+        }
+
+        event.preventDefault();
+        setGalleryLock(true);
+
+        var now = Date.now();
+        if (now - lastWheelStep < 260) {
+          return;
+        }
+
+        lastWheelStep = now;
+        showGalleryImage(galleryIndex + direction);
+      }
+
+      function onGalleryKeydown(event) {
+        var direction = 0;
+        if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === ' ') {
+          direction = 1;
+        } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
+          direction = -1;
+        }
+
+        if (!direction || !isInGalleryZone()) {
+          return;
+        }
+
+        if (canStepGallery(direction)) {
+          event.preventDefault();
+          stepGallery(direction);
+        }
+      }
+
+      function onGalleryTouchStart(event) {
+        if (!event.touches.length) {
+          return;
+        }
+
+        touchStartY = event.touches[0].clientY;
+        touchStartX = event.touches[0].clientX;
+      }
+
+      function onGalleryTouchMove(event) {
+        if (!event.touches.length || !isInGalleryZone()) {
+          return;
+        }
+
+        var deltaY = touchStartY - event.touches[0].clientY;
+        var deltaX = touchStartX - event.touches[0].clientX;
+        var direction = deltaY > 0 ? 1 : -1;
+
+        if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 12 && canStepGallery(direction)) {
+          event.preventDefault();
+          setGalleryLock(true);
+        }
+      }
+
+      function onGalleryTouchEnd(event) {
+        var touch = event.changedTouches && event.changedTouches[0];
+        if (!touch || !isInGalleryZone()) {
+          setGalleryLock(false);
+          return;
+        }
+
+        var deltaY = touchStartY - touch.clientY;
+        var deltaX = touchStartX - touch.clientX;
+        if (Math.abs(deltaY) < 42 || Math.abs(deltaY) < Math.abs(deltaX)) {
+          return;
+        }
+
+        stepGallery(deltaY > 0 ? 1 : -1);
+      }
+
+      function setupGalleryControls() {
+        galleryFrames = Array.prototype.slice.call(productGallery.querySelectorAll('.pdp-gallery-frame'));
+        galleryDots = Array.prototype.slice.call(productGallery.querySelectorAll('.pdp-gallery-dot'));
+        galleryCounter = productGallery.querySelector('.pdp-gallery-counter');
+        galleryIndex = 0;
+        productGallery.tabIndex = 0;
+
+        galleryDots.forEach(function (dot) {
+          dot.addEventListener('click', function () {
+            showGalleryImage(Number(dot.getAttribute('data-gallery-index')));
+          });
+        });
+
+        showGalleryImage(0);
+      }
+
+      function renderGallery(product) {
+        var frames = product.images.map(function (src, index) {
+          var alt = product.name + ' product view ' + (index + 1);
+          var lifestyle = index === 1 ? ' is-lifestyle' : '';
+          var active = index === 0 ? ' is-active' : '';
+          return '<figure class="pdp-gallery-frame' + lifestyle + active + '" aria-hidden="' + (index ? 'true' : 'false') + '"><img src="' + src + '" alt="' + alt + '"' + (index ? ' loading="lazy"' : ' fetchpriority="high"') + ' decoding="async"></figure>';
         }).join('');
 
-        categoryGrid.querySelectorAll('[data-product]').forEach(function (card) {
-          card.addEventListener('click', function (event) {
-            event.preventDefault();
-            renderProduct(card.getAttribute('data-product'), true);
+        var dots = product.images.map(function (_, index) {
+          return '<button class="pdp-gallery-dot' + (index === 0 ? ' is-active' : '') + '" type="button" data-gallery-index="' + index + '" aria-label="Show product image ' + (index + 1) + '"' + (index === 0 ? ' aria-current="true"' : ' aria-current="false"') + '></button>';
+        }).join('');
+
+        productGallery.innerHTML = frames + '<div class="pdp-gallery-ui"><span class="pdp-gallery-counter">1 / ' + product.images.length + '</span><div class="pdp-gallery-dots" aria-label="Product image controls">' + dots + '</div></div>';
+        setupGalleryControls();
+      }
+
+      function renderSwatches(activeId) {
+        productSwatches.innerHTML = colorOptions.map(function (option) {
+          var id = option[0];
+          return '<button class="pdp-swatch' + (id === activeId ? ' is-active' : '') + '" type="button" style="--swatch:' + option[1] + '" data-product="' + id + '" aria-label="' + option[2] + '"></button>';
+        }).join('');
+
+        productSwatches.querySelectorAll('[data-product]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            renderProduct(button.getAttribute('data-product'), true);
           });
         });
       }
 
-      function getOrderUrl(id, bundle) {
-        return 'contact.html?topic=start-order&product=' + encodeURIComponent(id) + '&bundle=' + encodeURIComponent(bundle || 'single') + '#message';
-      }
-
-      function updateProductStructuredData(id, product) {
-        if (!productJsonLd) {
-          return;
-        }
-
+      function updateStructuredData(id, product) {
         productJsonLd.textContent = JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'Product',
           name: product.name,
-          brand: {
-            '@type': 'Brand',
-            name: 'PureForm'
-          },
+          brand: { '@type': 'Brand', name: 'PureForm' },
           description: product.lead,
-          image: product.image,
+          image: product.images[0],
           sku: id,
           offers: {
             '@type': 'Offer',
             priceCurrency: 'AED',
             price: product.price.replace(/[^0-9.]/g, ''),
             availability: 'https://schema.org/InStock',
-            itemCondition: 'https://schema.org/NewCondition',
-            hasMerchantReturnPolicy: {
-              '@type': 'MerchantReturnPolicy',
-              applicableCountry: 'AE',
-              returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-              merchantReturnDays: 15
-            }
+            itemCondition: 'https://schema.org/NewCondition'
           },
           aggregateRating: {
             '@type': 'AggregateRating',
@@ -1302,85 +1036,39 @@
         });
       }
 
-      function setMainImage(src, alt) {
-        productImage.style.opacity = '0';
-        productImage.style.transform = 'translateY(12px)';
-
-        window.setTimeout(function () {
-          productImage.src = src;
-          productImage.alt = alt;
-          productImage.style.opacity = '1';
-          productImage.style.transform = 'translateY(0)';
-        }, 120);
-      }
-
-      function renderProductPhotos(product) {
-        var photos = product.photos || [];
-        productPhotoStrip.innerHTML = '';
-        productPhotoStrip.setAttribute('aria-label', product.color + ' product photos');
-
-        if (photos.length < 2) {
-          productPhotoStrip.hidden = true;
-          return;
-        }
-
-        productPhotoStrip.hidden = false;
-        productPhotoStrip.innerHTML = photos.map(function (photo, index) {
-          var active = index === 0 ? ' is-active' : '';
-          return '<button class="product-photo-thumb' + active + '" type="button" data-photo-index="' + index + '" aria-label="View photo ' + (index + 1) + ' of ' + product.name + '">'
-            + '<img src="' + photo.src + '" alt="' + photo.alt + '" loading="lazy" decoding="async">'
-            + '</button>';
-        }).join('');
-
-        productPhotoStrip.querySelectorAll('[data-photo-index]').forEach(function (button) {
-          button.addEventListener('click', function () {
-            var index = parseInt(button.getAttribute('data-photo-index'), 10);
-            var photo = photos[index];
-
-            if (!photo) {
-              return;
-            }
-
-            productPhotoStrip.querySelectorAll('.product-photo-thumb').forEach(function (thumb) {
-              thumb.classList.remove('is-active');
-            });
-
-            button.classList.add('is-active');
-            setMainImage(photo.src, photo.alt);
-          });
-        });
-      }
-
       function renderProduct(id, pushState) {
-        var product = products[id] || products[order[0]];
+        var product = products[id] || products[fallbackId];
         productName.textContent = product.name;
-        productTag.textContent = product.tag;
         productLead.textContent = product.lead;
         productPrice.textContent = product.price;
-        productCompare.textContent = product.compare;
-        detailTitle.textContent = product.detailTitle;
-        setMainImage(product.image, product.imageAlt || product.name);
-        renderProductPhotos(product);
-
-        setSpecs(product.specs);
-        setList(detailList, product.details);
-        setList(careList, product.care);
-        renderCategoryCards(id);
-        if (productOrderLink) {
-          productOrderLink.href = getOrderUrl(id, 'single');
-        }
-        document.querySelectorAll('[data-order-link]').forEach(function (link) {
-          link.href = getOrderUrl(id, link.getAttribute('data-bundle'));
-        });
-        updateProductStructuredData(id, product);
+        productFitIntro.textContent = product.color + ' option selected. Product details are confirmed before checkout.';
+        productFitList.innerHTML = product.fit.map(function (item) { return '<li>' + item + '</li>'; }).join('');
+        productCare.textContent = 'PureForm tools are made from soft silicone. Rinse after every use, shake off water, and let the piece dry in open air.';
+        productPriceNote.textContent = product.price + ' includes VAT. Delivery timing, COD availability, and bundle details are confirmed by support.';
+        availabilityLine.textContent = 'Available / delivery confirmed by city';
+        productOrderLink.href = orderUrl(id);
+        renderGallery(product);
+        renderSwatches(id);
+        updateStructuredData(id, product);
         document.title = product.name + ' | PureForm';
 
         if (pushState) {
-          var nextUrl = window.location.pathname + '?product=' + encodeURIComponent(id);
-          window.history.pushState({ product: id }, '', nextUrl);
-          document.querySelector('.detail-hero').scrollIntoView({ behavior: 'smooth' });
+          setGalleryLock(false);
+          history.pushState({ product: id }, '', 'pureform-product-detail.html?product=' + encodeURIComponent(id));
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }
+
+      window.addEventListener('wheel', onGalleryWheel, { passive: false });
+      window.addEventListener('keydown', onGalleryKeydown);
+      window.addEventListener('scroll', function () {
+        if (!isInGalleryZone()) {
+          setGalleryLock(false);
+        }
+      }, { passive: true });
+      productGallery.addEventListener('touchstart', onGalleryTouchStart, { passive: true });
+      productGallery.addEventListener('touchmove', onGalleryTouchMove, { passive: false });
+      productGallery.addEventListener('touchend', onGalleryTouchEnd, { passive: true });
 
       window.addEventListener('popstate', function () {
         renderProduct(getRequestedProduct(), false);
@@ -1390,7 +1078,6 @@
     })();
   </script>
   <script src="assets/pureform-mobile-menu.js" defer></script>
-  <script src="assets/pureform-store-flow.js" defer></script>
 </body>
 
 </html>

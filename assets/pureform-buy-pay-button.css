@@ -1,21 +1,30 @@
-/* From Uiverse.io by vinodjangid07, scoped for PureForm buy/pay CTAs */
+/* Flexible PureForm order CTA skin, scoped to explicit buy/pay buttons. */
 .Btn.buy-pay-button {
-  width: 130px;
-  height: 40px;
+  --pf-buy-button-bg: rgb(15, 15, 15);
+  --pf-buy-button-height: 40px;
+  --pf-buy-button-pad-x: 22px;
+  min-width: 130px;
+  width: auto;
+  min-height: var(--pf-buy-button-height);
+  height: auto;
+  padding: 0 var(--pf-buy-button-pad-x);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: rgb(15, 15, 15);
+  background-color: var(--pf-buy-button-bg);
   border: none;
+  border-radius: 999px;
   color: white;
-  font-weight: 600;
   gap: 8px;
+  font-family: inherit;
+  line-height: 1;
   cursor: pointer;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.103);
   position: relative;
   overflow: hidden;
-  transition-duration: .3s;
   text-decoration: none;
+  white-space: nowrap;
+  transition: background-color .25s ease, box-shadow .25s ease, color .25s ease, transform .25s ease;
 }
 
 .Btn.buy-pay-button .svgIcon {
@@ -28,27 +37,25 @@
 }
 
 .Btn.buy-pay-button::before {
-  width: 130px;
-  height: 130px;
+  width: 145%;
+  height: 240%;
   position: absolute;
   content: "";
   background-color: white;
   border-radius: 50%;
-  left: -100%;
-  top: 0;
-  transition-duration: .3s;
+  left: -155%;
+  top: -78%;
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1), border-radius .35s ease;
   mix-blend-mode: difference;
 }
 
 .Btn.buy-pay-button:hover::before {
-  transition-duration: .3s;
-  transform: translate(100%, -50%);
+  transform: translateX(106%);
   border-radius: 0;
 }
 
 .Btn.buy-pay-button:active {
-  transform: translate(5px, 5px);
-  transition-duration: .3s;
+  transform: translateY(1px) scale(.99);
 }
 
 .Btn.buy-pay-button span,
@@ -67,11 +74,34 @@
 }
 
 .Btn.buy-pay-button.buy-pay-button-wide {
-  width: 148px;
+  min-width: 148px;
+}
+
+.nav-cta.Btn.buy-pay-button {
+  --pf-buy-button-height: 44px;
+  --pf-buy-button-pad-x: 26px;
+  min-width: max-content;
+}
+
+.btn-p.Btn.buy-pay-button {
+  --pf-buy-button-height: 44px;
+  --pf-buy-button-pad-x: 28px;
+  min-width: 144px;
+}
+
+.offer-link.Btn.buy-pay-button {
+  --pf-buy-button-height: 36px;
+  --pf-buy-button-pad-x: 18px;
+  min-width: 130px;
 }
 
 @media (max-width: 820px) {
   .Btn.buy-pay-button {
-    min-width: 130px;
+    min-width: 128px;
+  }
+
+  .hero-btns .Btn.buy-pay-button,
+  .cta-btns .Btn.buy-pay-button {
+    width: 100%;
   }
 }
