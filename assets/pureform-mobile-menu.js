@@ -11,6 +11,7 @@
 
   const navLinks = Array.prototype.slice.call(nav.querySelectorAll('.nav-links a'));
   const cta = nav.querySelector('.nav-cta');
+  const cart = nav.querySelector('.nav-cart');
 
   if (!navLinks.length) {
     return;
@@ -63,6 +64,15 @@
     item.dataset.label = item.textContent.toLowerCase();
     list.appendChild(item);
   });
+
+  if (cart) {
+    const cartItem = document.createElement('a');
+    cartItem.className = 'pf-mobile-sidebar-link' + (cart.classList.contains('is-active') ? ' is-active' : '');
+    cartItem.href = cart.getAttribute('href') || 'cart.html';
+    cartItem.textContent = 'Cart';
+    cartItem.dataset.label = 'cart';
+    list.appendChild(cartItem);
+  }
 
   if (cta) {
     const ctaLink = document.createElement('a');

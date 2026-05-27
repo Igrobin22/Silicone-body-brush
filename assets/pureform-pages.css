@@ -1240,7 +1240,7 @@ h1 {
   }
 
   .collection-listing {
-    padding: 1rem .75rem 2rem;
+    padding: 1rem clamp(.85rem, 4vw, 1.15rem) 2.25rem;
   }
 
   .collection-toolbar {
@@ -1249,9 +1249,9 @@ h1 {
     z-index: 20;
     display: flex;
     flex-direction: column;
-    margin: 0 -.75rem 1rem;
-    padding: .75rem;
-    gap: .65rem;
+    margin: 0 calc(-1 * clamp(.85rem, 4vw, 1.15rem)) 1rem;
+    padding: .78rem clamp(.85rem, 4vw, 1.15rem);
+    gap: .72rem;
     border-bottom: 0.5px solid var(--border);
     background: rgba(255, 255, 255, .96);
   }
@@ -1322,7 +1322,7 @@ h1 {
 
   .collection-card-media {
     height: auto;
-    min-height: 245px;
+    min-height: 280px;
     aspect-ratio: 1 / 1.22;
   }
 
@@ -1333,7 +1333,9 @@ h1 {
   }
 
   .collection-card-media img {
-    width: min(86%, 260px);
+    width: min(78%, 235px);
+    max-height: 66%;
+    transform: translateY(7%);
   }
 
   .collection-arrow {
@@ -1347,8 +1349,8 @@ h1 {
 
   .collection-card-info {
     grid-template-columns: 1fr;
-    gap: .35rem;
-    padding: .75rem .2rem .25rem;
+    gap: .42rem;
+    padding: .85rem .15rem .32rem;
     font-size: 13px;
     min-width: 0;
   }
@@ -1369,6 +1371,7 @@ h1 {
   .page-hero {
     min-height: auto;
     min-width: 0;
+    padding-block: clamp(2rem, 8vw, 3rem);
   }
 
   .page-hero > *,
@@ -1379,6 +1382,13 @@ h1 {
 
   .hero-media {
     min-height: 320px;
+    padding-inline: clamp(.85rem, 4vw, 1.15rem);
+  }
+
+  .hero-media img {
+    width: min(100%, 340px);
+    max-height: 340px;
+    object-fit: contain;
   }
 
   .button-row {
@@ -1532,7 +1542,7 @@ h1 {
   .product-card,
   .review-card,
   .policy-card {
-    padding: .85rem;
+    padding: 1rem;
     border-radius: 12px;
   }
 
@@ -1573,8 +1583,8 @@ h1 {
   .card-text,
   .policy-card p,
   .review-card p {
-    font-size: 12px;
-    line-height: 1.6;
+    font-size: 12.5px;
+    line-height: 1.65;
   }
 
   .button-row {
@@ -1604,7 +1614,7 @@ h1 {
   }
 
   .collection-card-media {
-    min-height: 310px;
+    min-height: 286px;
     aspect-ratio: 1 / 1.05;
   }
 
@@ -1620,6 +1630,6 @@ h1 {
   .product-card,
   .review-card,
   .policy-card {
-    padding: .75rem;
+    padding: .9rem;
   }
 }

@@ -638,24 +638,126 @@
       }
 
       .pdp-grid {
-        padding: 0 .9rem 2rem;
+        gap: 1rem;
+        padding: 0 clamp(.9rem, 4vw, 1.15rem) 2.35rem;
+      }
+
+      .pdp-gallery {
+        display: flex;
+        gap: .7rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-padding-inline: 0;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .pdp-gallery::-webkit-scrollbar {
+        display: none;
       }
 
       .pdp-gallery-frame {
-        min-height: 64vh;
+        flex: 0 0 100%;
+        min-width: 100%;
+        min-height: min(54vh, 500px);
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
       }
 
       .pdp-gallery-frame img {
-        width: min(90%, 420px);
+        width: min(82%, 360px);
         height: auto;
       }
 
+      .pdp-copy,
+      .pdp-buy {
+        padding: 1.05rem 0 .25rem;
+      }
+
+      .pdp-status {
+        margin-bottom: .55rem;
+      }
+
       .pdp-copy h1 {
-        font-size: clamp(1.9rem, 8vw, 2.55rem);
+        max-width: 10.75em;
+        font-size: clamp(1.72rem, 7.2vw, 2.2rem);
+        line-height: 1.02;
+        margin-bottom: .9rem;
+        overflow-wrap: normal;
+      }
+
+      .pdp-lead {
+        margin-bottom: 1.05rem;
+        font-size: 14px;
+        line-height: 1.36;
+      }
+
+      .pdp-detail-block,
+      .pdp-accordion details,
+      .pdp-option-section {
+        margin-bottom: .62rem;
+        padding-bottom: .62rem;
+      }
+
+      .pdp-price-row {
+        padding-bottom: .7rem;
+      }
+
+      .pdp-alerts,
+      .pdp-shipping {
+        padding: .68rem 0 .76rem;
+        line-height: 1.38;
       }
 
       .pdp-size-row {
         grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .pdp-size strong {
+        min-width: 34px;
+        min-height: 34px;
+      }
+
+      .pdp-order-button {
+        min-height: 46px;
+      }
+
+      .pdp-normal-content {
+        gap: 1.45rem;
+        min-height: auto;
+        padding: 3rem clamp(.9rem, 4vw, 1.15rem);
+      }
+
+      .pdp-normal-content h2 {
+        font-size: clamp(2.15rem, 11vw, 3.3rem);
+        line-height: .98;
+      }
+
+      .pdp-normal-list {
+        gap: 1rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .pdp-gallery-frame {
+        min-height: min(48vh, 420px);
+      }
+
+      .pdp-gallery-frame img {
+        width: min(80%, 328px);
+      }
+
+      .pdp-size-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .45rem .5rem;
+      }
+
+      .pdp-size {
+        align-items: center;
+        grid-template-columns: auto minmax(0, 1fr);
+        justify-items: start;
+        text-align: left;
       }
     }
 
