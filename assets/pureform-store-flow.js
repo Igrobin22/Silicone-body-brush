@@ -29,7 +29,7 @@
 
     targets.forEach(function (item, index) {
       item.setAttribute('data-flow-reveal', '');
-      item.style.setProperty('--pf-flow-delay', (index % 5) * 52 + 'ms');
+      item.style.setProperty('--pf-flow-delay', (index % 5) * 42 + 'ms');
     });
 
     if (prefersReducedMotion || !('IntersectionObserver' in window)) {

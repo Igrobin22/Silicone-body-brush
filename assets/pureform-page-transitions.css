@@ -1,0 +1,106 @@
+:root {
+  --pf-page-ease: cubic-bezier(.23, 1, .32, 1);
+  --pf-page-fast: 180ms;
+  --pf-page-med: 260ms;
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: pf-page-native-out var(--pf-page-fast) var(--pf-page-ease) both;
+}
+
+::view-transition-new(root) {
+  animation: pf-page-native-in var(--pf-page-med) var(--pf-page-ease) both;
+}
+
+@keyframes pf-page-native-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes pf-page-native-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html.pf-page-fallback body {
+  transform-origin: center top;
+  transition:
+    opacity var(--pf-page-fast) var(--pf-page-ease),
+    transform var(--pf-page-fast) var(--pf-page-ease),
+    filter var(--pf-page-fast) ease;
+}
+
+html.pf-page-entering body {
+  opacity: 0;
+  transform: translateY(8px);
+  filter: blur(.4px);
+}
+
+html.pf-page-ready body {
+  opacity: 1;
+  transform: translateY(0);
+  filter: none;
+}
+
+html.pf-page-leaving body {
+  opacity: 0;
+  transform: translateY(-6px);
+  filter: blur(.4px);
+}
+
+html.pf-page-fallback::after {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #fff;
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--pf-page-fast) var(--pf-page-ease);
+}
+
+html.pf-page-leaving::after {
+  opacity: .34;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+
+  html.pf-page-fallback body,
+  html.pf-page-fallback::after {
+    transition: none;
+  }
+
+  html.pf-page-entering body,
+  html.pf-page-ready body,
+  html.pf-page-leaving body {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  html.pf-page-leaving::after {
+    opacity: 0;
+  }
+}

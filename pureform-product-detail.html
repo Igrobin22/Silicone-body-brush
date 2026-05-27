@@ -9,10 +9,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,700&family=DM+Sans:wght@300;400;500&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
   <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
+  <link rel="stylesheet" href="assets/pureform-page-transitions.css">
   <style>
     *,
     *::before,
@@ -30,13 +31,17 @@
       --dark: #050505;
       --mid: #505050;
       --light: #b8b8b8;
-      --serif: 'Cormorant Garamond', Georgia, serif;
+      --serif: 'Fraunces', Georgia, serif;
       --sans: 'DM Sans', Arial, sans-serif;
       --pdp-header-height: 106px;
+      --pdp-ease-out: cubic-bezier(.23, 1, .32, 1);
+      --pdp-motion-fast: 160ms;
+      --pdp-motion-med: 240ms;
     }
 
     html {
       scroll-behavior: smooth;
+      overflow-x: clip;
     }
 
     body {
@@ -44,7 +49,7 @@
       background: var(--white);
       color: var(--dark);
       font-family: var(--sans);
-      overflow-x: hidden;
+      overflow-x: clip;
     }
 
     a {
@@ -76,39 +81,39 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      overflow-y: auto;
-      padding-bottom: 1rem;
-      scrollbar-width: thin;
+      overflow: visible;
+      padding-block: clamp(.75rem, 1.8vh, 1.25rem);
+      scrollbar-width: none;
     }
 
     .pdp-status {
-      margin-bottom: 1.25rem;
-      font-size: 16px;
+      margin-bottom: .75rem;
+      font-size: 14px;
       letter-spacing: .02em;
     }
 
     .pdp-copy h1 {
       max-width: 13.5em;
-      font-size: clamp(2rem, 2vw, 2.55rem);
+      font-size: clamp(1.75rem, 1.8vw, 2.25rem);
       font-weight: 400;
       letter-spacing: .01em;
       line-height: 1.08;
-      margin-bottom: 2rem;
+      margin-bottom: 1.15rem;
     }
 
     .pdp-lead {
       max-width: 31rem;
-      margin-bottom: 2.25rem;
-      font-size: 15.5px;
+      margin-bottom: 1.35rem;
+      font-size: 14.5px;
       letter-spacing: .02em;
-      line-height: 1.2;
+      line-height: 1.28;
     }
 
     .pdp-detail-block,
     .pdp-accordion details {
       border-bottom: 1px solid #111;
-      padding: 0 0 .95rem;
-      margin-bottom: .95rem;
+      padding: 0 0 .72rem;
+      margin-bottom: .72rem;
     }
 
     .pdp-detail-head,
@@ -119,130 +124,122 @@
       gap: 1rem;
       list-style: none;
       cursor: pointer;
-      font-size: 15.5px;
+      font-size: 14.5px;
       letter-spacing: .02em;
       text-transform: uppercase;
+      transition: color var(--pdp-motion-fast) ease, transform var(--pdp-motion-fast) var(--pdp-ease-out);
+      user-select: none;
     }
 
+    .pdp-detail-head:focus-visible,
+    .pdp-accordion summary:focus-visible {
+      outline: 2px solid rgba(17, 17, 17, .28);
+      outline-offset: 4px;
+    }
+
+    .pdp-detail-block summary::-webkit-details-marker,
     .pdp-accordion summary::-webkit-details-marker {
       display: none;
     }
 
-    .pdp-detail-head span:last-child,
+    .pdp-detail-head::after,
     .pdp-accordion summary::after {
       content: '+';
       font-size: 18px;
       line-height: 1;
+      transform: translateY(-1px);
+      transition: transform var(--pdp-motion-fast) var(--pdp-ease-out);
     }
 
+    .pdp-detail-block[open] > .pdp-detail-head::after,
     .pdp-accordion details[open] summary::after {
       content: '-';
+      transform: translateY(-2px);
     }
 
     .pdp-fit-body,
     .pdp-accordion p {
       color: var(--mid);
-      font-size: 15px;
-      line-height: 1.45;
-      padding-top: .95rem;
+      font-size: 14px;
+      line-height: 1.42;
+      overflow: hidden;
+      padding-top: .7rem;
+      transform-origin: top;
     }
 
     .pdp-fit-body ul {
       display: grid;
-      gap: .7rem;
-      margin: 1.45rem 0 0 2rem;
+      gap: .48rem;
+      margin: .95rem 0 0 1.35rem;
     }
 
     .pdp-gallery {
-      position: sticky;
-      top: var(--pdp-header-height);
-      height: calc(100vh - var(--pdp-header-height));
-      height: calc(100dvh - var(--pdp-header-height));
-      overflow: hidden;
-      background: var(--panel);
+      position: relative;
+      display: grid;
+      gap: 2px;
+      align-self: start;
+      overflow: visible;
+      background: transparent;
       isolation: isolate;
       outline: none;
     }
 
     .pdp-gallery-frame {
-      position: absolute;
-      inset: 0;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
+      height: calc(100vh - var(--pdp-header-height));
+      height: calc(100dvh - var(--pdp-header-height));
+      min-height: calc(100vh - var(--pdp-header-height));
+      min-height: calc(100dvh - var(--pdp-header-height));
       overflow: hidden;
       background: var(--panel);
-      opacity: 0;
-      pointer-events: none;
-      transform: scale(1.018);
-      transition: opacity .34s ease, transform .34s ease;
-      will-change: opacity, transform;
-    }
-
-    .pdp-gallery-frame.is-active {
-      z-index: 1;
       opacity: 1;
       pointer-events: auto;
-      transform: scale(1);
+      transform: none;
     }
 
     .pdp-gallery-frame img {
       display: block;
-      width: min(80%, 620px);
-      max-height: 76vh;
-      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      max-height: none;
+      object-fit: cover;
     }
 
     .pdp-gallery-frame.is-lifestyle img {
-      width: min(92%, 680px);
-      max-height: 86vh;
+      width: 100%;
+      max-height: none;
     }
 
-    .pdp-gallery-ui {
-      position: absolute;
-      right: 1.1rem;
-      bottom: 1.1rem;
-      left: 1.1rem;
-      z-index: 5;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      pointer-events: none;
+    @supports (animation-timeline: view()) {
+      @media (min-width: 1101px) and (prefers-reduced-motion: no-preference) {
+        .pdp-gallery-frame {
+          animation: pdpImageEase both linear;
+          animation-timeline: view();
+          animation-range: entry 0% exit 100%;
+          will-change: transform, opacity;
+        }
+      }
     }
 
-    .pdp-gallery-counter {
-      display: inline-flex;
-      align-items: center;
-      min-height: 34px;
-      padding: 0 .85rem;
-      background: rgba(255, 255, 255, .72);
-      color: #111;
-      font-size: 13px;
-      letter-spacing: .06em;
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-    }
+    @keyframes pdpImageEase {
+      0% {
+        opacity: .72;
+        transform: translateY(18px) scale(.985);
+      }
 
-    .pdp-gallery-dots {
-      display: inline-flex;
-      align-items: center;
-      gap: .48rem;
-      pointer-events: auto;
-    }
+      22%,
+      78% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
 
-    .pdp-gallery-dot {
-      width: 9px;
-      height: 9px;
-      border: 1px solid rgba(17, 17, 17, .58);
-      border-radius: 50%;
-      background: transparent;
-      cursor: pointer;
-      padding: 0;
-    }
-
-    .pdp-gallery-dot.is-active {
-      background: #111;
+      100% {
+        opacity: .88;
+        transform: translateY(-10px) scale(.992);
+      }
     }
 
     .pdp-buy {
@@ -255,8 +252,8 @@
       justify-content: space-between;
       gap: 1rem;
       border-bottom: 1px solid #111;
-      padding-bottom: 1.2rem;
-      margin-bottom: .9rem;
+      padding-bottom: .85rem;
+      margin-bottom: .55rem;
     }
 
     .pdp-price {
@@ -272,15 +269,15 @@
 
     .pdp-option-section {
       border-bottom: 1px solid #111;
-      padding: .8rem 0 1.35rem;
+      padding: .62rem 0 .92rem;
     }
 
     .pdp-option-label-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: .75rem;
-      font-size: 15px;
+      margin-bottom: .55rem;
+      font-size: 14px;
       letter-spacing: .02em;
     }
 
@@ -290,23 +287,25 @@
       color: #111;
       cursor: pointer;
       font: inherit;
-      padding: .7rem 1.35rem;
+      padding: .52rem .95rem;
+      transition: background var(--pdp-motion-fast) ease, transform var(--pdp-motion-fast) var(--pdp-ease-out);
     }
 
     .pdp-swatches {
       display: flex;
-      gap: .8rem;
+      gap: .7rem;
       align-items: center;
-      min-height: 39px;
+      min-height: 32px;
     }
 
     .pdp-swatch {
-      width: 31px;
-      height: 31px;
+      width: 28px;
+      height: 28px;
       border: 1.5px solid #111;
       border-radius: 999px;
       background: var(--swatch, #eee);
       cursor: pointer;
+      transition: box-shadow var(--pdp-motion-fast) var(--pdp-ease-out), transform var(--pdp-motion-fast) var(--pdp-ease-out);
     }
 
     .pdp-swatch.is-active {
@@ -316,27 +315,27 @@
     .pdp-size-row {
       display: grid;
       grid-template-columns: repeat(8, minmax(0, 1fr));
-      gap: .55rem;
+      gap: .34rem;
       align-items: end;
     }
 
     .pdp-size {
       display: grid;
-      gap: .15rem;
+      gap: .1rem;
       justify-items: center;
       color: #c4c4c4;
-      font-size: 14px;
+      font-size: 12px;
       text-align: center;
     }
 
     .pdp-size strong {
       display: inline-flex;
-      min-width: 40px;
-      min-height: 40px;
+      min-width: 33px;
+      min-height: 33px;
       align-items: center;
       justify-content: center;
       color: inherit;
-      font-size: 17px;
+      font-size: 14px;
       font-weight: 400;
     }
 
@@ -347,16 +346,16 @@
 
     .pdp-size span {
       color: #111;
-      font-size: 12px;
+      font-size: 10.5px;
       text-decoration: underline;
     }
 
     .pdp-alerts {
       display: grid;
-      gap: .55rem;
+      gap: .42rem;
       border-bottom: 1px solid #111;
-      padding: 1.05rem 0 1.25rem;
-      font-size: 15.5px;
+      padding: .75rem 0 .85rem;
+      font-size: 14px;
     }
 
     .pdp-alerts p {
@@ -380,9 +379,9 @@
 
     .pdp-shipping {
       border-bottom: 1px solid #111;
-      padding: 1rem 0 1.25rem;
-      font-size: 15.5px;
-      line-height: 1.35;
+      padding: .75rem 0 .85rem;
+      font-size: 14px;
+      line-height: 1.32;
     }
 
     .pdp-order-button {
@@ -391,14 +390,40 @@
       min-height: 43px;
       align-items: center;
       justify-content: center;
-      margin-top: 1.65rem;
+      margin-top: 1rem;
       border: 0;
       background: #f4f4f3;
       color: #777;
-      font-size: 15px;
+      font-size: 13px;
       letter-spacing: .03em;
       text-decoration: none;
       text-transform: uppercase;
+      transition: background var(--pdp-motion-fast) ease, color var(--pdp-motion-fast) ease, transform var(--pdp-motion-fast) var(--pdp-ease-out);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .pdp-detail-head:hover,
+      .pdp-accordion summary:hover {
+        color: #000;
+        transform: translateX(2px);
+      }
+
+      .pdp-size-guide:hover,
+      .pdp-order-button:hover {
+        background: #e9e9e7;
+      }
+
+      .pdp-swatch:hover {
+        transform: scale(1.06);
+      }
+    }
+
+    .pdp-detail-head:active,
+    .pdp-accordion summary:active,
+    .pdp-size-guide:active,
+    .pdp-swatch:active,
+    .pdp-order-button:active {
+      transform: translateY(1px) scale(.98);
     }
 
     .pdp-normal-content {
@@ -470,18 +495,136 @@
       .pdp-gallery-frame {
         position: relative;
         inset: auto;
+        height: auto;
         min-height: min(82vh, 680px);
         opacity: 1;
         pointer-events: auto;
         transform: none;
       }
 
-      .pdp-gallery-ui {
-        display: none;
+      .pdp-gallery-frame img,
+      .pdp-gallery-frame.is-lifestyle img {
+        width: min(92%, 680px);
+        height: auto;
+        max-height: 86vh;
+        object-fit: contain;
       }
 
       .pdp-normal-content {
         grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 1101px) and (max-height: 760px) {
+      .pdp-grid {
+        gap: clamp(1.2rem, 2vw, 2.4rem);
+      }
+
+      .pdp-copy,
+      .pdp-buy {
+        padding-block: .55rem;
+      }
+
+      .pdp-status {
+        margin-bottom: .45rem;
+        font-size: 13px;
+      }
+
+      .pdp-copy h1 {
+        font-size: clamp(1.55rem, 1.55vw, 1.95rem);
+        margin-bottom: .82rem;
+      }
+
+      .pdp-lead {
+        margin-bottom: .92rem;
+        font-size: 13.5px;
+        line-height: 1.24;
+      }
+
+      .pdp-detail-block,
+      .pdp-accordion details {
+        padding-bottom: .52rem;
+        margin-bottom: .52rem;
+      }
+
+      .pdp-detail-head,
+      .pdp-accordion summary {
+        font-size: 13.5px;
+      }
+
+      .pdp-fit-body,
+      .pdp-accordion p {
+        font-size: 13px;
+        line-height: 1.35;
+        padding-top: .52rem;
+      }
+
+      .pdp-fit-body ul {
+        gap: .34rem;
+        margin-top: .65rem;
+      }
+
+      .pdp-price-row {
+        padding-bottom: .62rem;
+        margin-bottom: .38rem;
+      }
+
+      .pdp-price {
+        font-size: clamp(1.45rem, 1.6vw, 1.75rem);
+      }
+
+      .pdp-stars {
+        font-size: 13px;
+      }
+
+      .pdp-option-section {
+        padding: .48rem 0 .66rem;
+      }
+
+      .pdp-option-label-row {
+        margin-bottom: .42rem;
+        font-size: 13px;
+      }
+
+      .pdp-size-guide {
+        padding: .42rem .75rem;
+      }
+
+      .pdp-swatch {
+        width: 26px;
+        height: 26px;
+      }
+
+      .pdp-size-row {
+        gap: .24rem;
+      }
+
+      .pdp-size strong {
+        min-width: 30px;
+        min-height: 30px;
+        font-size: 13px;
+      }
+
+      .pdp-size span {
+        font-size: 10px;
+      }
+
+      .pdp-alerts {
+        gap: .32rem;
+        padding: .56rem 0 .64rem;
+        font-size: 13px;
+      }
+
+      .pdp-shipping {
+        padding: .55rem 0 .62rem;
+        font-size: 13px;
+        line-height: 1.24;
+      }
+
+      .pdp-order-button {
+        min-height: 38px;
+        margin-top: .72rem;
+        font-size: 12px;
       }
     }
 
@@ -504,6 +647,7 @@
 
       .pdp-gallery-frame img {
         width: min(90%, 420px);
+        height: auto;
       }
 
       .pdp-copy h1 {
@@ -525,6 +669,7 @@
         transform: none;
       }
     }
+
   </style>
   <script type="application/ld+json" id="productJsonLd"></script>
 </head>
@@ -567,8 +712,8 @@
         <h1 id="productName">Grey 4-Piece Silicone Brush Set</h1>
         <p class="pdp-lead" id="productLead">A complete PureForm silicone brush set made for smoother cleansing, easier reach, and a fresher post-shower feel.</p>
 
-        <div class="pdp-detail-block">
-          <div class="pdp-detail-head"><span>Fit notes</span><span>-</span></div>
+        <details class="pdp-detail-block">
+          <summary class="pdp-detail-head">Fit notes</summary>
           <div class="pdp-fit-body">
             <p id="productFitIntro">Includes four daily-use tools for face, scalp, body, and back care.</p>
             <ul id="productFitList">
@@ -577,7 +722,7 @@
               <li>Rinses clean and dries quickly after use.</li>
             </ul>
           </div>
-        </div>
+        </details>
 
         <div class="pdp-accordion">
           <details>
@@ -730,9 +875,7 @@
       var colorOptions = [
         ['pureform-4pc-set-grey', products['pureform-4pc-set-grey'].swatch, 'Grey set'],
         ['pureform-4pc-set-pink', products['pureform-4pc-set-pink'].swatch, 'Pink set'],
-        ['pureform-4pc-set-black', products['pureform-4pc-set-black'].swatch, 'Black set'],
-        ['family-bundle', products['family-bundle'].swatch, 'Mixed bundle'],
-        ['body-brush', 'linear-gradient(135deg, #fbfbf8, #e9e9e4)', 'Individual tools']
+        ['pureform-4pc-set-black', products['pureform-4pc-set-black'].swatch, 'Black set']
       ];
 
       var fallbackId = 'pureform-4pc-set-grey';
@@ -748,15 +891,7 @@
       var productOrderLink = document.getElementById('productOrderLink');
       var availabilityLine = document.getElementById('availabilityLine');
       var productJsonLd = document.getElementById('productJsonLd');
-      var galleryIndex = 0;
       var galleryFrames = [];
-      var galleryDots = [];
-      var galleryCounter = null;
-      var lastWheelStep = 0;
-      var touchStartY = 0;
-      var touchStartX = 0;
-      var galleryMedia = window.matchMedia('(min-width: 1101px)');
-      var reducedMotionMedia = window.matchMedia('(prefers-reduced-motion: reduce)');
 
       function getRequestedProduct() {
         var params = new URLSearchParams(window.location.search);
@@ -771,170 +906,23 @@
         return 'contact.html?topic=start-order&product=' + encodeURIComponent(id) + '&bundle=single#message';
       }
 
-      function clamp(value, min, max) {
-        return Math.min(Math.max(value, min), max);
-      }
-
-      function shouldUseStepGallery() {
-        return galleryMedia.matches && !reducedMotionMedia.matches && galleryFrames.length > 1;
-      }
-
-      function isInGalleryZone() {
-        if (!productGallery || !galleryFrames.length) {
-          return false;
-        }
-
-        var rect = productGallery.getBoundingClientRect();
-        var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-        return rect.top < viewportHeight * 0.86 && rect.bottom > viewportHeight * 0.14;
-      }
-
-      function showGalleryImage(nextIndex) {
-        var max = galleryFrames.length - 1;
-        var isStepLayout = galleryMedia.matches;
-        galleryIndex = clamp(nextIndex, 0, max);
-
-        galleryFrames.forEach(function (frame, index) {
-          var selected = index === galleryIndex;
-          frame.classList.toggle('is-active', !isStepLayout || selected);
-          frame.setAttribute('aria-hidden', isStepLayout && !selected ? 'true' : 'false');
-        });
-
-        galleryDots.forEach(function (dot, index) {
-          var active = index === galleryIndex;
-          dot.classList.toggle('is-active', active);
-          dot.setAttribute('aria-current', active ? 'true' : 'false');
-        });
-
-        if (galleryCounter) {
-          galleryCounter.textContent = (galleryIndex + 1) + ' / ' + galleryFrames.length;
-        }
-      }
-
-      function canStepGallery(direction) {
-        if (!shouldUseStepGallery() || !isInGalleryZone()) {
-          return false;
-        }
-
-        var max = galleryFrames.length - 1;
-        return !((direction > 0 && galleryIndex >= max) || (direction < 0 && galleryIndex <= 0));
-      }
-
-      function stepGallery(direction) {
-        if (!canStepGallery(direction)) {
-          return false;
-        }
-
-        showGalleryImage(galleryIndex + direction);
-        return true;
-      }
-
-      function onGalleryWheel(event) {
-        var direction = Math.sign(event.deltaY);
-        if (!direction || !canStepGallery(direction)) {
-          return;
-        }
-
-        event.preventDefault();
-
-        var now = Date.now();
-        if (now - lastWheelStep < 260) {
-          return;
-        }
-
-        lastWheelStep = now;
-        showGalleryImage(galleryIndex + direction);
-      }
-
-      function isTextControl(target) {
-        return target && target.closest && target.closest('a, button, summary, input, textarea, select, [contenteditable="true"]');
-      }
-
-      function onGalleryKeydown(event) {
-        var direction = 0;
-
-        if (isTextControl(event.target)) {
-          return;
-        }
-
-        if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === ' ') {
-          direction = 1;
-        } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
-          direction = -1;
-        }
-
-        if (direction && stepGallery(direction)) {
-          event.preventDefault();
-        }
-      }
-
-      function onGalleryTouchStart(event) {
-        if (!event.touches.length) {
-          return;
-        }
-
-        touchStartY = event.touches[0].clientY;
-        touchStartX = event.touches[0].clientX;
-      }
-
-      function onGalleryTouchMove(event) {
-        if (!event.touches.length || !shouldUseStepGallery() || !isInGalleryZone()) {
-          return;
-        }
-
-        var deltaY = touchStartY - event.touches[0].clientY;
-        var deltaX = touchStartX - event.touches[0].clientX;
-        var direction = deltaY > 0 ? 1 : -1;
-
-        if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 12 && canStepGallery(direction)) {
-          event.preventDefault();
-        }
-      }
-
-      function onGalleryTouchEnd(event) {
-        var touch = event.changedTouches && event.changedTouches[0];
-        if (!touch || !shouldUseStepGallery() || !isInGalleryZone()) {
-          return;
-        }
-
-        var deltaY = touchStartY - touch.clientY;
-        var deltaX = touchStartX - touch.clientX;
-        if (Math.abs(deltaY) < 42 || Math.abs(deltaY) < Math.abs(deltaX)) {
-          return;
-        }
-
-        stepGallery(deltaY > 0 ? 1 : -1);
-      }
-
       function setupGalleryControls() {
         galleryFrames = Array.prototype.slice.call(productGallery.querySelectorAll('.pdp-gallery-frame'));
-        galleryDots = Array.prototype.slice.call(productGallery.querySelectorAll('.pdp-gallery-dot'));
-        galleryCounter = productGallery.querySelector('.pdp-gallery-counter');
-        galleryIndex = 0;
-        productGallery.tabIndex = 0;
+        productGallery.tabIndex = -1;
 
-        galleryDots.forEach(function (dot) {
-          dot.addEventListener('click', function () {
-            showGalleryImage(Number(dot.getAttribute('data-gallery-index')));
-          });
+        galleryFrames.forEach(function (frame) {
+          frame.setAttribute('aria-hidden', 'false');
         });
-
-        showGalleryImage(0);
       }
 
       function renderGallery(product) {
         var frames = product.images.map(function (src, index) {
           var alt = product.name + ' product view ' + (index + 1);
           var lifestyle = index === 1 ? ' is-lifestyle' : '';
-          var active = index === 0 ? ' is-active' : '';
-          return '<figure class="pdp-gallery-frame' + lifestyle + active + '" aria-hidden="' + (index ? 'true' : 'false') + '"><img src="' + src + '" alt="' + alt + '"' + (index ? ' loading="lazy"' : ' fetchpriority="high"') + ' decoding="async"></figure>';
+          return '<figure class="pdp-gallery-frame' + lifestyle + '" aria-hidden="false"><img src="' + src + '" alt="' + alt + '"' + (index ? ' loading="lazy"' : ' fetchpriority="high"') + ' decoding="async"></figure>';
         }).join('');
 
-        var dots = product.images.map(function (_, index) {
-          return '<button class="pdp-gallery-dot' + (index === 0 ? ' is-active' : '') + '" type="button" data-gallery-index="' + index + '" aria-label="Show product image ' + (index + 1) + '"' + (index === 0 ? ' aria-current="true"' : ' aria-current="false"') + '></button>';
-        }).join('');
-
-        productGallery.innerHTML = frames + '<div class="pdp-gallery-ui"><span class="pdp-gallery-counter">1 / ' + product.images.length + '</span><div class="pdp-gallery-dots" aria-label="Product image controls">' + dots + '</div></div>';
+        productGallery.innerHTML = frames;
         setupGalleryControls();
       }
 
@@ -1001,18 +989,11 @@
         renderProduct(getRequestedProduct(), false);
       });
 
-      window.addEventListener('wheel', onGalleryWheel, { passive: false });
-      window.addEventListener('keydown', onGalleryKeydown);
-      window.addEventListener('resize', function () {
-        showGalleryImage(galleryIndex);
-      }, { passive: true });
-      productGallery.addEventListener('touchstart', onGalleryTouchStart, { passive: true });
-      productGallery.addEventListener('touchmove', onGalleryTouchMove, { passive: false });
-      productGallery.addEventListener('touchend', onGalleryTouchEnd, { passive: true });
-
       renderProduct(getRequestedProduct(), false);
     })();
   </script>
+  <script src="assets/pureform-motion.js" defer></script>
+  <script src="assets/pureform-page-transitions.js" defer></script>
   <script src="assets/pureform-mobile-menu.js" defer></script>
 </body>
 
