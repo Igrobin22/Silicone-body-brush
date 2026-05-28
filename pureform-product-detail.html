@@ -184,6 +184,13 @@
       outline: none;
     }
 
+    .pdp-gallery-shell {
+      position: relative;
+      display: grid;
+      gap: .65rem;
+      align-self: start;
+    }
+
     .pdp-gallery-frame {
       position: relative;
       display: flex;
@@ -242,6 +249,29 @@
       }
     }
 
+    .pdp-gallery-dots {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: .42rem;
+    }
+
+    .pdp-gallery-dot {
+      width: 7px;
+      height: 7px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(17, 17, 17, .22);
+      cursor: pointer;
+      padding: 0;
+      transition: width var(--pdp-motion-fast) var(--pdp-ease-out), background var(--pdp-motion-fast) ease, transform var(--pdp-motion-fast) var(--pdp-ease-out);
+    }
+
+    .pdp-gallery-dot.is-active {
+      width: 22px;
+      background: #111;
+    }
+
     .pdp-buy {
       padding-inline: clamp(.5rem, 1.5vw, 2rem);
     }
@@ -279,6 +309,11 @@
       margin-bottom: .55rem;
       font-size: 14px;
       letter-spacing: .02em;
+    }
+
+    .pdp-color-name {
+      color: var(--mid);
+      margin-left: .35rem;
     }
 
     .pdp-size-guide {
@@ -387,18 +422,40 @@
     .pdp-order-button {
       display: flex;
       width: 100%;
-      min-height: 43px;
+      min-height: 48px;
       align-items: center;
       justify-content: center;
+      gap: .48rem;
       margin-top: 1rem;
       border: 0;
-      background: #f4f4f3;
-      color: #777;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #111, #343434);
+      box-shadow: 0 14px 30px rgba(17, 17, 17, .14);
+      color: #fff;
       font-size: 13px;
+      font-weight: 500;
       letter-spacing: .03em;
       text-decoration: none;
       text-transform: uppercase;
-      transition: background var(--pdp-motion-fast) ease, color var(--pdp-motion-fast) ease, transform var(--pdp-motion-fast) var(--pdp-ease-out);
+      transition: background var(--pdp-motion-fast) ease, box-shadow var(--pdp-motion-fast) var(--pdp-ease-out), color var(--pdp-motion-fast) ease, transform var(--pdp-motion-fast) var(--pdp-ease-out);
+    }
+
+    .pdp-order-button svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2;
+    }
+
+    .pdp-size-guide:focus-visible,
+    .pdp-swatch:focus-visible,
+    .pdp-gallery-dot:focus-visible,
+    .pdp-order-button:focus-visible {
+      outline: 2px solid rgba(17, 17, 17, .32);
+      outline-offset: 4px;
     }
 
     @media (hover: hover) and (pointer: fine) {
@@ -408,13 +465,22 @@
         transform: translateX(2px);
       }
 
-      .pdp-size-guide:hover,
-      .pdp-order-button:hover {
+      .pdp-size-guide:hover {
         background: #e9e9e7;
       }
 
       .pdp-swatch:hover {
         transform: scale(1.06);
+      }
+
+      .pdp-gallery-dot:hover {
+        background: rgba(17, 17, 17, .48);
+      }
+
+      .pdp-order-button:hover {
+        background: linear-gradient(135deg, #2a2a2a, #050505);
+        box-shadow: 0 18px 34px rgba(17, 17, 17, .18);
+        transform: translateY(-1px);
       }
     }
 
@@ -422,6 +488,7 @@
     .pdp-accordion summary:active,
     .pdp-size-guide:active,
     .pdp-swatch:active,
+    .pdp-gallery-dot:active,
     .pdp-order-button:active {
       transform: translateY(1px) scale(.98);
     }
@@ -481,9 +548,12 @@
         padding: 1rem 0;
       }
 
-      .pdp-gallery {
+      .pdp-gallery-shell {
         order: -1;
         position: relative;
+      }
+
+      .pdp-gallery {
         top: auto;
         display: grid;
         gap: 1.1rem;
@@ -642,6 +712,10 @@
         padding: 0 clamp(.9rem, 4vw, 1.15rem) 2.35rem;
       }
 
+      .pdp-gallery-shell {
+        order: -1;
+      }
+
       .pdp-gallery {
         display: flex;
         gap: .7rem;
@@ -668,6 +742,10 @@
       .pdp-gallery-frame img {
         width: min(82%, 360px);
         height: auto;
+      }
+
+      .pdp-gallery-dots {
+        display: flex;
       }
 
       .pdp-copy,
@@ -814,7 +892,7 @@
         <h1 id="productName">Grey 4-Piece Silicone Brush Set</h1>
         <p class="pdp-lead" id="productLead">A complete PureForm silicone brush set made for smoother cleansing, easier reach, and a fresher post-shower feel.</p>
 
-        <details class="pdp-detail-block">
+        <details class="pdp-detail-block" id="fitGuide">
           <summary class="pdp-detail-head">Fit notes</summary>
           <div class="pdp-fit-body">
             <p id="productFitIntro">Includes four daily-use tools for face, scalp, body, and back care.</p>
@@ -838,28 +916,31 @@
         </div>
       </aside>
 
-      <div class="pdp-gallery" id="productGallery" aria-label="Product gallery"></div>
+      <div class="pdp-gallery-shell">
+        <div class="pdp-gallery" id="productGallery" aria-label="Product gallery"></div>
+        <div class="pdp-gallery-dots" id="productGalleryDots" aria-label="Product image controls"></div>
+      </div>
 
       <aside class="pdp-buy">
         <div class="pdp-price-row">
           <span class="pdp-price" id="productPrice">AED 87.78</span>
-          <span class="pdp-stars" aria-label="Rating 4.9 out of 5">☆☆☆☆☆</span>
+          <span class="pdp-stars" aria-label="Rating 4.9 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
         </div>
 
         <div class="pdp-option-section">
-          <div class="pdp-option-label-row"><span>Color</span></div>
+          <div class="pdp-option-label-row"><span>Color <span class="pdp-color-name" id="productColorName">Grey</span></span></div>
           <div class="pdp-swatches" id="productSwatches" aria-label="Color options"></div>
         </div>
 
         <div class="pdp-option-section">
           <div class="pdp-option-label-row">
             <span>Set</span>
-            <button class="pdp-size-guide" type="button">Set Guide</button>
+            <button class="pdp-size-guide" type="button" aria-controls="fitGuide">Set Guide</button>
           </div>
           <div class="pdp-size-row" aria-label="Set options">
-            <span class="pdp-size is-active"><strong>1</strong><span>Single</span></span>
-            <span class="pdp-size"><strong>2</strong><span>Two</span></span>
-            <span class="pdp-size"><strong>3</strong><span>Bundle</span></span>
+            <span class="pdp-size is-active" data-set-option="single" aria-current="true"><strong>1</strong><span>Single</span></span>
+            <span class="pdp-size" data-set-option="two"><strong>2</strong><span>Two</span></span>
+            <span class="pdp-size" data-set-option="three"><strong>3</strong><span>Bundle</span></span>
             <span class="pdp-size"><strong>4</strong><span>Tools</span></span>
             <span class="pdp-size"><strong>15</strong><span>Returns</span></span>
             <span class="pdp-size"><strong>COD</strong><span>Check</span></span>
@@ -874,7 +955,7 @@
         </div>
 
         <p class="pdp-shipping">Free delivery checks before order confirmation<br>15-day return policy for unused sets</p>
-        <a class="pdp-order-button" id="productOrderLink" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=single#message">Start order</a>
+        <a class="pdp-order-button" id="productOrderLink" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=single#message"><span>Start order</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></a>
       </aside>
     </section>
 
@@ -977,7 +1058,8 @@
       var colorOptions = [
         ['pureform-4pc-set-grey', products['pureform-4pc-set-grey'].swatch, 'Grey set'],
         ['pureform-4pc-set-pink', products['pureform-4pc-set-pink'].swatch, 'Pink set'],
-        ['pureform-4pc-set-black', products['pureform-4pc-set-black'].swatch, 'Black set']
+        ['pureform-4pc-set-black', products['pureform-4pc-set-black'].swatch, 'Black set'],
+        ['family-bundle', products['family-bundle'].swatch, 'Mixed bundle']
       ];
 
       var fallbackId = 'pureform-4pc-set-grey';
@@ -990,10 +1072,17 @@
       var productCare = document.getElementById('productCare');
       var productPriceNote = document.getElementById('productPriceNote');
       var productSwatches = document.getElementById('productSwatches');
+      var productColorName = document.getElementById('productColorName');
       var productOrderLink = document.getElementById('productOrderLink');
+      var productGalleryDots = document.getElementById('productGalleryDots');
       var availabilityLine = document.getElementById('availabilityLine');
       var productJsonLd = document.getElementById('productJsonLd');
+      var setGuideButton = document.querySelector('.pdp-size-guide');
+      var fitGuide = document.getElementById('fitGuide');
+      var setOptionTiles = Array.prototype.slice.call(document.querySelectorAll('[data-set-option]'));
+      var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
       var galleryFrames = [];
+      var galleryScrollFrame = null;
 
       function getRequestedProduct() {
         var params = new URLSearchParams(window.location.search);
@@ -1005,7 +1094,53 @@
       }
 
       function orderUrl(id) {
+        if (id === 'family-bundle') {
+          return 'contact.html?topic=start-order&product=mixed-colors&bundle=three#message';
+        }
+
         return 'contact.html?topic=start-order&product=' + encodeURIComponent(id) + '&bundle=single#message';
+      }
+
+      function setActiveGalleryDot(index) {
+        if (!productGalleryDots) {
+          return;
+        }
+
+        productGalleryDots.querySelectorAll('.pdp-gallery-dot').forEach(function (dot, dotIndex) {
+          var isActive = dotIndex === index;
+          dot.classList.toggle('is-active', isActive);
+          if (isActive) {
+            dot.setAttribute('aria-current', 'true');
+            return;
+          }
+
+          dot.removeAttribute('aria-current');
+        });
+      }
+
+      function updateGalleryActiveState() {
+        if (!galleryFrames.length) {
+          return;
+        }
+
+        var nearestIndex = galleryFrames.reduce(function (activeIndex, frame, index) {
+          var current = Math.abs(frame.offsetLeft - productGallery.scrollLeft);
+          var active = Math.abs(galleryFrames[activeIndex].offsetLeft - productGallery.scrollLeft);
+          return current < active ? index : activeIndex;
+        }, 0);
+
+        setActiveGalleryDot(nearestIndex);
+      }
+
+      function handleGalleryScroll() {
+        if (galleryScrollFrame !== null) {
+          return;
+        }
+
+        galleryScrollFrame = window.requestAnimationFrame(function () {
+          galleryScrollFrame = null;
+          updateGalleryActiveState();
+        });
       }
 
       function setupGalleryControls() {
@@ -1015,29 +1150,139 @@
         galleryFrames.forEach(function (frame) {
           frame.setAttribute('aria-hidden', 'false');
         });
+
+        setActiveGalleryDot(0);
       }
 
       function renderGallery(product) {
-        var frames = product.images.map(function (src, index) {
-          var alt = product.name + ' product view ' + (index + 1);
-          var lifestyle = index === 1 ? ' is-lifestyle' : '';
-          return '<figure class="pdp-gallery-frame' + lifestyle + '" aria-hidden="false"><img src="' + src + '" alt="' + alt + '"' + (index ? ' loading="lazy"' : ' fetchpriority="high"') + ' decoding="async"></figure>';
-        }).join('');
+        productGallery.replaceChildren();
 
-        productGallery.innerHTML = frames;
+        product.images.forEach(function (src, index) {
+          var alt = product.name + ' product view ' + (index + 1);
+          var frame = document.createElement('figure');
+          var image = document.createElement('img');
+
+          frame.className = 'pdp-gallery-frame' + (index === 1 ? ' is-lifestyle' : '');
+          frame.setAttribute('aria-hidden', 'false');
+          image.src = src;
+          image.alt = alt;
+          image.decoding = 'async';
+
+          if (index) {
+            image.loading = 'lazy';
+          } else {
+            image.setAttribute('fetchpriority', 'high');
+          }
+
+          frame.appendChild(image);
+          productGallery.appendChild(frame);
+        });
+
+        productGallery.scrollLeft = 0;
+        renderGalleryDots(product.images.length);
         setupGalleryControls();
       }
 
-      function renderSwatches(activeId) {
-        productSwatches.innerHTML = colorOptions.map(function (option) {
-          var id = option[0];
-          return '<button class="pdp-swatch' + (id === activeId ? ' is-active' : '') + '" type="button" style="--swatch:' + option[1] + '" data-product="' + id + '" aria-label="' + option[2] + '"></button>';
-        }).join('');
+      function renderGalleryDots(count) {
+        if (!productGalleryDots) {
+          return;
+        }
 
-        productSwatches.querySelectorAll('[data-product]').forEach(function (button) {
+        productGalleryDots.replaceChildren();
+
+        for (var index = 0; index < count; index += 1) {
+          var dot = document.createElement('button');
+          dot.className = 'pdp-gallery-dot' + (index === 0 ? ' is-active' : '');
+          dot.type = 'button';
+          dot.setAttribute('aria-label', 'Show product image ' + (index + 1));
+          if (index === 0) {
+            dot.setAttribute('aria-current', 'true');
+          }
+
+          dot.addEventListener('click', function (event) {
+            var dotIndex = Array.prototype.indexOf.call(productGalleryDots.children, event.currentTarget);
+            var frame = galleryFrames[dotIndex];
+            if (!frame) {
+              return;
+            }
+
+            productGallery.scrollTo({
+              left: frame.offsetLeft,
+              behavior: reduceMotion.matches ? 'auto' : 'smooth'
+            });
+            setActiveGalleryDot(dotIndex);
+          });
+
+          productGalleryDots.appendChild(dot);
+        }
+      }
+
+      function renderSwatches(activeId, activeColor) {
+        productSwatches.replaceChildren();
+
+        colorOptions.forEach(function (option) {
+          var id = option[0];
+          var isActive = id === activeId || (activeColor && option[2].toLowerCase().indexOf(activeColor.toLowerCase()) === 0);
+          var button = document.createElement('button');
+
+          button.className = 'pdp-swatch' + (isActive ? ' is-active' : '');
+          button.type = 'button';
+          button.style.setProperty('--swatch', option[1]);
+          button.setAttribute('data-product', id);
+          button.setAttribute('aria-label', option[2]);
+          button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
           button.addEventListener('click', function () {
             renderProduct(button.getAttribute('data-product'), true);
           });
+
+          productSwatches.appendChild(button);
+        });
+      }
+
+      function renderFitList(items) {
+        productFitList.replaceChildren();
+
+        items.forEach(function (item) {
+          var listItem = document.createElement('li');
+          listItem.textContent = item;
+          productFitList.appendChild(listItem);
+        });
+      }
+
+      function updateSetTiles(id) {
+        var activeOption = id === 'family-bundle' ? 'three' : 'single';
+
+        setOptionTiles.forEach(function (tile) {
+          var isActive = tile.getAttribute('data-set-option') === activeOption;
+          tile.classList.toggle('is-active', isActive);
+          if (isActive) {
+            tile.setAttribute('aria-current', 'true');
+            return;
+          }
+
+          tile.removeAttribute('aria-current');
+        });
+      }
+
+      function setupSetGuide() {
+        if (!setGuideButton || !fitGuide) {
+          return;
+        }
+
+        setGuideButton.addEventListener('click', function () {
+          var summary = fitGuide.querySelector('summary');
+          fitGuide.open = true;
+          fitGuide.scrollIntoView({ block: 'center', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+
+          if (!summary) {
+            return;
+          }
+
+          try {
+            summary.focus({ preventScroll: true });
+          } catch (error) {
+            summary.focus();
+          }
         });
       }
 
@@ -1070,14 +1315,17 @@
         productName.textContent = product.name;
         productLead.textContent = product.lead;
         productPrice.textContent = product.price;
+        productColorName.textContent = product.color;
         productFitIntro.textContent = product.color + ' option selected. Product details are confirmed before checkout.';
-        productFitList.innerHTML = product.fit.map(function (item) { return '<li>' + item + '</li>'; }).join('');
+        renderFitList(product.fit);
         productCare.textContent = 'PureForm tools are made from soft silicone. Rinse after every use, shake off water, and let the piece dry in open air.';
         productPriceNote.textContent = product.price + ' includes VAT. Delivery timing, COD availability, and bundle details are confirmed by support.';
         availabilityLine.textContent = 'Available / delivery confirmed by city';
         productOrderLink.href = orderUrl(id);
+        productOrderLink.setAttribute('aria-label', 'Start order for ' + product.name);
         renderGallery(product);
-        renderSwatches(id);
+        renderSwatches(id, product.color);
+        updateSetTiles(id);
         updateStructuredData(id, product);
         document.title = product.name + ' | PureForm';
 
@@ -1091,6 +1339,8 @@
         renderProduct(getRequestedProduct(), false);
       });
 
+      productGallery.addEventListener('scroll', handleGalleryScroll, { passive: true });
+      setupSetGuide();
       renderProduct(getRequestedProduct(), false);
     })();
   </script>

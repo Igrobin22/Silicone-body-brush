@@ -112,13 +112,17 @@
             </div>
 
             <div class="form-field">
-              <label for="order-product">Set color</label>
+              <label for="order-product">Product</label>
               <select id="order-product" name="product" autocomplete="off">
                 <option value="not-sure">Not sure yet</option>
                 <option value="pureform-4pc-set-grey">Grey 4-Piece Silicone Brush Set</option>
                 <option value="pureform-4pc-set-black">Black 4-Piece Silicone Brush Set</option>
                 <option value="pureform-4pc-set-pink">Pink 4-Piece Silicone Brush Set</option>
-                <option value="mixed-colors">Mixed colors</option>
+                <option value="mixed-colors">Mixed colors / Three Set Family Bundle</option>
+                <option value="back-scrubber">Long Handle Back Scrubber</option>
+                <option value="body-brush">Silicone Body Brush</option>
+                <option value="scalp-massager">Silicone Scalp Massager</option>
+                <option value="face-brush">Gentle Silicone Face Brush</option>
               </select>
             </div>
           </div>
@@ -187,7 +191,8 @@
         grey: 'pureform-4pc-set-grey',
         black: 'pureform-4pc-set-black',
         pink: 'pureform-4pc-set-pink',
-        mixed: 'mixed-colors'
+        mixed: 'mixed-colors',
+        'family-bundle': 'mixed-colors'
       };
 
       var topicAliases = {
@@ -264,7 +269,7 @@
           'Phone: ' + (data.get('phone') || ''),
           'Delivery city: ' + (data.get('delivery_city') || ''),
           'Topic: ' + getSelectedText(topic),
-          'Set color: ' + getSelectedText(product),
+          'Product: ' + getSelectedText(product),
           'Bundle: ' + getSelectedText(bundle),
           'Payment: ' + getSelectedText(document.getElementById('payment-preference')),
           '',
