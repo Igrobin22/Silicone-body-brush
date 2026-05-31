@@ -2828,7 +2828,7 @@
     }
 
     .review-card-home {
-      min-height: 280px;
+      min-height: 460px;
       padding: 1.65rem;
       display: flex;
       flex-direction: column;
@@ -2872,9 +2872,44 @@
 
     .review-rating {
       flex: 0 0 auto;
+      display: grid;
+      gap: .2rem;
+      justify-items: end;
       color: var(--dark);
       font-size: 11px;
       letter-spacing: .08em;
+      line-height: 1.1;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .review-rating span {
+      font-size: 12px;
+      letter-spacing: .12em;
+    }
+
+    .review-rating small {
+      display: block;
+      color: var(--light);
+      font-size: 10px;
+      letter-spacing: .04em;
+    }
+
+    .review-photo-home {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      margin: 0 0 1.2rem;
+      overflow: hidden;
+      border-radius: 16px;
+      border: .5px solid rgba(28, 32, 30, .08);
+      background: rgba(248, 248, 246, .82);
+    }
+
+    .review-photo-home img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .review-copy {
@@ -3135,6 +3170,10 @@
 
       .review-score {
         min-width: 0;
+      }
+
+      .review-card-home {
+        min-height: auto;
       }
 
       .site-footer-home {
@@ -4052,36 +4091,48 @@
 
     <div class="review-grid">
       <article class="review-card-home reveal">
+        <figure class="review-photo-home">
+          <img src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780243836/b49922d6-d5cd-4254-b166-be53bd47132e_675x1200_tspgdx.avif" alt="Customer photo for Mariam A. PureForm review" loading="lazy" decoding="async">
+        </figure>
         <div class="review-meta">
           <div><strong>Mariam A.</strong><small>Dubai, UAE</small></div>
-          <div class="review-rating">5/5</div>
+          <div class="review-rating" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span><small>5/5</small></div>
         </div>
         <p class="review-copy">The long handle makes the back brush useful every day. It rinses quickly and feels cleaner than my old sponge.</p>
         <div class="review-card-foot"><span class="review-date">March 2026</span><span class="review-badge">Customer</span></div>
       </article>
 
       <article class="review-card-home reveal">
+        <figure class="review-photo-home">
+          <img src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780243837/8bee4d53-eb50-45e4-902f-f91f232f7588_svrxkv.avif" alt="Customer photo for Sara J. PureForm review" loading="lazy" decoding="async">
+        </figure>
         <div class="review-meta">
           <div><strong>Sara J.</strong><small>London, UK</small></div>
-          <div class="review-rating">5/5</div>
+          <div class="review-rating" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span><small>5/5</small></div>
         </div>
         <p class="review-copy">The silicone bristles are gentle but still effective. The face brush and body brush are the pieces I use most.</p>
         <div class="review-card-foot"><span class="review-date">February 2026</span><span class="review-badge">Customer</span></div>
       </article>
 
       <article class="review-card-home reveal">
+        <figure class="review-photo-home">
+          <img src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780243837/4925d2f8-b8b1-43c6-9189-79b093734edc_675x1200_lltijt.avif" alt="Customer photo for Priya S. PureForm review" loading="lazy" decoding="async">
+        </figure>
         <div class="review-meta">
           <div><strong>Priya S.</strong><small>Mumbai, India</small></div>
-          <div class="review-rating">5/5</div>
+          <div class="review-rating" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span><small>5/5</small></div>
         </div>
         <p class="review-copy">I like that each brush has a clear job. The scalp massager is relaxing and the set dries fast after use.</p>
         <div class="review-card-foot"><span class="review-date">January 2026</span><span class="review-badge">Customer</span></div>
       </article>
 
       <article class="review-card-home reveal">
+        <figure class="review-photo-home">
+          <img src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780243837/25db5521-2dfa-47bc-a5e6-c6a45903204c_900x1200_kpyrfr.avif" alt="Customer photo for James C. PureForm review" loading="lazy" decoding="async">
+        </figure>
         <div class="review-meta">
           <div><strong>James C.</strong><small>Singapore</small></div>
-          <div class="review-rating">5/5</div>
+          <div class="review-rating" aria-label="4 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span><small>4/5</small></div>
         </div>
         <p class="review-copy">Simple, practical, and easy to keep clean. The grip strap on the body brush helps when my hands are wet.</p>
         <div class="review-card-foot"><span class="review-date">January 2026</span><span class="review-badge">Customer</span></div>
