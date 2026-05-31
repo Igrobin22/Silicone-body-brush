@@ -50,16 +50,20 @@
       font-family: var(--sans);
       background: var(--white);
       color: var(--dark);
-      overflow-x: hidden;
+      overflow-x: clip;
     }
 
     /* NAV */
     nav {
-      position: fixed;
+      position: sticky;
       top: 0;
       left: 0;
       right: 0;
-      z-index: 200;
+      z-index: 1000;
+      width: 100%;
+      min-width: 100%;
+      max-width: none;
+      margin: 0;
       padding: 0 5rem;
       height: 68px;
       display: flex;
@@ -891,28 +895,6 @@
       border: 0.5px solid var(--mg);
       padding: 5px 14px;
       border-radius: 100px;
-    }
-
-    .pcard-link {
-      display: inline-flex;
-      align-items: center;
-      gap: .35rem;
-      margin-top: 1rem;
-      font-size: 11px;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--dark);
-      font-weight: 400;
-    }
-
-    .pcard-link::after {
-      content: '->';
-      font-size: 12px;
-      transition: transform var(--motion-fast) var(--ease-out);
-    }
-
-    .pcard:hover .pcard-link::after {
-      transform: translateX(4px);
     }
 
     /* DARK FEATURES */
@@ -2193,7 +2175,7 @@
     @media (max-width: 760px) {
       html,
       body {
-        overflow-x: hidden;
+        overflow-x: clip;
       }
 
       nav {
@@ -2428,7 +2410,7 @@
     @media (max-width: 760px) {
       html,
       body {
-        overflow-x: hidden;
+        overflow-x: clip;
       }
 
       nav {
@@ -3623,8 +3605,7 @@
       }
 
       .hero-img-wrap:hover img,
-      .pcard:hover .pcard-img,
-      .pcard:hover .pcard-link::after {
+      .pcard:hover .pcard-img {
         transform: none !important;
       }
 
@@ -3857,7 +3838,6 @@
         <div class="pcard-name">Grey 4-Piece Silicone Brush Set</div>
         <p class="pcard-desc">One complete set in Grey with the back scrubber, body brush, scalp massager, and face brush.</p>
         <span class="pcard-tag">Grey Set</span>
-        <span class="pcard-link">Open product page</span>
       </a>
 
       <a class="pcard reveal" href="pureform-product-detail.html?product=pureform-4pc-set-black"
@@ -3868,7 +3848,6 @@
         <div class="pcard-name">Black 4-Piece Silicone Brush Set</div>
         <p class="pcard-desc">The same four-piece PureForm routine in Black, listed as its own product in this category.</p>
         <span class="pcard-tag">Black Set</span>
-        <span class="pcard-link">Open product page</span>
       </a>
 
       <a class="pcard reveal" href="pureform-product-detail.html?product=pureform-4pc-set-pink"
@@ -3879,7 +3858,6 @@
         <div class="pcard-name">Pink 4-Piece Silicone Brush Set</div>
         <p class="pcard-desc">A softer Pink finish for the same four-piece face, scalp, body, and back routine.</p>
         <span class="pcard-tag">Pink Set</span>
-        <span class="pcard-link">Open product page</span>
       </a>
     </div>
   </section>

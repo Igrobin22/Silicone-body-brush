@@ -16,10 +16,12 @@ body > nav.site-header {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 200;
+  z-index: 1000;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: 34px 72px;
   width: 100% !important;
+  inline-size: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
   margin: 0 !important;
@@ -27,10 +29,10 @@ body > nav.site-header {
   overflow: visible;
   padding: 0 !important;
   border: 0;
-  background: transparent;
+  background: rgba(255, 255, 255, .08);
   box-shadow: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
 }
 
 .promo-bar {
@@ -40,7 +42,9 @@ body > nav.site-header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
+  justify-self: stretch;
   width: 100% !important;
+  inline-size: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
   margin: 0 !important;
@@ -89,7 +93,9 @@ body > nav.site-header {
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 1.5rem;
+  justify-self: stretch;
   width: 100% !important;
+  inline-size: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
   margin: 0 !important;
@@ -216,7 +222,7 @@ body {
   max-width: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body > nav.site-header + .hero,
@@ -281,6 +287,7 @@ body > nav.site-header + .hero,
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
+    z-index: 1000 !important;
     height: 72px !important;
     min-height: 72px !important;
     width: 100% !important;
@@ -414,7 +421,7 @@ body > nav.site-header + .hero,
     position: fixed;
     top: calc(env(safe-area-inset-top, 0px) + 13px);
     left: calc(env(safe-area-inset-left, 0px) + 14px);
-    z-index: 420;
+    z-index: 1220;
     display: inline-flex;
     width: 38px;
     height: 38px;
@@ -457,7 +464,7 @@ body > nav.site-header + .hero,
   .pf-mobile-menu-overlay {
     position: fixed;
     inset: 0;
-    z-index: 410;
+    z-index: 1210;
     display: block;
     visibility: hidden;
     background: rgba(17, 17, 17, .38);
@@ -475,7 +482,7 @@ body > nav.site-header + .hero,
   .pf-mobile-sidebar {
     position: fixed;
     inset: 0 auto 0 0;
-    z-index: 430;
+    z-index: 1230;
     display: flex;
     width: min(86dvw, 318px);
     max-width: calc(100dvw - 1rem);
@@ -663,6 +670,7 @@ body > nav.site-header + .hero,
   body > nav.site-header {
     inset: 0 0 auto 0 !important;
     width: 100% !important;
+    inline-size: 100% !important;
     min-width: 100% !important;
     max-width: none !important;
   }
@@ -670,6 +678,7 @@ body > nav.site-header + .hero,
   body > nav.site-header .promo-bar,
   body > nav.site-header .nav-main {
     width: 100% !important;
+    inline-size: 100% !important;
     min-width: 100% !important;
     max-width: none !important;
   }
@@ -679,18 +688,33 @@ body > nav.site-header + .hero,
   body > nav.site-header {
     position: sticky !important;
     top: 0 !important;
+    z-index: 1000 !important;
     display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     grid-template-rows: 34px 72px !important;
+    width: 100% !important;
+    inline-size: 100% !important;
+    min-width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
     height: 106px !important;
     min-height: 106px !important;
     border: 0 !important;
-    background: transparent !important;
+    background: rgba(255, 255, 255, .08) !important;
     box-shadow: none !important;
+    -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
+    backdrop-filter: blur(18px) saturate(130%) !important;
   }
 
   body > nav.site-header .promo-bar {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    width: 100% !important;
+    inline-size: 100% !important;
+    min-width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
     height: 34px !important;
     min-height: 34px !important;
     align-items: center !important;
@@ -722,14 +746,19 @@ body > nav.site-header + .hero,
   body > nav.site-header .nav-main {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    width: 100% !important;
+    inline-size: 100% !important;
+    min-width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
     min-height: 72px !important;
     height: 72px !important;
     align-items: center !important;
     border-bottom: 0.5px solid rgba(28, 32, 30, .08) !important;
-    background: #fff !important;
+    background: rgba(255, 255, 255, .78) !important;
     box-shadow: 0 18px 70px rgba(19, 27, 24, .06) !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
+    -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
+    backdrop-filter: blur(18px) saturate(130%) !important;
   }
 
   body > nav.site-header .nav-links {

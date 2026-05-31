@@ -186,6 +186,7 @@
       var product = document.getElementById('order-product');
       var bundle = document.getElementById('order-bundle');
       var message = document.getElementById('customer-message');
+      var requestedQuantity = parseRequestedQuantity(params.get('quantity'));
 
       var productAliases = {
         grey: 'pureform-4pc-set-grey',
@@ -225,10 +226,44 @@
         return select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : '';
       }
 
+      function parseRequestedQuantity(value) {
+        var number = parseInt(value, 10);
+        return !isNaN(number) && number >= 1 ? number : null;
+      }
+
+      function bundleFromQuantity(quantity) {
+        if (quantity === 1) {
+          return 'single';
+        }
+
+        if (quantity === 2) {
+          return 'two';
+        }
+
+        if (quantity === 3) {
+          return 'three';
+        }
+
+        return 'question';
+      }
+
+      function getQuantityText() {
+        if (!requestedQuantity) {
+          return '';
+        }
+
+        return requestedQuantity + (requestedQuantity === 1 ? ' set' : ' sets');
+      }
+
       function updateMessageHint(shouldWrite) {
         var productText = getSelectedText(product);
         var bundleText = getSelectedText(bundle);
+        var quantityText = getQuantityText();
         var draft = 'Hi PureForm, I would like to start an order for the ' + productText + ' with the ' + bundleText + '.';
+
+        if (quantityText) {
+          draft += ' Quantity: ' + quantityText + '.';
+        }
 
         message.placeholder = draft + ' Please confirm availability and delivery.';
 
@@ -239,8 +274,8 @@
 
       setSelectValue(topic, params.get('topic'));
       setSelectValue(product, params.get('product'));
-      setSelectValue(bundle, params.get('bundle'));
-      updateMessageHint(Boolean(params.get('product') || params.get('bundle')));
+      setSelectValue(bundle, params.get('bundle') || (requestedQuantity ? bundleFromQuantity(requestedQuantity) : null));
+      updateMessageHint(Boolean(params.get('product') || params.get('bundle') || requestedQuantity));
 
       product.addEventListener('change', function () {
         updateMessageHint(false);
@@ -276,6 +311,9 @@
           'Message:',
           data.get('message') || ''
         ];
+        if (requestedQuantity) {
+          lines.splice(7, 0, 'Quantity: ' + getQuantityText());
+        }
         body = lines.join('\n');
 
         window.location.href = 'mailto:hello@pureform.ae?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);

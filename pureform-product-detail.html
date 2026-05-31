@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="View PureForm product details, gallery, color choices, set information, availability, delivery, returns, and order support.">
+  <meta name="description" content="View PureForm product details, gallery, quantity, availability, delivery, returns, and order support.">
   <title>PureForm Product Detail</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -311,78 +311,58 @@
       letter-spacing: .02em;
     }
 
-    .pdp-color-name {
+    .pdp-quantity-note {
       color: var(--mid);
-      margin-left: .35rem;
+      font-size: 13px;
     }
 
-    .pdp-size-guide {
-      border: 0;
-      background: #f3f3f2;
-      color: #111;
-      cursor: pointer;
-      font: inherit;
-      padding: .52rem .95rem;
-      transition: background var(--pdp-motion-fast) ease, transform var(--pdp-motion-fast) var(--pdp-ease-out);
-    }
-
-    .pdp-swatches {
-      display: flex;
-      gap: .7rem;
-      align-items: center;
-      min-height: 32px;
-    }
-
-    .pdp-swatch {
-      width: 28px;
-      height: 28px;
-      border: 1.5px solid #111;
+    .pdp-quantity-control {
+      display: inline-grid;
+      grid-template-columns: 44px minmax(64px, 1fr) 44px;
+      width: min(100%, 220px);
+      min-height: 46px;
+      overflow: hidden;
+      border: 1px solid rgba(17, 17, 17, .14);
       border-radius: 999px;
-      background: var(--swatch, #eee);
-      cursor: pointer;
-      transition: box-shadow var(--pdp-motion-fast) var(--pdp-ease-out), transform var(--pdp-motion-fast) var(--pdp-ease-out);
+      background: rgba(255, 255, 255, .74);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .45);
     }
 
-    .pdp-swatch.is-active {
-      box-shadow: 0 0 0 3px #fff, 0 0 0 5px #111;
+    .pdp-quantity-button,
+    .pdp-quantity-input {
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      color: #111;
+      font: 500 15px/1 var(--sans);
     }
 
-    .pdp-size-row {
-      display: grid;
-      grid-template-columns: repeat(8, minmax(0, 1fr));
-      gap: .34rem;
-      align-items: end;
-    }
-
-    .pdp-size {
-      display: grid;
-      gap: .1rem;
-      justify-items: center;
-      color: #c4c4c4;
-      font-size: 12px;
-      text-align: center;
-    }
-
-    .pdp-size strong {
+    .pdp-quantity-button {
       display: inline-flex;
-      min-width: 33px;
-      min-height: 33px;
       align-items: center;
       justify-content: center;
-      color: inherit;
-      font-size: 14px;
-      font-weight: 400;
+      cursor: pointer;
+      font-size: 19px;
+      transition: background var(--pdp-motion-fast) ease, color var(--pdp-motion-fast) ease, transform var(--pdp-motion-fast) var(--pdp-ease-out);
     }
 
-    .pdp-size.is-active strong {
-      background: #050505;
-      color: #fff;
+    .pdp-quantity-button[disabled] {
+      color: #b8b8b8;
+      cursor: not-allowed;
     }
 
-    .pdp-size span {
-      color: #111;
-      font-size: 10.5px;
-      text-decoration: underline;
+    .pdp-quantity-input {
+      width: 100%;
+      min-height: 44px;
+      border-inline: 1px solid rgba(17, 17, 17, .1);
+      text-align: center;
+      -moz-appearance: textfield;
+    }
+
+    .pdp-quantity-input::-webkit-outer-spin-button,
+    .pdp-quantity-input::-webkit-inner-spin-button {
+      margin: 0;
+      -webkit-appearance: none;
     }
 
     .pdp-alerts {
@@ -450,8 +430,8 @@
       stroke-width: 2;
     }
 
-    .pdp-size-guide:focus-visible,
-    .pdp-swatch:focus-visible,
+    .pdp-quantity-button:focus-visible,
+    .pdp-quantity-input:focus-visible,
     .pdp-gallery-dot:focus-visible,
     .pdp-order-button:focus-visible {
       outline: 2px solid rgba(17, 17, 17, .32);
@@ -465,12 +445,9 @@
         transform: translateX(2px);
       }
 
-      .pdp-size-guide:hover {
-        background: #e9e9e7;
-      }
-
-      .pdp-swatch:hover {
-        transform: scale(1.06);
+      .pdp-quantity-button:not([disabled]):hover {
+        background: #111;
+        color: #fff;
       }
 
       .pdp-gallery-dot:hover {
@@ -486,8 +463,7 @@
 
     .pdp-detail-head:active,
     .pdp-accordion summary:active,
-    .pdp-size-guide:active,
-    .pdp-swatch:active,
+    .pdp-quantity-button:not([disabled]):active,
     .pdp-gallery-dot:active,
     .pdp-order-button:active {
       transform: translateY(1px) scale(.98);
@@ -656,27 +632,13 @@
         font-size: 13px;
       }
 
-      .pdp-size-guide {
-        padding: .42rem .75rem;
+      .pdp-quantity-control {
+        grid-template-columns: 40px minmax(58px, 1fr) 40px;
+        min-height: 42px;
       }
 
-      .pdp-swatch {
-        width: 26px;
-        height: 26px;
-      }
-
-      .pdp-size-row {
-        gap: .24rem;
-      }
-
-      .pdp-size strong {
-        min-width: 30px;
-        min-height: 30px;
-        font-size: 13px;
-      }
-
-      .pdp-size span {
-        font-size: 10px;
+      .pdp-quantity-input {
+        min-height: 40px;
       }
 
       .pdp-alerts {
@@ -788,13 +750,13 @@
         line-height: 1.38;
       }
 
-      .pdp-size-row {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+      .pdp-quantity-control {
+        width: 100%;
+        max-width: 240px;
       }
 
-      .pdp-size strong {
-        min-width: 34px;
-        min-height: 34px;
+      .pdp-quantity-input {
+        min-height: 44px;
       }
 
       .pdp-order-button {
@@ -826,16 +788,8 @@
         width: min(80%, 328px);
       }
 
-      .pdp-size-row {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: .45rem .5rem;
-      }
-
-      .pdp-size {
-        align-items: center;
-        grid-template-columns: auto minmax(0, 1fr);
-        justify-items: start;
-        text-align: left;
+      .pdp-quantity-control {
+        max-width: none;
       }
     }
 
@@ -927,25 +881,15 @@
           <span class="pdp-stars" aria-label="Rating 4.9 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
         </div>
 
-        <div class="pdp-option-section">
-          <div class="pdp-option-label-row"><span>Color <span class="pdp-color-name" id="productColorName">Grey</span></span></div>
-          <div class="pdp-swatches" id="productSwatches" aria-label="Color options"></div>
-        </div>
-
-        <div class="pdp-option-section">
+        <div class="pdp-option-section pdp-quantity-section">
           <div class="pdp-option-label-row">
-            <span>Set</span>
-            <button class="pdp-size-guide" type="button" aria-controls="fitGuide">Set Guide</button>
+            <span>Quantity</span>
+            <span class="pdp-quantity-note" id="productQuantityNote">1 set</span>
           </div>
-          <div class="pdp-size-row" aria-label="Set options">
-            <span class="pdp-size is-active" data-set-option="single" aria-current="true"><strong>1</strong><span>Single</span></span>
-            <span class="pdp-size" data-set-option="two"><strong>2</strong><span>Two</span></span>
-            <span class="pdp-size" data-set-option="three"><strong>3</strong><span>Bundle</span></span>
-            <span class="pdp-size"><strong>4</strong><span>Tools</span></span>
-            <span class="pdp-size"><strong>15</strong><span>Returns</span></span>
-            <span class="pdp-size"><strong>COD</strong><span>Check</span></span>
-            <span class="pdp-size"><strong>UAE</strong><span>Delivery</span></span>
-            <span class="pdp-size"><strong>Care</strong><span>Guide</span></span>
+          <div class="pdp-quantity-control" aria-label="Select quantity">
+            <button class="pdp-quantity-button" type="button" data-quantity-action="decrease" aria-label="Decrease quantity" disabled>&minus;</button>
+            <input class="pdp-quantity-input" id="productQuantity" type="number" inputmode="numeric" min="1" step="1" value="1" aria-label="Quantity" autocomplete="off">
+            <button class="pdp-quantity-button" type="button" data-quantity-action="increase" aria-label="Increase quantity">+</button>
           </div>
         </div>
 
@@ -1055,13 +999,6 @@
         }
       };
 
-      var colorOptions = [
-        ['pureform-4pc-set-grey', products['pureform-4pc-set-grey'].swatch, 'Grey set'],
-        ['pureform-4pc-set-pink', products['pureform-4pc-set-pink'].swatch, 'Pink set'],
-        ['pureform-4pc-set-black', products['pureform-4pc-set-black'].swatch, 'Black set'],
-        ['family-bundle', products['family-bundle'].swatch, 'Mixed bundle']
-      ];
-
       var fallbackId = 'pureform-4pc-set-grey';
       var productName = document.getElementById('productName');
       var productLead = document.getElementById('productLead');
@@ -1071,16 +1008,16 @@
       var productFitIntro = document.getElementById('productFitIntro');
       var productCare = document.getElementById('productCare');
       var productPriceNote = document.getElementById('productPriceNote');
-      var productSwatches = document.getElementById('productSwatches');
-      var productColorName = document.getElementById('productColorName');
+      var productQuantityInput = document.getElementById('productQuantity');
+      var productQuantityNote = document.getElementById('productQuantityNote');
       var productOrderLink = document.getElementById('productOrderLink');
       var productGalleryDots = document.getElementById('productGalleryDots');
       var availabilityLine = document.getElementById('availabilityLine');
       var productJsonLd = document.getElementById('productJsonLd');
-      var setGuideButton = document.querySelector('.pdp-size-guide');
-      var fitGuide = document.getElementById('fitGuide');
-      var setOptionTiles = Array.prototype.slice.call(document.querySelectorAll('[data-set-option]'));
+      var quantityButtons = Array.prototype.slice.call(document.querySelectorAll('[data-quantity-action]'));
       var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var activeProductId = fallbackId;
+      var selectedQuantity = 1;
       var galleryFrames = [];
       var galleryScrollFrame = null;
 
@@ -1093,12 +1030,32 @@
         return products[id] ? id : fallbackId;
       }
 
-      function orderUrl(id) {
-        if (id === 'family-bundle') {
-          return 'contact.html?topic=start-order&product=mixed-colors&bundle=three#message';
+      function bundleForQuantity(quantity) {
+        if (quantity === 1) {
+          return 'single';
         }
 
-        return 'contact.html?topic=start-order&product=' + encodeURIComponent(id) + '&bundle=single#message';
+        if (quantity === 2) {
+          return 'two';
+        }
+
+        if (quantity === 3) {
+          return 'three';
+        }
+
+        return 'question';
+      }
+
+      function orderUrl(id, quantity) {
+        var safeQuantity = Math.max(1, parseInt(quantity, 10) || 1);
+        var bundle = bundleForQuantity(safeQuantity);
+
+        if (id === 'family-bundle') {
+          bundle = safeQuantity === 1 ? 'three' : 'question';
+          return 'contact.html?topic=start-order&product=mixed-colors&bundle=' + bundle + '&quantity=' + safeQuantity + '#message';
+        }
+
+        return 'contact.html?topic=start-order&product=' + encodeURIComponent(id) + '&bundle=' + bundle + '&quantity=' + safeQuantity + '#message';
       }
 
       function setActiveGalleryDot(index) {
@@ -1217,28 +1174,6 @@
         }
       }
 
-      function renderSwatches(activeId, activeColor) {
-        productSwatches.replaceChildren();
-
-        colorOptions.forEach(function (option) {
-          var id = option[0];
-          var isActive = id === activeId || (activeColor && option[2].toLowerCase().indexOf(activeColor.toLowerCase()) === 0);
-          var button = document.createElement('button');
-
-          button.className = 'pdp-swatch' + (isActive ? ' is-active' : '');
-          button.type = 'button';
-          button.style.setProperty('--swatch', option[1]);
-          button.setAttribute('data-product', id);
-          button.setAttribute('aria-label', option[2]);
-          button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-          button.addEventListener('click', function () {
-            renderProduct(button.getAttribute('data-product'), true);
-          });
-
-          productSwatches.appendChild(button);
-        });
-      }
-
       function renderFitList(items) {
         productFitList.replaceChildren();
 
@@ -1249,40 +1184,62 @@
         });
       }
 
-      function updateSetTiles(id) {
-        var activeOption = id === 'family-bundle' ? 'three' : 'single';
-
-        setOptionTiles.forEach(function (tile) {
-          var isActive = tile.getAttribute('data-set-option') === activeOption;
-          tile.classList.toggle('is-active', isActive);
-          if (isActive) {
-            tile.setAttribute('aria-current', 'true');
-            return;
-          }
-
-          tile.removeAttribute('aria-current');
-        });
+      function clampQuantity(value) {
+        return Math.max(1, parseInt(value, 10) || 1);
       }
 
-      function setupSetGuide() {
-        if (!setGuideButton || !fitGuide) {
+      function updateOrderLink() {
+        var product = products[activeProductId] || products[fallbackId];
+        productOrderLink.href = orderUrl(activeProductId, selectedQuantity);
+        productOrderLink.setAttribute('aria-label', 'Start order for ' + product.name + ', quantity ' + selectedQuantity);
+      }
+
+      function setQuantity(value) {
+        selectedQuantity = clampQuantity(value);
+
+        if (productQuantityInput) {
+          productQuantityInput.value = selectedQuantity;
+        }
+
+        if (productQuantityNote) {
+          productQuantityNote.textContent = selectedQuantity + (selectedQuantity === 1 ? ' set' : ' sets');
+        }
+
+        quantityButtons.forEach(function (button) {
+          if (button.getAttribute('data-quantity-action') === 'decrease') {
+            button.disabled = selectedQuantity <= 1;
+          }
+        });
+
+        updateOrderLink();
+      }
+
+      function setupQuantityControl() {
+        if (!productQuantityInput) {
           return;
         }
 
-        setGuideButton.addEventListener('click', function () {
-          var summary = fitGuide.querySelector('summary');
-          fitGuide.open = true;
-          fitGuide.scrollIntoView({ block: 'center', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+        quantityButtons.forEach(function (button) {
+          button.addEventListener('click', function () {
+            var action = button.getAttribute('data-quantity-action');
+            setQuantity(selectedQuantity + (action === 'increase' ? 1 : -1));
+          });
+        });
 
-          if (!summary) {
+        productQuantityInput.addEventListener('input', function () {
+          if (productQuantityInput.value === '') {
             return;
           }
 
-          try {
-            summary.focus({ preventScroll: true });
-          } catch (error) {
-            summary.focus();
-          }
+          setQuantity(productQuantityInput.value);
+        });
+
+        productQuantityInput.addEventListener('change', function () {
+          setQuantity(productQuantityInput.value);
+        });
+
+        productQuantityInput.addEventListener('blur', function () {
+          setQuantity(productQuantityInput.value);
         });
       }
 
@@ -1311,26 +1268,23 @@
       }
 
       function renderProduct(id, pushState) {
-        var product = products[id] || products[fallbackId];
+        activeProductId = products[id] ? id : fallbackId;
+        var product = products[activeProductId];
         productName.textContent = product.name;
         productLead.textContent = product.lead;
         productPrice.textContent = product.price;
-        productColorName.textContent = product.color;
-        productFitIntro.textContent = product.color + ' option selected. Product details are confirmed before checkout.';
+        productFitIntro.textContent = product.name + ' details are confirmed before checkout.';
         renderFitList(product.fit);
         productCare.textContent = 'PureForm tools are made from soft silicone. Rinse after every use, shake off water, and let the piece dry in open air.';
-        productPriceNote.textContent = product.price + ' includes VAT. Delivery timing, COD availability, and bundle details are confirmed by support.';
+        productPriceNote.textContent = product.price + ' includes VAT. Delivery timing, COD availability, and quantity details are confirmed by support.';
         availabilityLine.textContent = 'Available / delivery confirmed by city';
-        productOrderLink.href = orderUrl(id);
-        productOrderLink.setAttribute('aria-label', 'Start order for ' + product.name);
         renderGallery(product);
-        renderSwatches(id, product.color);
-        updateSetTiles(id);
-        updateStructuredData(id, product);
+        updateOrderLink();
+        updateStructuredData(activeProductId, product);
         document.title = product.name + ' | PureForm';
 
         if (pushState) {
-          history.pushState({ product: id }, '', 'pureform-product-detail.html?product=' + encodeURIComponent(id));
+          history.pushState({ product: activeProductId }, '', 'pureform-product-detail.html?product=' + encodeURIComponent(activeProductId));
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }
@@ -1340,7 +1294,8 @@
       });
 
       productGallery.addEventListener('scroll', handleGalleryScroll, { passive: true });
-      setupSetGuide();
+      setupQuantityControl();
+      setQuantity(1);
       renderProduct(getRequestedProduct(), false);
     })();
   </script>

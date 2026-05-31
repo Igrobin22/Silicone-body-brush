@@ -53,61 +53,6 @@
     });
   }
 
-  function setupFlowRail() {
-    if (window.matchMedia('(max-width: 760px)').matches) {
-      return;
-    }
-
-    var sections = [
-      ['products', 'Sets'],
-      ['colors', 'Colors'],
-      ['offers', 'Offers'],
-      ['reviews', 'Reviews']
-    ].filter(function (item) {
-      return document.getElementById(item[0]);
-    });
-
-    if (sections.length < 3 || document.querySelector('.pf-flow-rail')) {
-      return;
-    }
-
-    var rail = document.createElement('nav');
-    rail.className = 'pf-flow-rail';
-    rail.setAttribute('aria-label', 'Store section shortcuts');
-    rail.innerHTML = sections.map(function (item) {
-      return '<a href="#' + item[0] + '" data-flow-section="' + item[0] + '">' + item[1] + '</a>';
-    }).join('');
-    document.body.appendChild(rail);
-
-    function setRailVisibility() {
-      rail.classList.toggle('is-visible', window.scrollY > Math.max(420, window.innerHeight * 0.55));
-    }
-
-    setRailVisibility();
-    window.addEventListener('scroll', setRailVisibility, { passive: true });
-
-    if (!('IntersectionObserver' in window)) {
-      return;
-    }
-
-    var links = Array.prototype.slice.call(rail.querySelectorAll('[data-flow-section]'));
-    var sectionObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) {
-          return;
-        }
-
-        links.forEach(function (link) {
-          link.classList.toggle('is-active', link.getAttribute('data-flow-section') === entry.target.id);
-        });
-      });
-    }, { threshold: 0.35, rootMargin: '-18% 0px -52% 0px' });
-
-    sections.forEach(function (item) {
-      sectionObserver.observe(document.getElementById(item[0]));
-    });
-  }
-
   function setupStickyOrder() {
     var productOrderLink = document.getElementById('productOrderLink');
     var productName = document.getElementById('productName');
@@ -161,6 +106,5 @@
   }
 
   setupReveal();
-  setupFlowRail();
   setupStickyOrder();
 })();
