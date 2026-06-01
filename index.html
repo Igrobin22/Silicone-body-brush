@@ -11,7 +11,10 @@
   <link rel="preconnect" href="https://res.cloudinary.com">
   <link rel="preload" as="image"
     href="https://res.cloudinary.com/dqjilscgl/image/upload/v1778744471/ChatGPT_Image_May_14_2026_11_40_44_AM_jzx8xg.png"
-    fetchpriority="high">
+    fetchpriority="high" media="(min-width: 761px)">
+  <link rel="preload" as="image"
+    href="https://res.cloudinary.com/dqjilscgl/image/upload/v1780296029/FOR_MOBILE_dbeja3.png"
+    fetchpriority="high" media="(max-width: 760px)">
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,700&family=DM+Sans:wght@300;400;500&display=swap"
     rel="stylesheet">
@@ -862,6 +865,12 @@
       justify-content: center;
     }
 
+    .pcard-picture {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
     .pcard-img {
       width: 100%;
       height: 100%;
@@ -895,6 +904,10 @@
       border: 0.5px solid var(--mg);
       padding: 5px 14px;
       border-radius: 100px;
+    }
+
+    .pcard-sale {
+      display: none;
     }
 
     /* DARK FEATURES */
@@ -3659,6 +3672,345 @@
       }
     }
 
+    .hero-mobile-bg {
+      display: none;
+    }
+
+    @media (max-width: 760px) {
+      body > nav.site-header + .hero {
+        --mobile-hero-lift: clamp(34px, 9vw, 52px);
+        min-height: auto !important;
+        margin-top: -1px;
+      }
+
+      .hero {
+        grid-template-rows: auto auto !important;
+        align-items: start;
+        overflow: visible;
+      }
+
+      .hero-mobile-bg {
+        position: relative;
+        z-index: 0;
+        display: block !important;
+        grid-column: 1;
+        grid-row: 1;
+        width: calc(100% - 1rem);
+        max-width: 540px;
+        height: auto;
+        margin: calc(var(--mobile-hero-lift) * -1) auto 0;
+        border: .5px solid rgba(255, 255, 255, .68);
+        border-radius: clamp(20px, 5.8vw, 30px);
+        box-shadow: 0 18px 44px rgba(18, 24, 22, .12);
+        clip-path: inset(0 round clamp(20px, 5.8vw, 30px));
+        object-fit: contain;
+        object-position: center top;
+        pointer-events: none;
+      }
+
+      .hero::before {
+        content: none !important;
+        display: none !important;
+      }
+
+      .hero::after {
+        content: none !important;
+        display: none !important;
+      }
+
+      .hero-tag,
+      .hero-price-row,
+      .mobile-hero-price {
+        display: none !important;
+      }
+
+      .hero-desc {
+        display: none !important;
+      }
+
+      .hero-left {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: end;
+        z-index: 2;
+      }
+
+      .hero-btns {
+        width: 100% !important;
+        max-width: 340px;
+        justify-items: center;
+        margin-right: auto;
+        margin-left: auto;
+      }
+
+      .hero-btns .btn-p {
+        display: none !important;
+      }
+
+      .hero-btns .btn-s {
+        display: inline-flex !important;
+        width: min(100%, 240px) !important;
+        margin-right: auto;
+        margin-left: auto;
+        border-color: rgba(17, 17, 17, .92) !important;
+        background: var(--dark) !important;
+        color: var(--white) !important;
+        box-shadow: 0 16px 36px rgba(17, 17, 17, .18) !important;
+      }
+
+      .hero-right-info {
+        border-top: 0 !important;
+        background: #eef3ef !important;
+        box-shadow: none !important;
+      }
+
+      .hero-spec-group {
+        background: transparent !important;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .pgrid,
+      .fgrid,
+      .shade-grid,
+      .set-includes,
+      .ogrid,
+      .store-proof-grid,
+      .order-step-grid,
+      .review-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+      }
+
+      .pcard,
+      .fitem,
+      .shade-card,
+      .tool-mini,
+      .ocard,
+      .store-proof-item,
+      .order-step,
+      .review-card-home {
+        min-width: 0;
+      }
+
+      .pcard {
+        padding: .9rem .75rem !important;
+        border-radius: 18px !important;
+      }
+
+      .pgrid .pcard {
+        position: relative;
+        min-height: 352px;
+        border: .5px solid rgba(0, 0, 0, .055);
+        background: var(--off) !important;
+        background-color: var(--off) !important;
+        color: var(--dark) !important;
+        box-shadow: 0 20px 52px rgba(32, 37, 34, .08);
+      }
+
+      .pgrid .pcard::before {
+        content: none !important;
+        display: none !important;
+      }
+
+      .pgrid .pcard > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .pcard-num {
+        margin-bottom: .7rem;
+      }
+
+      .pcard-imgwrap {
+        max-width: 100% !important;
+        margin-bottom: .8rem !important;
+        aspect-ratio: 1 / .88 !important;
+        border-radius: 14px;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .pgrid .pcard-img {
+        border-radius: 14px;
+        object-fit: cover;
+        filter: saturate(1.03) contrast(1.04);
+      }
+
+      .pcard-name,
+      .shade-card h3,
+      .order-step h3 {
+        overflow-wrap: anywhere;
+      }
+
+      .pcard-name {
+        color: var(--dark) !important;
+        font-size: clamp(.98rem, 4.3vw, 1.18rem) !important;
+        line-height: 1.05;
+      }
+
+      .pgrid .pcard-desc {
+        margin-top: .55rem;
+        color: var(--mid) !important;
+        font-weight: 500;
+        letter-spacing: .02em;
+      }
+
+      .pgrid .pcard-tag {
+        border-color: var(--mg) !important;
+        background: transparent;
+        color: var(--light) !important;
+      }
+
+      .pgrid .pcard-sale {
+        position: absolute;
+        top: .72rem;
+        right: .72rem;
+        z-index: 3;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 26px;
+        padding: .38rem .62rem .36rem;
+        border: .5px solid rgba(17, 17, 17, .9);
+        border-radius: 999px 999px 999px 7px;
+        background: var(--dark);
+        color: var(--white);
+        box-shadow: 0 12px 30px rgba(17, 17, 17, .22);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        line-height: 1;
+        text-transform: uppercase;
+        transform: rotate(2deg);
+      }
+
+      .pgrid .pcard-sale::before {
+        content: '';
+        width: 4px;
+        height: 4px;
+        margin-right: .34rem;
+        border-radius: 50%;
+        background: var(--white);
+        opacity: .9;
+      }
+
+      .pcard-desc,
+      .ftext,
+      .o-txt,
+      .shade-card p,
+      .store-proof-item p,
+      .order-step p,
+      .review-copy {
+        font-size: 11px !important;
+        line-height: 1.45 !important;
+      }
+
+      .pcard-tag,
+      .o-code,
+      .shade-badge,
+      .review-meta small,
+      .review-date {
+        font-size: 8.5px !important;
+      }
+
+      .fgrid {
+        gap: 1rem !important;
+      }
+
+      .fitem {
+        padding-top: 1rem;
+      }
+
+      .ficon {
+        margin-bottom: .85rem;
+      }
+
+      .ftitle {
+        font-size: 13px;
+        line-height: 1.25;
+      }
+
+      .shade-card {
+        min-height: 240px !important;
+        padding: 1rem !important;
+        border-radius: 20px !important;
+      }
+
+      .shade-card::before {
+        display: none !important;
+      }
+
+      .shade-card h3 {
+        font-size: clamp(1.55rem, 7vw, 2.15rem) !important;
+      }
+
+      .shade-select {
+        max-width: 100%;
+        min-height: 38px;
+        padding: 9px 10px;
+        font-size: 10px;
+        text-align: center;
+        white-space: normal;
+      }
+
+      .set-includes {
+        gap: .6rem !important;
+      }
+
+      .tool-mini,
+      .store-proof-item,
+      .order-step,
+      .ocard {
+        min-height: auto !important;
+        padding: .9rem !important;
+        border-radius: 16px !important;
+      }
+
+      .tool-mini span,
+      .order-step span,
+      .o-disc,
+      .store-proof-item strong {
+        font-size: clamp(1.25rem, 6vw, 1.65rem) !important;
+      }
+
+      .review-grid {
+        border: 0;
+        background: transparent;
+      }
+
+      .review-card-home {
+        min-height: auto !important;
+        padding: .85rem !important;
+        border: .5px solid rgba(28, 32, 30, .08);
+        border-radius: 18px;
+        transform: none !important;
+      }
+
+      .review-meta,
+      .review-card-foot {
+        gap: .45rem;
+      }
+
+      .store-proof {
+        background: #eef3ef !important;
+      }
+
+      .store-proof-grid {
+        border-color: rgba(28, 32, 30, .06);
+        background: rgba(28, 32, 30, .06);
+        box-shadow: none;
+      }
+
+      .store-proof-item {
+        background: rgba(255, 255, 255, .72) !important;
+      }
+
+      #products {
+        background: #fbfbfa !important;
+      }
+    }
+
   </style>
   <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
   <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
@@ -3699,6 +4051,10 @@
   </nav>
 
   <section class="hero" id="hero">
+
+    <img class="hero-mobile-bg"
+      src="https://res.cloudinary.com/dqjilscgl/image/upload/v1780296029/FOR_MOBILE_dbeja3.png"
+      alt="" aria-hidden="true" fetchpriority="high" decoding="async">
 
     <div class="hero-bg-text" id="heroBgText">Silicone</div>
 
@@ -3869,35 +4225,50 @@
     <div class="pgrid">
       <a class="pcard reveal" href="pureform-product-detail.html?product=pureform-4pc-set-grey"
         aria-label="View Grey 4-Piece Silicone Brush Set details">
-        <div class="pcard-num">01</div>
-        <div class="pcard-imgwrap"><img class="pcard-img"
-            src="https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png"
-            alt="Grey 4-piece silicone brush set with back, body, scalp, and face tools" loading="lazy"
-            decoding="async"></div>
+        <span class="pcard-sale">50% OFF</span>
+        <div class="pcard-imgwrap">
+          <picture class="pcard-picture">
+            <source media="(max-width: 760px)" type="image/webp" srcset="https://res.cloudinary.com/dqjilscgl/image/upload/f_webp,q_auto/v1779553521/Main_with_background_anlah0.webp">
+            <img class="pcard-img"
+              src="https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png"
+              alt="Grey 4-piece silicone brush set with back, body, scalp, and face tools" loading="lazy"
+              decoding="async">
+          </picture>
+        </div>
         <div class="pcard-name">Grey 4-Piece Silicone Brush Set</div>
-        <p class="pcard-desc">One complete set in Grey with the back scrubber, body brush, scalp massager, and face brush.</p>
+        <p class="pcard-desc">AED 87.78</p>
         <span class="pcard-tag">Grey Set</span>
       </a>
 
       <a class="pcard reveal" href="pureform-product-detail.html?product=pureform-4pc-set-black"
         aria-label="View Black 4-Piece Silicone Brush Set details">
-        <div class="pcard-num">02</div>
-        <div class="pcard-imgwrap"><img class="pcard-img" src="assets/pureform-body-brush.png"
-            alt="Black PureForm silicone body brush from the 4-piece set" loading="lazy" decoding="async"></div>
+        <span class="pcard-sale">50% OFF</span>
+        <div class="pcard-imgwrap">
+          <picture class="pcard-picture">
+            <source media="(max-width: 760px)" type="image/webp" srcset="assets/pureform-body-brush.webp">
+            <img class="pcard-img" src="assets/pureform-body-brush.png"
+              alt="Black PureForm silicone body brush from the 4-piece set" loading="lazy" decoding="async">
+          </picture>
+        </div>
         <div class="pcard-name">Black 4-Piece Silicone Brush Set</div>
-        <p class="pcard-desc">The same four-piece PureForm routine in Black, listed as its own product in this category.</p>
+        <p class="pcard-desc">AED 87.78</p>
         <span class="pcard-tag">Black Set</span>
       </a>
 
       <a class="pcard reveal" href="pureform-product-detail.html?product=pureform-4pc-set-pink"
         aria-label="View Pink 4-Piece Silicone Brush Set details">
-        <div class="pcard-num">03</div>
-        <div class="pcard-imgwrap"><img class="pcard-img"
-            src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227618/main_img_without_bg_mbrxsg.png"
-            alt="Pink 4-piece silicone brush set with back, body, scalp, and face tools" loading="lazy"
-            decoding="async"></div>
+        <span class="pcard-sale">50% OFF</span>
+        <div class="pcard-imgwrap">
+          <picture class="pcard-picture">
+            <source media="(max-width: 760px)" type="image/webp" srcset="https://res.cloudinary.com/dqjilscgl/image/upload/f_webp,q_auto/v1780227617/main_img_voei63.webp">
+            <img class="pcard-img"
+              src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227618/main_img_without_bg_mbrxsg.png"
+              alt="Pink 4-piece silicone brush set with back, body, scalp, and face tools" loading="lazy"
+              decoding="async">
+          </picture>
+        </div>
         <div class="pcard-name">Pink 4-Piece Silicone Brush Set</div>
-        <p class="pcard-desc">A softer Pink finish for the same four-piece face, scalp, body, and back routine.</p>
+        <p class="pcard-desc">AED 87.78</p>
         <span class="pcard-tag">Pink Set</span>
       </a>
     </div>
@@ -4047,33 +4418,6 @@
     </div>
   </section>
 
-  <section class="order-steps" aria-labelledby="orderStepsTitle">
-    <div class="order-steps-head">
-      <div>
-        <p class="eyebrow reveal">How Ordering Works</p>
-        <h2 class="sec-title reveal" id="orderStepsTitle">A simple path from choice to shower.</h2>
-      </div>
-      <p class="order-steps-copy reveal">Your color, bundle, delivery city, and payment preference are confirmed before the order is finalized.</p>
-    </div>
-    <div class="order-step-grid">
-      <article class="order-step reveal">
-        <span>01</span>
-        <h3>Choose color and bundle</h3>
-        <p>Start with Grey, Black, Pink, or mixed sets. Every color includes the same four silicone tools.</p>
-      </article>
-      <article class="order-step reveal">
-        <span>02</span>
-        <h3>Confirm delivery details</h3>
-        <p>Share your city, phone number, and preferred payment method so availability can be confirmed.</p>
-      </article>
-      <article class="order-step reveal">
-        <span>03</span>
-        <h3>Use, rinse, and hang</h3>
-        <p>The set is designed for daily face, scalp, body, and back care with quick-rinse silicone.</p>
-      </article>
-    </div>
-  </section>
-
   <section class="review-sec" id="reviews">
     <div class="review-head">
       <div>
@@ -4169,6 +4513,24 @@
       document.querySelectorAll('[data-scroll]').forEach(function (btn) {
         btn.addEventListener('click', function () { scrollToId(btn.getAttribute('data-scroll')); });
       });
+      var mobileProductOrder = window.matchMedia('(max-width: 760px)');
+      function syncProductSectionOrder() {
+        var products = document.getElementById('products');
+        var marquee = document.querySelector('.mq-wrap');
+        var specs = document.querySelector('.specs');
+        if (!products || !marquee || !specs) return;
+        if (mobileProductOrder.matches) {
+          if (marquee.nextElementSibling !== products) marquee.insertAdjacentElement('afterend', products);
+        } else if (specs.nextElementSibling !== products) {
+          specs.insertAdjacentElement('afterend', products);
+        }
+      }
+      syncProductSectionOrder();
+      if (mobileProductOrder.addEventListener) {
+        mobileProductOrder.addEventListener('change', syncProductSectionOrder);
+      } else if (mobileProductOrder.addListener) {
+        mobileProductOrder.addListener(syncProductSectionOrder);
+      }
       function revealHero() {
         var heroBits = [];
         var left = document.getElementById('heroLeft');

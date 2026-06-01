@@ -1678,3 +1678,66 @@ h1 {
     padding: .9rem;
   }
 }
+
+@media (max-width: 820px) {
+  .collection-listing .collection-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .65rem;
+  }
+
+  .collection-listing .collection-card-media {
+    min-height: 0;
+    aspect-ratio: 1 / 1.18;
+    border-radius: 16px;
+  }
+
+  .collection-listing .collection-badge {
+    top: .72rem;
+    left: .72rem;
+    font-size: 11px;
+  }
+
+  .collection-listing .collection-card-media img {
+    width: min(78%, 190px);
+    max-height: 66%;
+    transform: translateY(7%);
+  }
+
+  .collection-listing .collection-dots {
+    left: .65rem;
+    bottom: .65rem;
+    gap: .3rem;
+  }
+
+  .collection-listing .collection-dots i {
+    width: 6px;
+    height: 6px;
+  }
+
+  .collection-listing .collection-card-info {
+    gap: .35rem;
+    padding: .72rem .2rem .28rem;
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .collection-listing .collection-card-info strong {
+    font-size: 12px;
+  }
+
+  .collection-listing .collection-card-meta {
+    padding-inline: .2rem;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 360px) {
+  .collection-listing .collection-grid {
+    gap: .5rem;
+  }
+
+  .collection-listing .collection-card-info,
+  .collection-listing .collection-card-info strong {
+    font-size: 11px;
+  }
+}
