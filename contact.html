@@ -172,6 +172,7 @@
       </ul>
     </div>
   </footer>
+  <script src="assets/pureform-cart.js"></script>
   <script>
     (function () {
       'use strict';
@@ -186,7 +187,13 @@
       var product = document.getElementById('order-product');
       var bundle = document.getElementById('order-bundle');
       var message = document.getElementById('customer-message');
+      var submitButton = form.querySelector('button[type="submit"]');
       var requestedQuantity = parseRequestedQuantity(params.get('quantity'));
+      var isCartCheckout = params.get('checkout') === 'cart';
+      var cartLineItems = isCartCheckout && window.PureFormCart ? window.PureFormCart.getLineItems() : [];
+      var cartQuantity = cartLineItems.reduce(function (sum, item) {
+        return sum + item.quantity;
+      }, 0);
 
       var productAliases = {
         grey: 'pureform-4pc-set-grey',
@@ -255,7 +262,29 @@
         return requestedQuantity + (requestedQuantity === 1 ? ' set' : ' sets');
       }
 
+      function buildCartDraft() {
+        var lines = [
+          'Hi PureForm, I would like to purchase the items in my cart:'
+        ];
+
+        cartLineItems.forEach(function (item) {
+          lines.push('- ' + item.name + ' x ' + item.quantity + ' = ' + window.PureFormCart.formatAED(item.lineTotal));
+        });
+
+        lines.push('Subtotal: ' + window.PureFormCart.formatAED(window.PureFormCart.getSubtotal()));
+        lines.push('Please confirm availability, delivery timing, and payment options for my city.');
+        return lines.join('\n');
+      }
+
       function updateMessageHint(shouldWrite) {
+        if (cartLineItems.length) {
+          message.placeholder = buildCartDraft();
+          if (shouldWrite && !message.value.trim()) {
+            message.value = message.placeholder;
+          }
+          return;
+        }
+
         var productText = getSelectedText(product);
         var bundleText = getSelectedText(bundle);
         var quantityText = getQuantityText();
@@ -272,10 +301,21 @@
         }
       }
 
-      setSelectValue(topic, params.get('topic'));
-      setSelectValue(product, params.get('product'));
-      setSelectValue(bundle, params.get('bundle') || (requestedQuantity ? bundleFromQuantity(requestedQuantity) : null));
-      updateMessageHint(Boolean(params.get('product') || params.get('bundle') || requestedQuantity));
+      if (cartLineItems.length) {
+        requestedQuantity = cartQuantity;
+        setSelectValue(topic, 'start-order');
+        setSelectValue(product, cartLineItems.length === 1 ? cartLineItems[0].id : 'mixed-colors');
+        setSelectValue(bundle, bundleFromQuantity(cartQuantity));
+        if (submitButton) {
+          submitButton.textContent = 'Send purchase request by email';
+        }
+        updateMessageHint(true);
+      } else {
+        setSelectValue(topic, params.get('topic'));
+        setSelectValue(product, params.get('product'));
+        setSelectValue(bundle, params.get('bundle') || (requestedQuantity ? bundleFromQuantity(requestedQuantity) : null));
+        updateMessageHint(Boolean(params.get('product') || params.get('bundle') || requestedQuantity));
+      }
 
       product.addEventListener('change', function () {
         updateMessageHint(false);
@@ -314,6 +354,18 @@
         if (requestedQuantity) {
           lines.splice(7, 0, 'Quantity: ' + getQuantityText());
         }
+
+        if (cartLineItems.length) {
+          var cartLines = cartLineItems.map(function (item) {
+            return '- ' + item.name + ' x ' + item.quantity + ' = ' + window.PureFormCart.formatAED(item.lineTotal);
+          });
+          var breakIndex = lines.indexOf('');
+
+          if (breakIndex >= 0) {
+            lines.splice.apply(lines, [breakIndex, 0].concat(['Cart items:'], cartLines, ['Cart subtotal: ' + window.PureFormCart.formatAED(window.PureFormCart.getSubtotal())]));
+          }
+        }
+
         body = lines.join('\n');
 
         window.location.href = 'mailto:hello@pureform.ae?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);

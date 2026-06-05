@@ -50,50 +50,43 @@
   </nav>
 
   <main>
-    <section class="page-hero compact" data-animate>
-      <div>
-        <p class="eyebrow">Cart</p>
-        <h1>Your PureForm cart.</h1>
-        <p class="lead">Review selected sets here before confirming color, bundle, delivery city, and payment preference with support.</p>
-        <div class="button-row">
-          <a class="btn-p" href="products.html#offers">Shop set offers</a>
-          <a class="btn-s" href="pureform-product-detail.html?product=pureform-4pc-set-grey">Open product page</a>
-        </div>
-      </div>
-      <div class="hero-media">
-        <img src="https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png" alt="Grey PureForm 4-piece silicone brush set" fetchpriority="high" decoding="async">
-      </div>
-    </section>
-
     <section class="sec cart-section" aria-labelledby="cartTitle">
       <div class="section-head">
         <div>
           <p class="eyebrow">Order Bag</p>
           <h2 class="section-title" id="cartTitle">Ready when you choose a set.</h2>
         </div>
-        <p class="section-copy">PureForm currently confirms orders through the support form, so this cart page gives shoppers a clear destination from the bag icon.</p>
+        <p class="section-copy">Review your selected PureForm sets, adjust quantities, then continue into the checkout form for delivery and payment preference.</p>
       </div>
 
       <div class="cart-layout">
-        <article class="card cart-empty-card" data-animate>
-          <div>
-            <div class="card-kicker">0 items</div>
-            <h3 class="card-title">Your cart is empty.</h3>
-            <p class="card-text">Choose a Grey, Black, or Pink 4-piece set, then confirm your bundle and delivery details before checkout.</p>
+        <article class="card cart-items-card" data-animate>
+          <div class="cart-empty-state" id="cartEmptyState">
+            <div>
+              <div class="card-kicker" id="cartItemKicker">0 items</div>
+              <h3 class="card-title">Your cart is empty.</h3>
+              <p class="card-text">Choose a Grey, Black, or Pink 4-piece set, then confirm your bundle and delivery details before checkout.</p>
+            </div>
+            <div class="button-row">
+              <a class="btn-p" href="products.html#set-colors">Browse sets</a>
+              <a class="btn-s" href="products.html#offers">View offers</a>
+            </div>
           </div>
-          <div class="button-row">
-            <a class="btn-p" href="products.html#set-colors">Browse sets</a>
-            <a class="btn-s" href="products.html#offers">View offers</a>
-          </div>
+          <div class="cart-items-list" id="cartItemsList" aria-live="polite" hidden></div>
         </article>
 
         <aside class="cart-summary" aria-label="Cart summary" data-animate>
           <h3>Summary</h3>
-          <div class="cart-summary-line"><span>Subtotal</span><strong>AED 0.00</strong></div>
+          <div class="cart-summary-line"><span>Items</span><strong id="cartSummaryCount">0</strong></div>
+          <div class="cart-summary-line"><span>Subtotal</span><strong id="cartSubtotal">AED 0.00</strong></div>
           <div class="cart-summary-line"><span>Delivery</span><strong>Confirmed by city</strong></div>
           <div class="cart-summary-line"><span>Returns</span><strong>15 days</strong></div>
-          <p class="cart-summary-note">Add your city and preferred payment method in the order form. COD availability is confirmed before finalizing.</p>
-          <a class="btn-p Btn buy-pay-button" href="pureform-product-detail.html?product=pureform-4pc-set-grey"><span>Shop Sets</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+          <p class="cart-summary-note">Add your city and preferred payment method at checkout. COD availability is confirmed before finalizing.</p>
+          <div class="cart-summary-actions">
+            <a class="btn-p Btn buy-pay-button" id="cartCheckoutLink" href="checkout.html" aria-disabled="true"><span>Continue to checkout</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+            <button class="btn-s" id="cartClearButton" type="button" disabled>Clear cart</button>
+          </div>
+          <p class="cart-summary-status" id="cartStatus" aria-live="polite"></p>
         </aside>
       </div>
     </section>
@@ -141,6 +134,7 @@
     </div>
   </footer>
 
+  <script src="assets/pureform-cart.js"></script>
   <script>
     (function () {
       var animatedItems = document.querySelectorAll('[data-animate]');
@@ -165,6 +159,205 @@
         item.style.setProperty('--stagger', (index % 4) * 80 + 'ms');
         observer.observe(item);
       });
+    })();
+  </script>
+  <script>
+    (function () {
+      'use strict';
+
+      var cart = window.PureFormCart;
+      var emptyState = document.getElementById('cartEmptyState');
+      var itemsList = document.getElementById('cartItemsList');
+      var itemKicker = document.getElementById('cartItemKicker');
+      var summaryCount = document.getElementById('cartSummaryCount');
+      var subtotal = document.getElementById('cartSubtotal');
+      var checkoutLink = document.getElementById('cartCheckoutLink');
+      var clearButton = document.getElementById('cartClearButton');
+      var status = document.getElementById('cartStatus');
+
+      if (!cart || !itemsList) {
+        return;
+      }
+
+      function setStatus(message) {
+        if (!status) {
+          return;
+        }
+
+        status.textContent = message || '';
+      }
+
+      function renderItem(item) {
+        var row = document.createElement('article');
+        var media = document.createElement('a');
+        var image = document.createElement('img');
+        var body = document.createElement('div');
+        var name = document.createElement('a');
+        var meta = document.createElement('div');
+        var price = document.createElement('div');
+        var controls = document.createElement('div');
+        var quantity = document.createElement('div');
+        var decrease = document.createElement('button');
+        var input = document.createElement('input');
+        var increase = document.createElement('button');
+        var remove = document.createElement('button');
+        var total = document.createElement('strong');
+        var productUrl = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
+
+        row.className = 'cart-item';
+        row.dataset.cartId = item.id;
+
+        media.className = 'cart-item-media';
+        media.href = productUrl;
+        image.src = item.image;
+        image.alt = item.name;
+        image.loading = 'lazy';
+        image.decoding = 'async';
+        media.appendChild(image);
+
+        body.className = 'cart-item-body';
+        name.className = 'cart-item-name';
+        name.href = productUrl;
+        name.textContent = item.name;
+        meta.className = 'cart-item-meta';
+        meta.textContent = item.meta;
+        price.className = 'cart-item-price';
+        price.textContent = cart.formatAED(item.price) + ' each';
+
+        controls.className = 'cart-item-controls';
+        quantity.className = 'cart-quantity-control';
+        quantity.setAttribute('aria-label', 'Quantity for ' + item.name);
+
+        decrease.type = 'button';
+        decrease.textContent = '-';
+        decrease.dataset.cartAction = 'decrease';
+        decrease.setAttribute('aria-label', 'Decrease quantity for ' + item.name);
+
+        input.type = 'number';
+        input.inputMode = 'numeric';
+        input.min = '1';
+        input.step = '1';
+        input.value = item.quantity;
+        input.dataset.cartQuantity = item.id;
+        input.setAttribute('aria-label', 'Quantity for ' + item.name);
+
+        increase.type = 'button';
+        increase.textContent = '+';
+        increase.dataset.cartAction = 'increase';
+        increase.setAttribute('aria-label', 'Increase quantity for ' + item.name);
+
+        quantity.appendChild(decrease);
+        quantity.appendChild(input);
+        quantity.appendChild(increase);
+
+        remove.className = 'cart-item-remove';
+        remove.type = 'button';
+        remove.textContent = 'Remove';
+        remove.dataset.cartAction = 'remove';
+        remove.setAttribute('aria-label', 'Remove ' + item.name + ' from cart');
+
+        controls.appendChild(quantity);
+        controls.appendChild(remove);
+
+        body.appendChild(name);
+        body.appendChild(meta);
+        body.appendChild(price);
+        body.appendChild(controls);
+
+        total.className = 'cart-item-total';
+        total.textContent = cart.formatAED(item.lineTotal);
+
+        row.appendChild(media);
+        row.appendChild(body);
+        row.appendChild(total);
+        return row;
+      }
+
+      function renderCart() {
+        var lineItems = cart.getLineItems();
+        var count = cart.getCount();
+        var hasItems = lineItems.length > 0;
+
+        if (emptyState) {
+          emptyState.hidden = hasItems;
+        }
+
+        itemsList.hidden = !hasItems;
+        itemsList.replaceChildren();
+        lineItems.forEach(function (item) {
+          itemsList.appendChild(renderItem(item));
+        });
+
+        if (itemKicker) {
+          itemKicker.textContent = count + (count === 1 ? ' item' : ' items');
+        }
+
+        summaryCount.textContent = count + (count === 1 ? ' item' : ' items');
+        subtotal.textContent = cart.formatAED(cart.getSubtotal());
+        checkoutLink.href = hasItems ? cart.getCheckoutUrl() : 'products.html#set-colors';
+        checkoutLink.toggleAttribute('aria-disabled', !hasItems);
+        clearButton.disabled = !hasItems;
+      }
+
+      itemsList.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-cart-action]');
+        var row;
+        var id;
+        var current;
+
+        if (!button) {
+          return;
+        }
+
+        row = event.target.closest('.cart-item');
+        id = row ? row.dataset.cartId : '';
+        current = cart.getCart().find(function (item) {
+          return item.id === id;
+        });
+
+        if (!id || !current) {
+          return;
+        }
+
+        if (button.dataset.cartAction === 'increase') {
+          cart.setQuantity(id, current.quantity + 1);
+          setStatus('Quantity updated.');
+        }
+
+        if (button.dataset.cartAction === 'decrease') {
+          cart.setQuantity(id, current.quantity - 1);
+          setStatus(current.quantity <= 1 ? 'Item removed from cart.' : 'Quantity updated.');
+        }
+
+        if (button.dataset.cartAction === 'remove') {
+          cart.removeItem(id);
+          setStatus('Item removed from cart.');
+        }
+      });
+
+      itemsList.addEventListener('change', function (event) {
+        if (!event.target.matches('[data-cart-quantity]')) {
+          return;
+        }
+
+        cart.setQuantity(event.target.dataset.cartQuantity, event.target.value);
+        setStatus('Quantity updated.');
+      });
+
+      checkoutLink.addEventListener('click', function (event) {
+        if (!cart.getCount()) {
+          event.preventDefault();
+          window.location.href = 'products.html#set-colors';
+        }
+      });
+
+      clearButton.addEventListener('click', function () {
+        cart.clearCart();
+        setStatus('Cart cleared.');
+      });
+
+      window.addEventListener('pureform:cart-change', renderCart);
+      renderCart();
     })();
   </script>
   <script src="assets/pureform-page-transitions.js" defer></script>

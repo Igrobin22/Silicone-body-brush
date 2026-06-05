@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Complete your PureForm checkout with contact, delivery, shipping, payment preference, and order summary details.">
+  <title>Checkout | PureForm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,700&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="assets/pureform-pages.css">
+  <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
+  <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
+  <link rel="stylesheet" href="assets/pureform-store-flow.css">
+  <link rel="stylesheet" href="assets/pureform-page-transitions.css">
+</head>
+
+<body>
+  <nav class="site-header" aria-label="Primary navigation">
+    <div class="promo-bar">
+      <div class="promo-message">Free delivery checks and 15-day returns on PureForm orders</div>
+      <div class="promo-links">
+        <a href="policy.html#delivery">UAE (AED) - EN</a>
+        <a href="contact.html">Support</a>
+      </div>
+    </div>
+    <div class="nav-main">
+      <ul class="nav-links">
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="reviews.html">Reviews</a></li>
+        <li><a href="policy.html">Policy</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+      <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
+      <div class="nav-actions" aria-label="Shop utilities">
+        <a class="nav-action-link" href="contact.html">Support</a>
+        <a class="nav-icon nav-search" href="products.html#set-colors" aria-label="Search products">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
+        </a>
+        <a class="nav-icon nav-cart is-active" href="cart.html" aria-label="Open cart">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 8.5h11l-.8 11h-9.4l-.8-11Z"></path><path d="M9 8.5V6.8a3 3 0 0 1 6 0v1.7"></path></svg>
+          <span class="nav-cart-count" aria-label="0 items in cart">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="checkout-page">
+    <div class="checkout-shell">
+      <section class="checkout-panel" aria-labelledby="checkoutTitle">
+        <div class="checkout-head">
+          <p class="eyebrow">Checkout</p>
+          <h1 class="checkout-title" id="checkoutTitle">Complete your order.</h1>
+          <p class="checkout-subtitle">Share the details PureForm needs to confirm delivery, payment preference, and availability before your order is finalized.</p>
+        </div>
+
+        <form class="checkout-form" id="checkoutForm" action="mailto:hello@pureform.ae" method="post" enctype="text/plain">
+          <section class="checkout-step" aria-labelledby="quickCheckoutTitle">
+            <div class="checkout-step-title">
+              <h2 id="quickCheckoutTitle">Quick checkout</h2>
+            </div>
+            <div class="checkout-express" aria-label="Quick checkout choices">
+              <button type="button" data-payment-choice="cash-on-delivery">Cash on delivery</button>
+              <button type="button" data-payment-choice="payment-link">Payment link</button>
+              <button type="button" data-payment-choice="confirm-options">Ask support</button>
+            </div>
+            <p class="checkout-helper">Choose one to preselect your payment preference below.</p>
+          </section>
+
+          <section class="checkout-step" aria-labelledby="contactTitle">
+            <div class="checkout-step-title">
+              <h2 id="contactTitle">Contact</h2>
+              <a href="contact.html">Need help?</a>
+            </div>
+            <div class="checkout-form-grid">
+              <div class="checkout-field">
+                <label for="checkout-contact">Email or mobile phone</label>
+                <input id="checkout-contact" name="contact" type="text" autocomplete="email" placeholder="you@example.com or +971 50 000 0000" required>
+              </div>
+              <div class="checkout-field">
+                <label for="checkout-phone">Phone for delivery</label>
+                <input id="checkout-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+971 50 000 0000">
+              </div>
+            </div>
+          </section>
+
+          <section class="checkout-step" aria-labelledby="deliveryTitle">
+            <div class="checkout-step-title">
+              <h2 id="deliveryTitle">Delivery</h2>
+            </div>
+            <div class="checkout-form-grid">
+              <div class="checkout-field">
+                <label for="checkout-country">Country / region</label>
+                <select id="checkout-country" name="country" autocomplete="country-name" required>
+                  <option value="United Arab Emirates">United Arab Emirates</option>
+                </select>
+              </div>
+              <div class="checkout-form-row">
+                <div class="checkout-field">
+                  <label for="checkout-first-name">First name</label>
+                  <input id="checkout-first-name" name="first_name" type="text" autocomplete="given-name" required>
+                </div>
+                <div class="checkout-field">
+                  <label for="checkout-last-name">Last name</label>
+                  <input id="checkout-last-name" name="last_name" type="text" autocomplete="family-name" required>
+                </div>
+              </div>
+              <div class="checkout-field">
+                <label for="checkout-address">Address</label>
+                <input id="checkout-address" name="address" type="text" autocomplete="street-address" placeholder="Street, building, villa, or landmark" required>
+              </div>
+              <div class="checkout-field">
+                <label for="checkout-apartment">Apartment, suite, etc.</label>
+                <input id="checkout-apartment" name="apartment" type="text" autocomplete="address-line2" placeholder="Optional">
+              </div>
+              <div class="checkout-form-row">
+                <div class="checkout-field">
+                  <label for="checkout-city">City</label>
+                  <input id="checkout-city" name="city" type="text" autocomplete="address-level2" placeholder="Dubai, Abu Dhabi..." required>
+                </div>
+                <div class="checkout-field">
+                  <label for="checkout-emirate">Emirate</label>
+                  <select id="checkout-emirate" name="emirate" autocomplete="address-level1" required>
+                    <option value="">Select emirate</option>
+                    <option>Abu Dhabi</option>
+                    <option>Dubai</option>
+                    <option>Sharjah</option>
+                    <option>Ajman</option>
+                    <option>Umm Al Quwain</option>
+                    <option>Ras Al Khaimah</option>
+                    <option>Fujairah</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="checkout-step" aria-labelledby="shippingTitle">
+            <div class="checkout-step-title">
+              <h2 id="shippingTitle">Shipping method</h2>
+            </div>
+            <div class="checkout-shipping-method" id="shippingMethod">Enter your delivery city to confirm timing and available delivery options.</div>
+          </section>
+
+          <section class="checkout-step" aria-labelledby="paymentTitle">
+            <div class="checkout-step-title">
+              <h2 id="paymentTitle">Payment</h2>
+            </div>
+            <p class="checkout-payment-note">No card details are collected on this static checkout. Secure payment options are confirmed after the request is sent.</p>
+            <div class="checkout-payment-options">
+              <label class="checkout-payment-option">
+                <input type="radio" name="payment" value="Cash on delivery" checked>
+                <span class="checkout-payment-copy"><strong>Cash on delivery</strong><span>Pay when the delivery option is confirmed for your city.</span></span>
+              </label>
+              <label class="checkout-payment-option">
+                <input type="radio" name="payment" value="Secure payment link">
+                <span class="checkout-payment-copy"><strong>Secure payment link</strong><span>Request a card/payment link after PureForm confirms stock and delivery.</span></span>
+              </label>
+              <label class="checkout-payment-option">
+                <input type="radio" name="payment" value="Confirm payment options">
+                <span class="checkout-payment-copy"><strong>Confirm payment options</strong><span>Ask support to confirm the available payment methods before finalizing.</span></span>
+              </label>
+            </div>
+          </section>
+
+          <section class="checkout-step" aria-labelledby="notesTitle">
+            <div class="checkout-step-title">
+              <h2 id="notesTitle">Order notes</h2>
+            </div>
+            <div class="checkout-field">
+              <label for="checkout-notes">Notes</label>
+              <textarea id="checkout-notes" name="notes" placeholder="Delivery timing, landmark, color preference, or any special note"></textarea>
+            </div>
+          </section>
+
+          <div class="checkout-actions">
+            <button class="btn-p Btn buy-pay-button" type="submit" id="checkoutSubmit"><span>Place order request</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
+            <p class="checkout-status" id="checkoutStatus" aria-live="polite"></p>
+          </div>
+        </form>
+      </section>
+
+      <aside class="checkout-summary" aria-labelledby="checkoutSummaryTitle">
+        <h2 id="checkoutSummaryTitle">Order summary</h2>
+        <div class="checkout-summary-list" id="checkoutSummaryList" aria-live="polite"></div>
+        <div class="checkout-discount">
+          <input id="discountCode" type="text" autocomplete="off" placeholder="Discount code" aria-label="Discount code">
+          <button id="discountApply" type="button">Apply</button>
+        </div>
+        <p class="checkout-discount-status" id="discountStatus" aria-live="polite"></p>
+        <div class="checkout-totals">
+          <div class="checkout-total-line"><span>Subtotal</span><strong id="checkoutSubtotal">AED 0.00</strong></div>
+          <div class="checkout-total-line"><span>Shipping</span><strong id="checkoutShipping">Enter delivery city</strong></div>
+          <div class="checkout-total-line"><span>Discount</span><strong id="checkoutDiscount">Confirmed by support</strong></div>
+          <div class="checkout-total-line is-total"><span>Total</span><strong id="checkoutTotal">AED 0.00</strong></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="assets/pureform-cart.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var cart = window.PureFormCart;
+      var form = document.getElementById('checkoutForm');
+      var summaryList = document.getElementById('checkoutSummaryList');
+      var subtotalNode = document.getElementById('checkoutSubtotal');
+      var totalNode = document.getElementById('checkoutTotal');
+      var shippingNode = document.getElementById('checkoutShipping');
+      var discountInput = document.getElementById('discountCode');
+      var discountButton = document.getElementById('discountApply');
+      var discountStatus = document.getElementById('discountStatus');
+      var status = document.getElementById('checkoutStatus');
+      var submitButton = document.getElementById('checkoutSubmit');
+      var cityInput = document.getElementById('checkout-city');
+      var shippingMethod = document.getElementById('shippingMethod');
+
+      if (!cart || !form || !summaryList) {
+        return;
+      }
+
+      function getSelectedPayment() {
+        var selected = form.querySelector('input[name="payment"]:checked');
+        return selected ? selected.value : 'Cash on delivery';
+      }
+
+      function setStatus(message) {
+        status.textContent = message || '';
+      }
+
+      function renderSummary() {
+        var items = cart.getLineItems();
+        var subtotal = cart.getSubtotal();
+
+        summaryList.replaceChildren();
+
+        if (!items.length) {
+          var empty = document.createElement('p');
+          empty.className = 'checkout-empty';
+          empty.textContent = 'Your cart is empty. Add a PureForm set before checkout.';
+          summaryList.appendChild(empty);
+          submitButton.disabled = true;
+          submitButton.setAttribute('aria-disabled', 'true');
+          subtotalNode.textContent = cart.formatAED(0);
+          totalNode.textContent = cart.formatAED(0);
+          return;
+        }
+
+        items.forEach(function (item) {
+          var row = document.createElement('article');
+          var media = document.createElement('div');
+          var image = document.createElement('img');
+          var badge = document.createElement('span');
+          var copy = document.createElement('div');
+          var name = document.createElement('div');
+          var meta = document.createElement('div');
+          var price = document.createElement('strong');
+
+          row.className = 'checkout-summary-item';
+          media.className = 'checkout-summary-media';
+          image.src = item.image;
+          image.alt = item.name;
+          image.loading = 'lazy';
+          image.decoding = 'async';
+          badge.className = 'checkout-summary-qty';
+          badge.textContent = item.quantity;
+          media.appendChild(image);
+          media.appendChild(badge);
+
+          name.className = 'checkout-summary-name';
+          name.textContent = item.name;
+          meta.className = 'checkout-summary-meta';
+          meta.textContent = item.meta;
+          copy.appendChild(name);
+          copy.appendChild(meta);
+
+          price.className = 'checkout-summary-price';
+          price.textContent = cart.formatAED(item.lineTotal);
+
+          row.appendChild(media);
+          row.appendChild(copy);
+          row.appendChild(price);
+          summaryList.appendChild(row);
+        });
+
+        submitButton.disabled = false;
+        submitButton.removeAttribute('aria-disabled');
+        subtotalNode.textContent = cart.formatAED(subtotal);
+        totalNode.textContent = cart.formatAED(subtotal);
+      }
+
+      function updateShippingCopy() {
+        var city = cityInput.value.trim();
+
+        if (!city) {
+          shippingMethod.textContent = 'Enter your delivery city to confirm timing and available delivery options.';
+          shippingNode.textContent = 'Enter delivery city';
+          return;
+        }
+
+        shippingMethod.textContent = 'PureForm will confirm delivery timing and availability for ' + city + ' before finalizing the order.';
+        shippingNode.textContent = 'Confirmed after request';
+      }
+
+      function buildOrderBody(data) {
+        var lines = [
+          'PureForm checkout request',
+          '',
+          'Contact: ' + (data.get('contact') || ''),
+          'Delivery phone: ' + (data.get('phone') || ''),
+          'Name: ' + (data.get('first_name') || '') + ' ' + (data.get('last_name') || ''),
+          'Country: ' + (data.get('country') || ''),
+          'Address: ' + (data.get('address') || ''),
+          'Apartment / suite: ' + (data.get('apartment') || ''),
+          'City: ' + (data.get('city') || ''),
+          'Emirate: ' + (data.get('emirate') || ''),
+          'Shipping: Confirm before finalizing',
+          'Payment preference: ' + getSelectedPayment(),
+          'Discount code: ' + (discountInput.value.trim() || 'None'),
+          '',
+          'Cart:'
+        ];
+
+        cart.getLineItems().forEach(function (item) {
+          lines.push('- ' + item.name + ' x ' + item.quantity + ' = ' + cart.formatAED(item.lineTotal));
+        });
+
+        lines.push('Subtotal: ' + cart.formatAED(cart.getSubtotal()));
+        lines.push('Total to confirm: ' + cart.formatAED(cart.getSubtotal()));
+        lines.push('');
+        lines.push('Order notes:');
+        lines.push(data.get('notes') || '');
+
+        return lines.join('\n');
+      }
+
+      document.querySelectorAll('[data-payment-choice]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var value = button.getAttribute('data-payment-choice');
+          var targetValue = value === 'payment-link' ? 'Secure payment link' : value === 'confirm-options' ? 'Confirm payment options' : 'Cash on delivery';
+          var option = Array.prototype.find.call(form.querySelectorAll('input[name="payment"]'), function (input) {
+            return input.value === targetValue;
+          });
+
+          if (option) {
+            option.checked = true;
+            setStatus(targetValue + ' selected.');
+          }
+        });
+      });
+
+      discountButton.addEventListener('click', function () {
+        var code = discountInput.value.trim();
+
+        if (!code) {
+          discountStatus.textContent = 'Enter a code and PureForm will confirm whether it applies.';
+          return;
+        }
+
+        discountStatus.textContent = code.toUpperCase() + ' saved. The final discount will be confirmed before payment.';
+      });
+
+      cityInput.addEventListener('input', updateShippingCopy);
+
+      form.addEventListener('submit', function (event) {
+        var data;
+        var subject;
+        var body;
+
+        if (!cart.getCount()) {
+          event.preventDefault();
+          setStatus('Your cart is empty. Add a product before checkout.');
+          return;
+        }
+
+        if (!form.checkValidity()) {
+          return;
+        }
+
+        event.preventDefault();
+        data = new FormData(form);
+        subject = 'PureForm checkout request';
+        body = buildOrderBody(data);
+        setStatus('Opening your email app with the checkout request.');
+        window.location.href = 'mailto:hello@pureform.ae?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      });
+
+      window.addEventListener('pureform:cart-change', renderSummary);
+      updateShippingCopy();
+      renderSummary();
+    })();
+  </script>
+  <script src="assets/pureform-page-transitions.js" defer></script>
+  <script src="assets/pureform-mobile-menu.js" defer></script>
+  <script src="assets/pureform-store-flow.js" defer></script>
+</body>
+
+</html>

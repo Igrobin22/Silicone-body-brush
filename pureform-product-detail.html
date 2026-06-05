@@ -899,7 +899,7 @@
         </div>
 
         <p class="pdp-shipping">Free delivery checks before order confirmation<br>15-day return policy for unused sets</p>
-        <a class="pdp-order-button" id="productOrderLink" href="contact.html?topic=start-order&amp;product=pureform-4pc-set-grey&amp;bundle=single#message"><span>Start order</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></a>
+        <a class="pdp-order-button" id="productOrderLink" href="cart.html"><span>Add to cart</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></a>
       </aside>
     </section>
 
@@ -913,6 +913,7 @@
     </section>
   </main>
 
+  <script src="assets/pureform-cart.js"></script>
   <script>
     (function () {
       'use strict';
@@ -1203,8 +1204,8 @@
 
       function updateOrderLink() {
         var product = products[activeProductId] || products[fallbackId];
-        productOrderLink.href = orderUrl(activeProductId, selectedQuantity);
-        productOrderLink.setAttribute('aria-label', 'Start order for ' + product.name + ', quantity ' + selectedQuantity);
+        productOrderLink.href = 'cart.html';
+        productOrderLink.setAttribute('aria-label', 'Add ' + product.name + ' to cart, quantity ' + selectedQuantity);
       }
 
       function setQuantity(value) {
@@ -1253,6 +1254,22 @@
 
         productQuantityInput.addEventListener('blur', function () {
           setQuantity(productQuantityInput.value);
+        });
+      }
+
+      function setupCartButton() {
+        if (!productOrderLink) {
+          return;
+        }
+
+        productOrderLink.addEventListener('click', function (event) {
+          if (!window.PureFormCart) {
+            return;
+          }
+
+          event.preventDefault();
+          window.PureFormCart.addItem(activeProductId, selectedQuantity);
+          window.location.href = 'cart.html';
         });
       }
 
@@ -1308,6 +1325,7 @@
 
       productGallery.addEventListener('scroll', handleGalleryScroll, { passive: true });
       setupQuantityControl();
+      setupCartButton();
       setQuantity(1);
       renderProduct(getRequestedProduct(), false);
     })();
