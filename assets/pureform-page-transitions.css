@@ -4,42 +4,6 @@
   --pf-page-med: 260ms;
 }
 
-@view-transition {
-  navigation: auto;
-}
-
-::view-transition-old(root) {
-  animation: pf-page-native-out var(--pf-page-fast) var(--pf-page-ease) both;
-}
-
-::view-transition-new(root) {
-  animation: pf-page-native-in var(--pf-page-med) var(--pf-page-ease) both;
-}
-
-@keyframes pf-page-native-out {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  to {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-}
-
-@keyframes pf-page-native-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 html.pf-page-fallback body {
   transform-origin: center top;
   transition:
@@ -82,11 +46,6 @@ html.pf-page-leaving::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none;
-  }
-
   html.pf-page-fallback body,
   html.pf-page-fallback::after {
     transition: none;

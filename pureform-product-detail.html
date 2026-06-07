@@ -781,11 +781,11 @@
 
     @media (max-width: 420px) {
       .pdp-gallery-frame {
-        min-height: min(48vh, 420px);
+        min-height: min(44vh, 390px);
       }
 
       .pdp-gallery-frame img {
-        width: min(80%, 328px);
+        width: min(88%, 344px);
       }
 
       .pdp-quantity-control {
@@ -914,6 +914,7 @@
   </main>
 
   <script src="assets/pureform-cart.js"></script>
+  <script src="assets/pureform-store-flow.js"></script>
   <script>
     (function () {
       'use strict';
@@ -1034,6 +1035,12 @@
       var selectedQuantity = 1;
       var galleryFrames = [];
       var galleryScrollFrame = null;
+      var localGalleryFallbacks = [
+        'assets/pureform-body-brush.png',
+        'assets/pureform-back-scrubber.png',
+        'assets/pureform-scalp-massager.png',
+        'assets/pureform-face-brush.png'
+      ];
 
       function getRequestedProduct() {
         var params = new URLSearchParams(window.location.search);
@@ -1138,6 +1145,7 @@
           image.src = src;
           image.alt = alt;
           image.decoding = 'async';
+          image.dataset.pfFallback = localGalleryFallbacks[index % localGalleryFallbacks.length];
 
           if (index) {
             image.loading = 'lazy';

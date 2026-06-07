@@ -888,7 +888,7 @@ h1 {
 }
 
 .cart-items-card {
-  min-height: 360px;
+  min-height: auto;
 }
 
 .cart-empty-card .button-row {

@@ -3,13 +3,8 @@
 
   var root = document.documentElement;
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  var supportsNativeTransitions = 'startViewTransition' in document;
   var transitionKey = 'pfPageTransition';
   var exitDuration = 170;
-
-  if (supportsNativeTransitions) {
-    root.classList.add('pf-native-view-transition');
-  }
 
   root.classList.add('pf-page-fallback');
 
