@@ -97,7 +97,7 @@ code {
   align-items: center;
   width: max-content;
   color: var(--dark);
-  font: 400 28px/1 var(--serif);
+  font: 400 26px/1 var(--serif);
   letter-spacing: .08em;
   text-decoration: none;
 }
@@ -258,7 +258,7 @@ a:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
+  min-height: 40px;
   border: 1px solid transparent;
   border-radius: 999px;
   padding: 0 18px;
@@ -314,7 +314,7 @@ a:focus-visible {
 .admin-dashboard {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr);
 }
 
 .admin-sidebar {
@@ -324,17 +324,17 @@ a:focus-visible {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 28px;
+  gap: 22px;
   border-right: 1px solid var(--line);
   background: rgba(255, 255, 255, .72);
-  padding: 28px 22px;
+  padding: 22px 20px;
   backdrop-filter: blur(22px);
 }
 
 .admin-nav {
   display: grid;
-  gap: 8px;
-  margin-top: 36px;
+  gap: 6px;
+  margin-top: 28px;
 }
 
 .nav-tab {
@@ -352,8 +352,8 @@ a:focus-visible {
 
 .admin-user {
   display: grid;
-  gap: 12px;
-  padding-top: 20px;
+  gap: 10px;
+  padding-top: 16px;
   border-top: 1px solid var(--line);
   color: var(--mid);
   font-size: 13px;
@@ -361,7 +361,7 @@ a:focus-visible {
 
 .admin-main {
   min-width: 0;
-  padding: clamp(24px, 4vw, 56px);
+  padding: clamp(18px, 2.8vw, 34px);
 }
 
 .admin-topbar,
@@ -369,13 +369,17 @@ a:focus-visible {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 24px;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.admin-topbar {
+  align-items: center;
 }
 
 .admin-topbar h1 {
-  margin-top: 10px;
-  font-size: clamp(42px, 5vw, 72px);
+  margin-top: 6px;
+  font-size: clamp(38px, 4vw, 54px);
   line-height: .96;
 }
 
@@ -384,17 +388,17 @@ a:focus-visible {
 }
 
 .section-head h2 {
-  margin-top: 10px;
-  font-size: clamp(36px, 4vw, 56px);
+  margin-top: 8px;
+  font-size: clamp(30px, 3.2vw, 42px);
   line-height: 1;
 }
 
 .dashboard-section-head {
-  max-width: 760px;
+  max-width: 680px;
 }
 
 .dashboard-status {
-  margin: -6px 0 20px;
+  margin: -4px 0 14px;
 }
 
 .view-panel[hidden],
@@ -405,17 +409,17 @@ a:focus-visible {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 14px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 .stat-card {
-  min-height: 138px;
+  min-height: 104px;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, .72);
-  padding: 18px;
+  padding: 15px;
   box-shadow: 0 18px 46px rgba(20, 28, 24, .05);
 }
 
@@ -431,8 +435,8 @@ a:focus-visible {
 
 .stat-card strong {
   display: block;
-  margin-top: 26px;
-  font: 300 42px/1 var(--serif);
+  margin-top: 18px;
+  font: 300 34px/1 var(--serif);
   letter-spacing: 0;
 }
 
@@ -440,7 +444,7 @@ a:focus-visible {
 .manager-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
-  gap: 18px;
+  gap: 14px;
   align-items: start;
 }
 
@@ -449,7 +453,11 @@ a:focus-visible {
 }
 
 .admin-card {
-  padding: 22px;
+  padding: 18px;
+}
+
+.card-head h3 {
+  font-size: 22px;
 }
 
 .card-head,
@@ -463,7 +471,7 @@ a:focus-visible {
 .badge {
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
+  min-height: 26px;
   border: 1px solid rgba(17, 17, 17, .08);
   border-radius: 999px;
   background: rgba(220, 238, 231, .74);
@@ -477,8 +485,8 @@ a:focus-visible {
 
 .mini-list {
   display: grid;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 8px;
+  margin-top: 14px;
 }
 
 .mini-item,
@@ -489,7 +497,7 @@ a:focus-visible {
   border: 1px solid var(--line);
   border-radius: 16px;
   background: rgba(255, 255, 255, .58);
-  padding: 14px;
+  padding: 12px;
   color: var(--mid);
   font-size: 13px;
   line-height: 1.35;
@@ -734,7 +742,7 @@ a:focus-visible {
   }
 
   .admin-main {
-    padding: 20px 14px 32px;
+    padding: 16px 12px 28px;
   }
 
   .admin-topbar,
@@ -749,6 +757,10 @@ a:focus-visible {
   }
 
   .stats-grid,
+  .panel-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .panel-grid {
     grid-template-columns: 1fr;
   }
@@ -781,7 +793,21 @@ a:focus-visible {
 
   .admin-topbar h1,
   .section-head h2 {
-    font-size: 40px;
+    font-size: 34px;
+  }
+
+  .stats-grid {
+    gap: 10px;
+  }
+
+  .stat-card {
+    min-height: 96px;
+    padding: 13px;
+  }
+
+  .stat-card strong {
+    margin-top: 16px;
+    font-size: 30px;
   }
 
   .card-head,
