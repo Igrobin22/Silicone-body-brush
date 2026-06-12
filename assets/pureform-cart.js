@@ -4,64 +4,41 @@
   var storageKey = 'pureform.cart.v1';
   var memoryCart = [];
 
-  var catalog = {
+  var fallbackCatalog = {
     'pureform-4pc-set-grey': {
+      id: 'pureform-4pc-set-grey',
       name: 'Grey 4-Piece Silicone Brush Set',
-      price: 87.78,
+      price: 43.89,
+      regularPrice: 87.78,
       image: 'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png',
       meta: 'Grey set / 4 tools'
     },
     'pureform-4pc-set-black': {
+      id: 'pureform-4pc-set-black',
       name: 'Black 4-Piece Silicone Brush Set',
-      price: 87.78,
+      price: 43.89,
+      regularPrice: 87.78,
       image: 'assets/pureform-body-brush.png',
       meta: 'Black set / 4 tools'
     },
     'pureform-4pc-set-pink': {
+      id: 'pureform-4pc-set-pink',
       name: 'Pink 4-Piece Silicone Brush Set',
-      price: 87.78,
+      price: 43.89,
+      regularPrice: 87.78,
       image: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227618/main_img_without_bg_mbrxsg.png',
       meta: 'Pink set / 4 tools'
-    },
-    'back-scrubber': {
-      name: 'Long Handle Back Scrubber',
-      price: 39,
-      image: 'assets/pureform-back-scrubber.png',
-      meta: 'Back reach'
-    },
-    'body-brush': {
-      name: 'Silicone Body Brush',
-      price: 29,
-      image: 'assets/pureform-body-brush.png',
-      meta: 'Daily cleanse'
-    },
-    'scalp-massager': {
-      name: 'Silicone Scalp Massager',
-      price: 24,
-      image: 'assets/pureform-scalp-massager.png',
-      meta: 'Shampoo massage'
-    },
-    'face-brush': {
-      name: 'Gentle Silicone Face Brush',
-      price: 22,
-      image: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/p_face_1_f4vdyz.png',
-      meta: 'Face care'
-    },
-    'family-bundle': {
-      name: 'Three Set Family Bundle',
-      price: 228,
-      image: 'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553513/grey_white_bg_irnzyc.png',
-      meta: 'Grey, Black, Pink'
     }
   };
+
+  var catalog = window.PureFormCatalog && typeof window.PureFormCatalog.getCatalogSync === 'function'
+    ? window.PureFormCatalog.getCatalogSync()
+    : Object.assign({}, fallbackCatalog);
 
   var aliases = {
     grey: 'pureform-4pc-set-grey',
     black: 'pureform-4pc-set-black',
-    pink: 'pureform-4pc-set-pink',
-    mixed: 'family-bundle',
-    'mixed-colors': 'family-bundle',
-    three: 'family-bundle'
+    pink: 'pureform-4pc-set-pink'
   };
 
   function normalizeId(id) {
@@ -76,6 +53,26 @@
 
   function formatAED(amount) {
     return 'AED ' + (Number(amount) || 0).toFixed(2);
+  }
+
+  function setCatalog(nextCatalog) {
+    if (!nextCatalog || typeof nextCatalog !== 'object') {
+      return;
+    }
+
+    catalog = Object.keys(nextCatalog).reduce(function (cleanCatalog, key) {
+      if (fallbackCatalog[key] || aliases[key]) {
+        cleanCatalog[key] = Object.assign({}, fallbackCatalog[key] || {}, nextCatalog[key]);
+      }
+
+      return cleanCatalog;
+    }, {});
+
+    if (!Object.keys(catalog).length) {
+      catalog = Object.assign({}, fallbackCatalog);
+    }
+
+    saveCart(getCart());
   }
 
   function readCart() {
@@ -196,11 +193,11 @@
       return {
         id: item.id,
         name: product.name,
-        price: product.price,
+        price: Number(product.price) || 0,
         image: product.image,
         meta: product.meta,
         quantity: quantity,
-        lineTotal: product.price * quantity
+        lineTotal: (Number(product.price) || 0) * quantity
       };
     });
   }
@@ -257,6 +254,7 @@
     getSubtotal: getSubtotal,
     getSummaryText: getSummaryText,
     removeItem: removeItem,
+    setCatalog: setCatalog,
     setQuantity: setQuantity
   };
 
@@ -272,5 +270,10 @@
     if (event.key === storageKey) {
       updateNavCount();
     }
+  });
+
+  window.addEventListener('pureform:catalog-ready', function (event) {
+    setCatalog(event.detail && event.detail.catalog);
+    window.PureFormCart.catalog = catalog;
   });
 })();

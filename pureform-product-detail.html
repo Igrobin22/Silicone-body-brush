@@ -913,108 +913,19 @@
     </section>
   </main>
 
+  <script src="assets/pureform-supabase-config.js"></script>
+  <script src="assets/pureform-public-catalog.js"></script>
   <script src="assets/pureform-cart.js"></script>
   <script src="assets/pureform-store-flow.js"></script>
   <script>
     (function () {
       'use strict';
 
-      var greyPhotos = [
-        'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553521/Main_with_background_anlah0.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553513/grey_white_bg_irnzyc.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553535/grey_Head_h1duwj.png'
-      ];
-
-      var pinkPhotos = [
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/main_img_voei63.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227618/main_img_without_bg_mbrxsg.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227616/p_body_1_kgg059.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/p_body_2_lv1x37.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/p_face_1_f4vdyz.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_face_2_yoirlr.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_head_1_yquyts.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227620/p_head_2_vtl4pl.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_handle_1_crtic9.png',
-        'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_handle_2_komo0m.png'
-      ];
-
-      var products = {
-        'pureform-4pc-set-grey': {
-          name: 'Grey 4-Piece Silicone Brush Set',
-          lead: 'A complete PureForm silicone brush set in Grey, made for smoother cleansing, easier reach, and a fresher post-shower feel.',
-          price: 'AED 87.78',
-          color: 'Grey',
-          swatch: 'linear-gradient(135deg, #eeeeea, #868681)',
-          images: greyPhotos,
-          fit: ['Flexible silicone bristles for a gentle cleanse.', 'Long handle piece helps reach the back.', 'Rinses clean and dries quickly after use.']
-        },
-        'pureform-4pc-set-black': {
-          name: 'Black 4-Piece Silicone Brush Set',
-          lead: 'The same four-piece PureForm shower routine in a clean Black finish, including back, body, scalp, and face tools.',
-          price: 'AED 87.78',
-          color: 'Black',
-          swatch: 'linear-gradient(135deg, #5b5b5b, #070707)',
-          images: ['assets/pureform-body-brush.png', 'assets/pureform-back-scrubber.png', 'assets/pureform-scalp-massager.png', 'assets/pureform-face-brush.png'],
-          fit: ['Complete set with four dedicated tools.', 'Best for a minimal bathroom setup.', 'Easy-rinse silicone for daily use.']
-        },
-        'pureform-4pc-set-pink': {
-          name: 'Pink 4-Piece Silicone Brush Set',
-          lead: 'A softer Pink finish for the same complete face, scalp, body, and back silicone cleansing routine.',
-          price: 'AED 87.78',
-          color: 'Pink',
-          swatch: 'linear-gradient(135deg, #ffd8e2, #d28ca1)',
-          images: pinkPhotos,
-          fit: ['Gentle finish with the same four tool routine.', 'Face and scalp tools support softer care moments.', 'Rinses clean and stores easily.']
-        },
-        'back-scrubber': {
-          name: 'Long Handle Back Scrubber',
-          lead: 'A flexible silicone back scrubber designed to make hard-to-reach cleansing easier in the shower.',
-          price: 'AED 39.00',
-          color: 'Grey',
-          swatch: 'linear-gradient(135deg, #eeeeea, #868681)',
-          images: ['assets/pureform-back-scrubber.png', greyPhotos[1], greyPhotos[2]],
-          fit: ['Long handle reach for back cleansing.', 'Flexible silicone bristles.', 'Rinse and hang after use.']
-        },
-        'body-brush': {
-          name: 'Silicone Body Brush',
-          lead: 'A soft silicone body brush for daily cleansing with a comfortable grip strap.',
-          price: 'AED 29.00',
-          color: 'Black',
-          swatch: 'linear-gradient(135deg, #5b5b5b, #070707)',
-          images: ['assets/pureform-body-brush.png', greyPhotos[1], greyPhotos[2]],
-          fit: ['Palm-friendly body cleansing.', 'Grip strap helps when hands are wet.', 'Non-absorbent silicone rinses quickly.']
-        },
-        'scalp-massager': {
-          name: 'Silicone Scalp Massager',
-          lead: 'A silicone scalp massager for shampoo days, made to feel relaxing while helping distribute product.',
-          price: 'AED 24.00',
-          color: 'Grey',
-          swatch: 'linear-gradient(135deg, #eeeeea, #868681)',
-          images: ['assets/pureform-scalp-massager.png', greyPhotos[3], greyPhotos[1]],
-          fit: ['Soft bristles for shampoo massage.', 'Easy to hold in the shower.', 'Rinses clean after use.']
-        },
-        'face-brush': {
-          name: 'Gentle Silicone Face Brush',
-          lead: 'A compact silicone face brush for gentle daily cleansing around delicate areas.',
-          price: 'AED 22.00',
-          color: 'Pink',
-          swatch: 'linear-gradient(135deg, #ffd8e2, #d28ca1)',
-          images: [pinkPhotos[4], pinkPhotos[5], pinkPhotos[1]],
-          fit: ['Compact tool for face cleansing.', 'Gentle silicone touch.', 'Store separately from body tools.']
-        },
-        'family-bundle': {
-          name: 'Three Set Family Bundle',
-          lead: 'One Grey, one Black, and one Pink 4-piece silicone brush set for separate routines or gifting.',
-          price: 'AED 228.00',
-          color: 'Mixed',
-          swatch: 'linear-gradient(135deg, #eeeeea, #ffd8e2 50%, #111)',
-          images: [greyPhotos[2], greyPhotos[1], 'assets/pureform-body-brush.png', pinkPhotos[1]],
-          fit: ['Three complete color sets.', 'Best value for family bathrooms.', 'Includes 12 total silicone tools.']
-        }
-      };
-
-      var fallbackId = 'pureform-4pc-set-grey';
+      var publicCatalog = window.PureFormCatalog;
+      var products = publicCatalog && typeof publicCatalog.getCatalogSync === 'function'
+        ? publicCatalog.getCatalogSync()
+        : {};
+      var fallbackId = publicCatalog && publicCatalog.defaultSlug ? publicCatalog.defaultSlug : 'pureform-4pc-set-grey';
       var productName = document.getElementById('productName');
       var productLead = document.getElementById('productLead');
       var productPrice = document.getElementById('productPrice');
@@ -1045,38 +956,10 @@
       function getRequestedProduct() {
         var params = new URLSearchParams(window.location.search);
         var id = params.get('product') || params.get('bundle');
-        if (id === 'three' || id === 'mixed-colors') {
-          id = 'family-bundle';
-        }
+        if (id === 'grey') id = 'pureform-4pc-set-grey';
+        if (id === 'black') id = 'pureform-4pc-set-black';
+        if (id === 'pink') id = 'pureform-4pc-set-pink';
         return products[id] ? id : fallbackId;
-      }
-
-      function bundleForQuantity(quantity) {
-        if (quantity === 1) {
-          return 'single';
-        }
-
-        if (quantity === 2) {
-          return 'two';
-        }
-
-        if (quantity === 3) {
-          return 'three';
-        }
-
-        return 'question';
-      }
-
-      function orderUrl(id, quantity) {
-        var safeQuantity = Math.max(1, parseInt(quantity, 10) || 1);
-        var bundle = bundleForQuantity(safeQuantity);
-
-        if (id === 'family-bundle') {
-          bundle = safeQuantity === 1 ? 'three' : 'question';
-          return 'contact.html?topic=start-order&product=mixed-colors&bundle=' + bundle + '&quantity=' + safeQuantity + '#message';
-        }
-
-        return 'contact.html?topic=start-order&product=' + encodeURIComponent(id) + '&bundle=' + bundle + '&quantity=' + safeQuantity + '#message';
       }
 
       function setActiveGalleryDot(index) {
@@ -1133,9 +1016,10 @@
       }
 
       function renderGallery(product) {
+        var images = getProductImages(product);
         productGallery.replaceChildren();
 
-        product.images.forEach(function (src, index) {
+        images.forEach(function (src, index) {
           var alt = product.name + ' product view ' + (index + 1);
           var frame = document.createElement('figure');
           var image = document.createElement('img');
@@ -1158,7 +1042,7 @@
         });
 
         productGallery.scrollLeft = 0;
-        renderGalleryDots(product.images.length);
+        renderGalleryDots(images.length);
         setupGalleryControls();
       }
 
@@ -1210,10 +1094,57 @@
         return Math.max(1, parseInt(value, 10) || 1);
       }
 
+      function getProductImages(product) {
+        var images = product && Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+        if (!images.length && product && product.image) {
+          images.push(product.image);
+        }
+
+        return images.length ? images : [localGalleryFallbacks[0]];
+      }
+
+      function getPriceText(product) {
+        if (product && product.priceText) {
+          return product.priceText;
+        }
+
+        if (publicCatalog && typeof publicCatalog.formatAED === 'function') {
+          return publicCatalog.formatAED(product && product.price);
+        }
+
+        return 'AED ' + (Number(product && product.price) || 0).toFixed(2);
+      }
+
+      function getProductDescription(product) {
+        return product && (product.lead || product.description) || 'A complete PureForm silicone brush set for face, scalp, body, and back care.';
+      }
+
+      function isProductAvailable(product) {
+        return product && product.inventory_status !== 'out_of_stock' && (product.inventory_quantity === undefined || Number(product.inventory_quantity) > 0);
+      }
+
+      function getAvailabilityText(product) {
+        if (!isProductAvailable(product)) {
+          return 'Out of stock / support can confirm restock timing';
+        }
+
+        if (product.inventoryStatusText) {
+          return product.inventoryStatusText + ' / delivery confirmed by city';
+        }
+
+        return 'Available / delivery confirmed by city';
+      }
+
       function updateOrderLink() {
         var product = products[activeProductId] || products[fallbackId];
+        var label = productOrderLink.querySelector('span');
+        var available = isProductAvailable(product);
         productOrderLink.href = 'cart.html';
-        productOrderLink.setAttribute('aria-label', 'Add ' + product.name + ' to cart, quantity ' + selectedQuantity);
+        productOrderLink.toggleAttribute('aria-disabled', !available);
+        if (label) {
+          label.textContent = available ? 'Add to cart' : 'Out of stock';
+        }
+        productOrderLink.setAttribute('aria-label', available ? 'Add ' + product.name + ' to cart, quantity ' + selectedQuantity : product.name + ' is out of stock');
       }
 
       function setQuantity(value) {
@@ -1276,25 +1207,30 @@
           }
 
           event.preventDefault();
+          if (!isProductAvailable(products[activeProductId])) {
+            return;
+          }
+
           window.PureFormCart.addItem(activeProductId, selectedQuantity);
           window.location.href = 'cart.html';
         });
       }
 
       function updateStructuredData(id, product) {
+        var productImages = getProductImages(product);
         productJsonLd.textContent = JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'Product',
           name: product.name,
           brand: { '@type': 'Brand', name: 'PureForm' },
-          description: product.lead,
-          image: product.images[0],
+          description: getProductDescription(product),
+          image: productImages[0],
           sku: id,
           offers: {
             '@type': 'Offer',
             priceCurrency: 'AED',
-            price: product.price.replace(/[^0-9.]/g, ''),
-            availability: 'https://schema.org/InStock',
+            price: String(Number(product.price) || 0),
+            availability: isProductAvailable(product) ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
             itemCondition: 'https://schema.org/NewCondition'
           },
           aggregateRating: {
@@ -1308,14 +1244,18 @@
       function renderProduct(id, pushState) {
         activeProductId = products[id] ? id : fallbackId;
         var product = products[activeProductId];
+        var priceNote = getPriceText(product) + ' includes VAT.';
+        if (product.discountActive && product.regularPriceText) {
+          priceNote += ' Discount applied from ' + product.regularPriceText + '.';
+        }
         productName.textContent = product.name;
-        productLead.textContent = product.lead;
-        productPrice.textContent = product.price;
+        productLead.textContent = getProductDescription(product);
+        productPrice.textContent = getPriceText(product);
         productFitIntro.textContent = product.name + ' details are confirmed before checkout.';
-        renderFitList(product.fit);
+        renderFitList(product.fit || []);
         productCare.textContent = 'PureForm tools are made from soft silicone. Rinse after every use, shake off water, and let the piece dry in open air.';
-        productPriceNote.textContent = product.price + ' includes VAT. Delivery timing, COD availability, and quantity details are confirmed by support.';
-        availabilityLine.textContent = 'Available / delivery confirmed by city';
+        productPriceNote.textContent = priceNote + ' Delivery timing, COD availability, and quantity details are confirmed by support.';
+        availabilityLine.textContent = getAvailabilityText(product);
         renderGallery(product);
         updateOrderLink();
         updateStructuredData(activeProductId, product);
@@ -1325,6 +1265,25 @@
           history.pushState({ product: activeProductId }, '', 'pureform-product-detail.html?product=' + encodeURIComponent(activeProductId));
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+      }
+
+      function syncCatalog(nextCatalog) {
+        if (!nextCatalog || !Object.keys(nextCatalog).length) {
+          return;
+        }
+
+        products = nextCatalog;
+        renderProduct(getRequestedProduct(), false);
+      }
+
+      window.addEventListener('pureform:catalog-ready', function (event) {
+        syncCatalog(event.detail && event.detail.catalog);
+      });
+
+      if (publicCatalog && publicCatalog.ready && typeof publicCatalog.ready.then === 'function') {
+        publicCatalog.ready.then(function () {
+          syncCatalog(publicCatalog.getCatalogSync());
+        });
       }
 
       window.addEventListener('popstate', function () {

@@ -513,6 +513,13 @@ h1 {
   white-space: nowrap;
 }
 
+.pf-catalog-compare-price {
+  color: var(--light);
+  font-size: .82em;
+  font-weight: 300;
+  text-decoration-thickness: 1px;
+}
+
 .collection-card-meta {
   padding: 0 .9rem;
   color: var(--light);

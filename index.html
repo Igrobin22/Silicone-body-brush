@@ -894,6 +894,13 @@
       font-weight: 300;
     }
 
+    .pf-catalog-compare-price {
+      color: var(--light);
+      font-size: .82em;
+      font-weight: 300;
+      text-decoration-thickness: 1px;
+    }
+
     .pcard-tag {
       display: inline-block;
       margin-top: 1.2rem;
@@ -4252,7 +4259,7 @@
   <section class="sec" id="products">
     <p class="eyebrow reveal">The Collection</p>
     <h2 class="sec-title reveal">Choose your set<br><em>color.</em></h2>
-    <div class="pgrid">
+    <div class="pgrid" data-pf-catalog-grid="home">
       <a class="pcard reveal" href="pureform-product-detail.html?product=pureform-4pc-set-grey"
         aria-label="View Grey 4-Piece Silicone Brush Set details">
         <span class="pcard-sale">50% OFF</span>
@@ -4348,7 +4355,7 @@
       <p class="shade-copy reveal">Grey, Black, and Pink are not color options inside one product. Each color is its own 4-piece silicone brush set listing.</p>
     </div>
 
-    <div class="shade-grid">
+    <div class="shade-grid" data-pf-catalog-grid="shade">
       <article class="shade-card shade-card-grey reveal" data-shade="Grey Set">
         <div class="shade-card-top">
           <span class="shade-badge">Listed</span>
@@ -4598,6 +4605,8 @@
       }
     })();
   </script>
+  <script src="assets/pureform-supabase-config.js"></script>
+  <script src="assets/pureform-public-catalog.js"></script>
   <script src="assets/pureform-cart.js"></script>
   <script src="assets/pureform-page-transitions.js" defer></script>
   <script src="assets/pureform-mobile-menu.js" defer></script>
