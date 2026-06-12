@@ -73,6 +73,25 @@ code {
   min-height: 100vh;
 }
 
+.dashboard-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 4vw, 48px);
+}
+
+.loading-panel {
+  width: min(640px, 100%);
+  display: grid;
+  gap: 18px;
+}
+
+.loading-panel h1 {
+  margin: 0;
+  font: 300 clamp(46px, 7vw, 78px)/.94 var(--serif);
+  letter-spacing: 0;
+}
+
 .admin-brand {
   display: inline-flex;
   align-items: center;
@@ -154,6 +173,16 @@ code {
   margin-top: 30px;
   padding-top: 30px;
   border-top: 1px solid var(--line);
+}
+
+.has-default-supabase-config #configForm {
+  display: none;
+}
+
+.has-default-supabase-config .login-form {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .form-head {
@@ -332,7 +361,7 @@ a:focus-visible {
 
 .admin-main {
   min-width: 0;
-  padding: clamp(22px, 4vw, 48px);
+  padding: clamp(24px, 4vw, 56px);
 }
 
 .admin-topbar,
@@ -360,20 +389,25 @@ a:focus-visible {
   line-height: 1;
 }
 
+.dashboard-section-head {
+  max-width: 760px;
+}
+
 .dashboard-status {
   margin: -6px 0 20px;
 }
 
 .view-panel[hidden],
-.admin-dashboard[hidden] {
+.admin-dashboard[hidden],
+.dashboard-loading[hidden] {
   display: none;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 14px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .stat-card {

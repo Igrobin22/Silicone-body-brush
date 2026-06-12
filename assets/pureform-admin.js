@@ -12,7 +12,8 @@
     profile: null,
     listings: [],
     contentBlocks: [],
-    activeView: 'overview'
+    activeView: 'overview',
+    page: 'login'
   };
 
   var els = {};
@@ -21,12 +22,16 @@
 
   function init() {
     collectElements();
+    state.page = document.body.dataset.adminPage || (els.dashboardView && !els.authView ? 'dashboard' : 'login');
+    document.body.classList.toggle('has-default-supabase-config', hasConfig(DEFAULT_CONFIG));
     bindEvents();
     var config = loadConfig();
     fillConfigForm(config);
 
     if (hasConfig(config)) {
       connectSupabase(config, { silent: true });
+    } else if (isDashboardPage()) {
+      redirectToLogin();
     } else {
       setAuthStatus('Enter your Supabase project URL and anon key to enable the admin login.', 'neutral');
     }
@@ -35,6 +40,7 @@
   function collectElements() {
     els.authView = document.getElementById('authView');
     els.dashboardView = document.getElementById('dashboardView');
+    els.dashboardLoading = document.getElementById('dashboardLoading');
     els.configForm = document.getElementById('configForm');
     els.loginForm = document.getElementById('loginForm');
     els.supabaseUrl = document.getElementById('supabaseUrl');
@@ -73,11 +79,11 @@
   }
 
   function bindEvents() {
-    els.configForm.addEventListener('submit', onConfigSubmit);
-    els.clearConfigButton.addEventListener('click', clearConfig);
-    els.loginForm.addEventListener('submit', onLoginSubmit);
-    els.signOutButton.addEventListener('click', signOut);
-    els.refreshButton.addEventListener('click', loadDashboardData);
+    bind(els.configForm, 'submit', onConfigSubmit);
+    bind(els.clearConfigButton, 'click', clearConfig);
+    bind(els.loginForm, 'submit', onLoginSubmit);
+    bind(els.signOutButton, 'click', signOut);
+    bind(els.refreshButton, 'click', loadDashboardData);
 
     els.navTabs.forEach(function (button) {
       button.addEventListener('click', function () {
@@ -85,26 +91,32 @@
       });
     });
 
-    els.newListingButton.addEventListener('click', function () {
+    bind(els.newListingButton, 'click', function () {
       fillListingForm();
       setView('listings');
     });
 
-    els.listingsTableBody.addEventListener('click', onListingsTableClick);
-    els.listingsTableBody.addEventListener('change', onListingsTableChange);
-    els.listingForm.addEventListener('submit', onListingSubmit);
-    els.deleteListingButton.addEventListener('click', onDeleteListing);
-    document.getElementById('listingPhotos').addEventListener('input', renderPhotoPreviewFromForm);
-    document.getElementById('listingName').addEventListener('input', maybeFillSlug);
+    bind(els.listingsTableBody, 'click', onListingsTableClick);
+    bind(els.listingsTableBody, 'change', onListingsTableChange);
+    bind(els.listingForm, 'submit', onListingSubmit);
+    bind(els.deleteListingButton, 'click', onDeleteListing);
+    bind(document.getElementById('listingPhotos'), 'input', renderPhotoPreviewFromForm);
+    bind(document.getElementById('listingName'), 'input', maybeFillSlug);
 
-    els.newContentButton.addEventListener('click', function () {
+    bind(els.newContentButton, 'click', function () {
       fillContentForm();
       setView('content');
     });
 
-    els.contentTableBody.addEventListener('click', onContentTableClick);
-    els.contentForm.addEventListener('submit', onContentSubmit);
-    els.deleteContentButton.addEventListener('click', onDeleteContent);
+    bind(els.contentTableBody, 'click', onContentTableClick);
+    bind(els.contentForm, 'submit', onContentSubmit);
+    bind(els.deleteContentButton, 'click', onDeleteContent);
+  }
+
+  function bind(element, eventName, handler) {
+    if (element) {
+      element.addEventListener(eventName, handler);
+    }
   }
 
   function loadConfig() {
@@ -132,6 +144,10 @@
   }
 
   function fillConfigForm(config) {
+    if (!els.supabaseUrl || !els.supabaseAnonKey) {
+      return;
+    }
+
     els.supabaseUrl.value = config.url || '';
     els.supabaseAnonKey.value = config.anonKey || '';
   }
@@ -262,6 +278,12 @@
       }
 
       state.profile = profileResult.data;
+
+      if (!isDashboardPage()) {
+        redirectToDashboard();
+        return;
+      }
+
       showDashboard();
       await loadDashboardData();
     } catch (error) {
@@ -278,8 +300,7 @@
     await state.supabase.auth.signOut();
     state.session = null;
     state.profile = null;
-    showAuth();
-    setAuthStatus('Signed out.', 'success');
+    redirectToLogin();
   }
 
   function unsubscribeAuthListener() {
@@ -290,14 +311,46 @@
   }
 
   function showAuth() {
-    els.authView.hidden = false;
-    els.dashboardView.hidden = true;
+    if (isDashboardPage()) {
+      redirectToLogin();
+      return;
+    }
+
+    if (els.authView) {
+      els.authView.hidden = false;
+    }
+
+    if (els.dashboardView) {
+      els.dashboardView.hidden = true;
+    }
+
+    if (els.dashboardLoading) {
+      els.dashboardLoading.hidden = true;
+    }
   }
 
   function showDashboard() {
-    els.authView.hidden = true;
-    els.dashboardView.hidden = false;
-    els.adminUserEmail.textContent = (state.profile && state.profile.email) || (state.session && state.session.user.email) || 'Admin';
+    if (!isDashboardPage()) {
+      redirectToDashboard();
+      return;
+    }
+
+    if (els.authView) {
+      els.authView.hidden = true;
+    }
+
+    if (els.dashboardLoading) {
+      els.dashboardLoading.hidden = true;
+    }
+
+    if (els.dashboardView) {
+      els.dashboardView.hidden = false;
+    }
+
+    if (els.adminUserEmail) {
+      els.adminUserEmail.textContent = (state.profile && state.profile.email) || (state.session && state.session.user.email) || 'Admin';
+    }
+
     setView(state.activeView || 'overview');
   }
 
@@ -309,10 +362,14 @@
       content: 'Site Content'
     };
 
-    els.viewTitle.textContent = titles[view] || 'Overview';
+    if (els.viewTitle) {
+      els.viewTitle.textContent = titles[view] || 'Overview';
+    }
 
     Object.keys(els.panels).forEach(function (key) {
-      els.panels[key].hidden = key !== view;
+      if (els.panels[key]) {
+        els.panels[key].hidden = key !== view;
+      }
     });
 
     els.navTabs.forEach(function (button) {
@@ -368,16 +425,22 @@
     renderListingsTable();
     renderContentTable();
 
-    if (!document.getElementById('listingId').value) {
+    var listingId = document.getElementById('listingId');
+    if (listingId && !listingId.value) {
       fillListingForm();
     }
 
-    if (!document.getElementById('contentId').value) {
+    var contentId = document.getElementById('contentId');
+    if (contentId && !contentId.value) {
       fillContentForm();
     }
   }
 
   function renderStats() {
+    if (!els.statsGrid) {
+      return;
+    }
+
     var totalListings = state.listings.length;
     var visibleListings = state.listings.filter(function (item) { return item.visible; }).length;
     var activeDiscounts = state.listings.filter(function (item) { return Number(item.discount) > 0; }).length;
@@ -447,6 +510,10 @@
   }
 
   function renderMiniList(container, items, mapper, emptyText) {
+    if (!container) {
+      return;
+    }
+
     container.innerHTML = '';
 
     if (!items.length) {
@@ -480,6 +547,10 @@
   }
 
   function renderListingsTable() {
+    if (!els.listingsTableBody) {
+      return;
+    }
+
     els.listingsTableBody.innerHTML = '';
 
     if (!state.listings.length) {
@@ -569,6 +640,10 @@
   }
 
   function renderContentTable() {
+    if (!els.contentTableBody) {
+      return;
+    }
+
     els.contentTableBody.innerHTML = '';
 
     if (!state.contentBlocks.length) {
@@ -788,7 +863,12 @@
   }
 
   function renderPhotoPreviewFromForm() {
-    var urls = parsePhotoUrls(document.getElementById('listingPhotos').value).slice(0, 6);
+    var photosInput = document.getElementById('listingPhotos');
+    if (!photosInput || !els.listingPhotoPreview) {
+      return;
+    }
+
+    var urls = parsePhotoUrls(photosInput.value).slice(0, 6);
     els.listingPhotoPreview.innerHTML = '';
 
     urls.forEach(function (url) {
@@ -994,6 +1074,10 @@
   }
 
   function setStatus(element, message, type) {
+    if (!element) {
+      return;
+    }
+
     element.textContent = message || '';
     element.classList.toggle('is-error', type === 'error');
     element.classList.toggle('is-success', type === 'success');
@@ -1001,5 +1085,19 @@
 
   function getErrorMessage(error) {
     return error && error.message ? error.message : String(error || 'Unknown error');
+  }
+
+  function isDashboardPage() {
+    return state.page === 'dashboard';
+  }
+
+  function redirectToDashboard() {
+    var url = new URL('dashboard.html', window.location.href);
+    window.location.href = url.href;
+  }
+
+  function redirectToLogin() {
+    var url = new URL('index.html', window.location.href);
+    window.location.href = url.href;
   }
 })();

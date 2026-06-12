@@ -4,60 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>PureForm Admin</title>
+  <title>PureForm Admin Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/pureform-admin.css">
 </head>
-<body class="admin-page" data-admin-page="login">
+<body class="admin-page" data-admin-page="dashboard">
   <main id="adminApp" class="admin-app">
-    <section id="authView" class="admin-auth" aria-labelledby="authTitle">
-      <div class="auth-panel brand-panel">
-        <a class="admin-brand" href="../index.html" aria-label="Back to PureForm homepage">PureForm</a>
-        <p class="eyebrow">Private Admin</p>
-        <h1 id="authTitle">Manage products, stock, pricing, and content.</h1>
-        <p class="auth-copy">This route connects to Supabase Auth and only loads the dashboard for users listed in <code>admin_profiles</code>.</p>
-      </div>
-
-      <div class="auth-panel">
-        <form id="configForm" class="admin-form" autocomplete="off">
-          <div class="form-head">
-            <p class="eyebrow">Supabase Setup</p>
-            <h2>Connect project</h2>
-          </div>
-          <label>
-            <span>Project URL</span>
-            <input id="supabaseUrl" name="supabaseUrl" type="url" placeholder="https://your-project.supabase.co" required>
-          </label>
-          <label>
-            <span>Anon public key</span>
-            <input id="supabaseAnonKey" name="supabaseAnonKey" type="password" autocomplete="off" required>
-          </label>
-          <div class="button-row">
-            <button type="submit" class="btn btn-primary">Save connection</button>
-            <button type="button" id="clearConfigButton" class="btn btn-secondary">Clear</button>
-          </div>
-          <p class="help-text">Use the anon public key only. Never paste the service-role key into browser code.</p>
-        </form>
-
-        <form id="loginForm" class="admin-form login-form" autocomplete="on">
-          <div class="form-head">
-            <p class="eyebrow">Authorized Access</p>
-            <h2>Sign in</h2>
-          </div>
-          <label>
-            <span>Email</span>
-            <input id="adminEmail" name="email" type="email" autocomplete="email" required>
-          </label>
-          <label>
-            <span>Password</span>
-            <input id="adminPassword" name="password" type="password" autocomplete="current-password" required>
-          </label>
-          <button type="submit" class="btn btn-primary full-width">Open dashboard</button>
-        </form>
-
-        <div id="authStatus" class="status-message" role="status" aria-live="polite"></div>
+    <section id="dashboardLoading" class="dashboard-loading" aria-live="polite">
+      <div class="auth-panel loading-panel">
+        <a class="admin-brand" href="../index.html">PureForm</a>
+        <p class="eyebrow">Admin Dashboard</p>
+        <h1>Opening your workspace.</h1>
+        <p class="auth-copy">Checking the saved Supabase session before loading store data.</p>
       </div>
     </section>
 
@@ -93,9 +53,11 @@
         <div id="dashboardStatus" class="status-message dashboard-status" role="status" aria-live="polite"></div>
 
         <section id="overviewPanel" class="view-panel" aria-labelledby="overviewHeading">
-          <div class="section-head">
-            <p class="eyebrow">Control Room</p>
-            <h2 id="overviewHeading">Store health at a glance.</h2>
+          <div class="section-head dashboard-section-head">
+            <div>
+              <p class="eyebrow">Control Room</p>
+              <h2 id="overviewHeading">Store health at a glance.</h2>
+            </div>
           </div>
           <div id="statsGrid" class="stats-grid"></div>
           <div class="panel-grid">
