@@ -102,6 +102,11 @@
     bind(els.deleteListingButton, 'click', onDeleteListing);
     bind(document.getElementById('listingPhotos'), 'input', renderPhotoPreviewFromForm);
     bind(document.getElementById('listingName'), 'input', maybeFillSlug);
+    bind(document.getElementById('listingPrice'), 'input', renderPricePreview);
+    bind(document.getElementById('listingDiscount'), 'input', renderPricePreview);
+    bind(document.getElementById('listingDiscountMode'), 'change', renderPricePreview);
+    bind(document.getElementById('listingDiscountStartsAt'), 'input', renderPricePreview);
+    bind(document.getElementById('listingDiscountEndsAt'), 'input', renderPricePreview);
 
     bind(els.newContentButton, 'click', function () {
       fillContentForm();
@@ -396,7 +401,7 @@
   async function loadListings() {
     var result = await state.supabase
       .from('site_listings')
-      .select('id,slug,name,description,price,discount,inventory_quantity,inventory_status,visible,photo_urls,sort_order,updated_at')
+      .select('id,slug,name,description,price,discount,discount_mode,discount_starts_at,discount_ends_at,inventory_quantity,inventory_status,inventory_note,visible,photo_urls,sort_order,updated_at')
       .order('sort_order', { ascending: true })
       .order('name', { ascending: true });
 
@@ -443,7 +448,7 @@
 
     var totalListings = state.listings.length;
     var visibleListings = state.listings.filter(function (item) { return item.visible; }).length;
-    var activeDiscounts = state.listings.filter(function (item) { return Number(item.discount) > 0; }).length;
+    var activeDiscounts = state.listings.filter(isDiscountActive).length;
     var inventoryUnits = state.listings.reduce(function (sum, item) {
       return sum + Number(item.inventory_quantity || 0);
     }, 0);
@@ -492,7 +497,7 @@
     );
 
     var discountItems = state.listings.filter(function (item) {
-      return Number(item.discount) > 0;
+      return isDiscountActive(item);
     });
     els.discountBadge.textContent = discountItems.length + ' active';
     renderMiniList(
@@ -501,7 +506,7 @@
       function (item) {
         return {
           title: item.name,
-          meta: formatCurrency(Number(item.price || 0)),
+          meta: formatCurrency(Number(item.price || 0)) + ' -> ' + formatCurrency(discountedPrice(item)) + ' / ' + discountWindowLabel(item),
           value: Number(item.discount || 0) + '% off'
         };
       },
@@ -587,7 +592,23 @@
       listingCell.appendChild(listingWrap);
 
       var priceCell = document.createElement('td');
-      priceCell.textContent = formatCurrency(Number(listing.price || 0));
+      var priceStack = document.createElement('div');
+      priceStack.className = 'price-stack';
+      var basePrice = document.createElement('strong');
+      basePrice.textContent = formatCurrency(discountedPrice(listing));
+      priceStack.appendChild(basePrice);
+
+      if (isDiscountActive(listing)) {
+        var oldPrice = document.createElement('span');
+        oldPrice.textContent = formatCurrency(Number(listing.price || 0)) + ' before discount';
+        priceStack.appendChild(oldPrice);
+      } else {
+        var noDiscount = document.createElement('span');
+        noDiscount.textContent = 'No active discount';
+        priceStack.appendChild(noDiscount);
+      }
+
+      priceCell.appendChild(priceStack);
 
       var discountCell = document.createElement('td');
       var discountInput = document.createElement('input');
@@ -824,14 +845,19 @@
     document.getElementById('listingDescription').value = isExisting ? listing.description : '';
     document.getElementById('listingPrice').value = isExisting ? normalizeNumber(listing.price) : '87.78';
     document.getElementById('listingDiscount').value = isExisting ? normalizeNumber(listing.discount) : '0';
+    document.getElementById('listingDiscountMode').value = isExisting ? listing.discount_mode || 'ongoing' : 'ongoing';
+    document.getElementById('listingDiscountStartsAt').value = isExisting ? toDateTimeLocal(listing.discount_starts_at) : '';
+    document.getElementById('listingDiscountEndsAt').value = isExisting ? toDateTimeLocal(listing.discount_ends_at) : '';
     document.getElementById('listingInventory').value = isExisting ? String(Number(listing.inventory_quantity || 0)) : '0';
     document.getElementById('listingStatus').value = isExisting ? listing.inventory_status : 'in_stock';
+    document.getElementById('listingInventoryNote').value = isExisting ? listing.inventory_note || '' : '';
     document.getElementById('listingVisible').checked = isExisting ? Boolean(listing.visible) : true;
     document.getElementById('listingSortOrder').value = isExisting ? String(Number(listing.sort_order || 0)) : String(nextSortOrder());
     document.getElementById('listingPhotos').value = isExisting ? (listing.photo_urls || []).join('\n') : '';
     els.listingFormTitle.textContent = isExisting ? 'Edit listing' : 'New listing';
     els.deleteListingButton.hidden = !isExisting;
     renderPhotoPreviewFromForm();
+    renderPricePreview();
   }
 
   function collectListingPayload() {
@@ -844,8 +870,14 @@
       description: document.getElementById('listingDescription').value.trim(),
       price: price,
       discount: discount,
+      discount_mode: document.getElementById('listingDiscountMode').value,
+      discount_starts_at: fromDateTimeLocal(document.getElementById('listingDiscountStartsAt').value),
+      discount_ends_at: document.getElementById('listingDiscountMode').value === 'ongoing'
+        ? null
+        : fromDateTimeLocal(document.getElementById('listingDiscountEndsAt').value),
       inventory_quantity: Math.max(0, parseInteger(document.getElementById('listingInventory').value)),
       inventory_status: document.getElementById('listingStatus').value,
+      inventory_note: document.getElementById('listingInventoryNote').value.trim(),
       visible: document.getElementById('listingVisible').checked,
       sort_order: parseInteger(document.getElementById('listingSortOrder').value),
       photo_urls: parsePhotoUrls(document.getElementById('listingPhotos').value)
@@ -878,6 +910,45 @@
       img.loading = 'lazy';
       els.listingPhotoPreview.appendChild(img);
     });
+  }
+
+  function renderPricePreview() {
+    var preview = document.getElementById('listingPricePreview');
+    var priceInput = document.getElementById('listingPrice');
+    var discountInput = document.getElementById('listingDiscount');
+    var modeInput = document.getElementById('listingDiscountMode');
+    var startsInput = document.getElementById('listingDiscountStartsAt');
+    var endsInput = document.getElementById('listingDiscountEndsAt');
+
+    if (!preview || !priceInput || !discountInput || !modeInput) {
+      return;
+    }
+
+    var listing = {
+      price: Math.max(0, parseDecimal(priceInput.value)),
+      discount: clamp(parseDecimal(discountInput.value), 0, 100),
+      discount_mode: modeInput.value || 'ongoing',
+      discount_starts_at: fromDateTimeLocal(startsInput ? startsInput.value : ''),
+      discount_ends_at: fromDateTimeLocal(endsInput ? endsInput.value : '')
+    };
+
+    var active = isDiscountActive(listing);
+    preview.innerHTML = '';
+
+    var base = document.createElement('span');
+    base.textContent = 'Base: ' + formatCurrency(listing.price);
+
+    var sale = document.createElement('strong');
+    sale.textContent = active
+      ? 'Active price: ' + formatCurrency(discountedPrice(listing))
+      : 'No active discount';
+
+    var windowText = document.createElement('span');
+    windowText.textContent = discountWindowLabel(listing);
+
+    preview.appendChild(base);
+    preview.appendChild(sale);
+    preview.appendChild(windowText);
   }
 
   async function onContentTableClick(event) {
@@ -1038,6 +1109,78 @@
     return Number.isInteger(number) ? String(number) : number.toFixed(2);
   }
 
+  function isDiscountActive(listing) {
+    var discount = Number(listing && listing.discount ? listing.discount : 0);
+    if (!discount) {
+      return false;
+    }
+
+    if ((listing.discount_mode || 'ongoing') === 'ongoing') {
+      return true;
+    }
+
+    var now = Date.now();
+    var startsAt = listing.discount_starts_at ? new Date(listing.discount_starts_at).getTime() : null;
+    var endsAt = listing.discount_ends_at ? new Date(listing.discount_ends_at).getTime() : null;
+
+    if (startsAt && now < startsAt) {
+      return false;
+    }
+
+    if (endsAt && now > endsAt) {
+      return false;
+    }
+
+    return true;
+  }
+
+  function discountedPrice(listing) {
+    var price = Number(listing && listing.price ? listing.price : 0);
+    if (!isDiscountActive(listing)) {
+      return price;
+    }
+
+    var discount = clamp(Number(listing.discount || 0), 0, 100);
+    return Math.max(0, price * (1 - discount / 100));
+  }
+
+  function discountWindowLabel(listing) {
+    if (!Number(listing && listing.discount ? listing.discount : 0)) {
+      return 'No discount configured';
+    }
+
+    if ((listing.discount_mode || 'ongoing') === 'ongoing') {
+      return 'Ongoing, no end date';
+    }
+
+    var starts = listing.discount_starts_at ? formatDateTime(listing.discount_starts_at) : 'Now';
+    var ends = listing.discount_ends_at ? formatDateTime(listing.discount_ends_at) : 'No end date';
+    return starts + ' to ' + ends;
+  }
+
+  function toDateTimeLocal(value) {
+    if (!value) {
+      return '';
+    }
+
+    var date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
+    var offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+  }
+
+  function fromDateTimeLocal(value) {
+    if (!value) {
+      return null;
+    }
+
+    var date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+
   function statusLabel(value) {
     return String(value || '')
       .replace(/_/g, ' ')
@@ -1062,6 +1205,19 @@
       month: 'short',
       day: 'numeric',
       year: 'numeric'
+    }).format(new Date(value));
+  }
+
+  function formatDateTime(value) {
+    if (!value) {
+      return '';
+    }
+
+    return new Intl.DateTimeFormat('en', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     }).format(new Date(value));
   }
 

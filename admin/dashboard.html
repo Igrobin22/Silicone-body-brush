@@ -139,6 +139,24 @@
                     <input id="listingDiscount" name="discount" type="number" min="0" max="100" step="0.01">
                   </label>
                 </div>
+                <div id="listingPricePreview" class="discount-preview" aria-live="polite"></div>
+                <div class="form-grid two">
+                  <label>
+                    <span>Discount timing</span>
+                    <select id="listingDiscountMode" name="discount_mode">
+                      <option value="ongoing">Ongoing, no end date</option>
+                      <option value="fixed">Fixed time period</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Discount starts</span>
+                    <input id="listingDiscountStartsAt" name="discount_starts_at" type="datetime-local">
+                  </label>
+                </div>
+                <label>
+                  <span>Discount ends</span>
+                  <input id="listingDiscountEndsAt" name="discount_ends_at" type="datetime-local">
+                </label>
                 <div class="form-grid two">
                   <label>
                     <span>Inventory</span>
@@ -154,6 +172,10 @@
                     </select>
                   </label>
                 </div>
+                <label>
+                  <span>Inventory details</span>
+                  <textarea id="listingInventoryNote" name="inventory_note" rows="3" placeholder="Example: Low stock, shipment expected Friday, or COD availability note"></textarea>
+                </label>
                 <div class="form-grid two">
                   <label>
                     <span>Sort order</span>
@@ -179,7 +201,7 @@
           <div class="section-head split">
             <div>
               <p class="eyebrow">Content Data</p>
-              <h2 id="contentHeading">Site-wide copy blocks.</h2>
+              <h2 id="contentHeading">Announcements, popup, and site copy.</h2>
             </div>
             <button type="button" id="newContentButton" class="btn btn-primary">Add block</button>
           </div>

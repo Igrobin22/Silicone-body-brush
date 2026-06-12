@@ -584,6 +584,21 @@ a:focus-visible {
   font-size: 12px;
 }
 
+.price-stack {
+  display: grid;
+  gap: 4px;
+}
+
+.price-stack strong {
+  color: var(--dark);
+  font-weight: 600;
+}
+
+.price-stack span {
+  color: var(--light);
+  font-size: 12px;
+}
+
 .quick-input {
   max-width: 92px;
   min-height: 36px;
@@ -644,6 +659,24 @@ a:focus-visible {
 
 .form-grid.two {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.discount-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(220, 238, 231, .42);
+  color: var(--mid);
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+.discount-preview strong {
+  color: var(--dark);
+  font-weight: 600;
 }
 
 .check-row {

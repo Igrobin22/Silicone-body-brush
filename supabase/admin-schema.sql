@@ -25,8 +25,12 @@ create table if not exists public.site_listings (
   description text not null default '',
   price numeric(10, 2) not null default 0,
   discount numeric(5, 2) not null default 0,
+  discount_mode text not null default 'ongoing',
+  discount_starts_at timestamptz,
+  discount_ends_at timestamptz,
   inventory_quantity integer not null default 0,
   inventory_status text not null default 'in_stock',
+  inventory_note text not null default '',
   visible boolean not null default true,
   photo_urls text[] not null default '{}',
   sort_order integer not null default 0,
@@ -34,11 +38,53 @@ create table if not exists public.site_listings (
   updated_at timestamptz not null default now(),
   constraint site_listings_price_check check (price >= 0),
   constraint site_listings_discount_check check (discount >= 0 and discount <= 100),
+  constraint site_listings_discount_mode_check check (discount_mode in ('ongoing', 'fixed')),
+  constraint site_listings_discount_dates_check check (
+    discount_mode = 'ongoing'
+    or discount_ends_at is null
+    or discount_starts_at is null
+    or discount_ends_at >= discount_starts_at
+  ),
   constraint site_listings_inventory_quantity_check check (inventory_quantity >= 0),
   constraint site_listings_inventory_status_check check (
     inventory_status in ('in_stock', 'low_stock', 'out_of_stock', 'preorder')
   )
 );
+
+alter table public.site_listings
+  add column if not exists discount_mode text not null default 'ongoing',
+  add column if not exists discount_starts_at timestamptz,
+  add column if not exists discount_ends_at timestamptz,
+  add column if not exists inventory_note text not null default '';
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'site_listings_discount_mode_check'
+      and conrelid = 'public.site_listings'::regclass
+  ) then
+    alter table public.site_listings
+      add constraint site_listings_discount_mode_check
+      check (discount_mode in ('ongoing', 'fixed'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'site_listings_discount_dates_check'
+      and conrelid = 'public.site_listings'::regclass
+  ) then
+    alter table public.site_listings
+      add constraint site_listings_discount_dates_check
+      check (
+        discount_mode = 'ongoing'
+        or discount_ends_at is null
+        or discount_starts_at is null
+        or discount_ends_at >= discount_starts_at
+      );
+  end if;
+end;
+$$;
 
 create table if not exists public.site_content_blocks (
   id uuid primary key default gen_random_uuid(),
@@ -56,6 +102,7 @@ create table if not exists public.site_content_blocks (
 create index if not exists admin_profiles_email_idx on public.admin_profiles (email);
 create index if not exists site_listings_visible_sort_idx on public.site_listings (visible, sort_order);
 create index if not exists site_listings_inventory_status_idx on public.site_listings (inventory_status);
+create index if not exists site_listings_discount_window_idx on public.site_listings (discount_mode, discount_starts_at, discount_ends_at);
 create index if not exists site_listings_updated_at_idx on public.site_listings (updated_at desc);
 create index if not exists site_content_blocks_key_idx on public.site_content_blocks (key);
 
@@ -194,14 +241,32 @@ for delete
 to authenticated
 using (public.is_admin());
 
+with duplicate_listings as (
+  select
+    id,
+    row_number() over (
+      partition by lower(trim(name))
+      order by sort_order asc, updated_at desc, id
+    ) as duplicate_rank
+  from public.site_listings
+)
+delete from public.site_listings target
+using duplicate_listings ranked
+where target.id = ranked.id
+  and ranked.duplicate_rank > 1;
+
 insert into public.site_listings (
   slug,
   name,
   description,
   price,
   discount,
+  discount_mode,
+  discount_starts_at,
+  discount_ends_at,
   inventory_quantity,
   inventory_status,
+  inventory_note,
   visible,
   photo_urls,
   sort_order
@@ -213,11 +278,18 @@ values
     'A complete silicone brush set with a back scrubber, body brush, scalp massager, and face brush.',
     87.78,
     50,
+    'ongoing',
+    null,
+    null,
     24,
     'in_stock',
+    'Ready to ship. Includes back scrubber, body brush, scalp massager, and face brush.',
     true,
     array[
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/main_img_voei63.png'
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553521/Main_with_background_anlah0.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553513/grey_white_bg_irnzyc.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553535/grey_Head_h1duwj.png'
     ],
     10
   ),
@@ -227,11 +299,15 @@ values
     'The same four-piece PureForm routine in Black.',
     87.78,
     50,
+    'ongoing',
+    null,
+    null,
     18,
     'in_stock',
+    'Black set listing. Keep stock count synced with available black inventory.',
     true,
     array[
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/main_img_voei63.png'
+      '/assets/pureform-body-brush.png'
     ],
     20
   ),
@@ -241,11 +317,24 @@ values
     'A softer Pink finish for the same face, scalp, body, and back care routine.',
     87.78,
     50,
+    'ongoing',
+    null,
+    null,
     12,
     'low_stock',
+    'Low stock alert. Uses dedicated pink product photography.',
     true,
     array[
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/main_img_voei63.png'
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/main_img_voei63.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227618/main_img_without_bg_mbrxsg.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227616/p_body_1_kgg059.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/p_body_2_lv1x37.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/p_face_1_f4vdyz.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_face_2_yoirlr.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_head_1_yquyts.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227620/p_head_2_vtl4pl.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_handle_1_crtic9.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_handle_2_komo0m.png'
     ],
     30
   )
@@ -255,8 +344,12 @@ set
   description = excluded.description,
   price = excluded.price,
   discount = excluded.discount,
+  discount_mode = excluded.discount_mode,
+  discount_starts_at = excluded.discount_starts_at,
+  discount_ends_at = excluded.discount_ends_at,
   inventory_quantity = excluded.inventory_quantity,
   inventory_status = excluded.inventory_status,
+  inventory_note = excluded.inventory_note,
   visible = excluded.visible,
   photo_urls = excluded.photo_urls,
   sort_order = excluded.sort_order;
@@ -265,7 +358,9 @@ insert into public.site_content_blocks (key, label, value, block_type)
 values
   ('home.hero.title', 'Home hero title', 'Soft touch. Deep clean. Every day.', 'text'),
   ('home.hero.body', 'Home hero body', 'A complete silicone brush set made for smoother cleansing, easier reach, and a fresher post-shower feel.', 'text'),
-  ('site.announcement', 'Announcement bar', 'Free delivery checks and 15-day returns on PureForm orders', 'text')
+  ('site.announcement', 'Announcement bar', 'Free delivery checks and 15-day returns on PureForm orders', 'text'),
+  ('sidebar.announcement', 'Sidebar announcement', 'Need help choosing a set? Support can confirm color, stock, delivery, and COD availability.', 'text'),
+  ('popup.message', 'Popup message', 'Add the exact popup copy here once the popup purpose is confirmed.', 'text')
 on conflict (key) do update
 set
   label = excluded.label,
