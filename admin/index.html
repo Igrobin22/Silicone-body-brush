@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>PureForm Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/pureform-admin.css">
+</head>
+<body class="admin-page">
+  <main id="adminApp" class="admin-app">
+    <section id="authView" class="admin-auth" aria-labelledby="authTitle">
+      <div class="auth-panel brand-panel">
+        <a class="admin-brand" href="../index.html" aria-label="Back to PureForm homepage">PureForm</a>
+        <p class="eyebrow">Private Admin</p>
+        <h1 id="authTitle">Manage products, stock, pricing, and content.</h1>
+        <p class="auth-copy">This route connects to Supabase Auth and only loads the dashboard for users listed in <code>admin_profiles</code>.</p>
+      </div>
+
+      <div class="auth-panel">
+        <form id="configForm" class="admin-form" autocomplete="off">
+          <div class="form-head">
+            <p class="eyebrow">Supabase Setup</p>
+            <h2>Connect project</h2>
+          </div>
+          <label>
+            <span>Project URL</span>
+            <input id="supabaseUrl" name="supabaseUrl" type="url" placeholder="https://your-project.supabase.co" required>
+          </label>
+          <label>
+            <span>Anon public key</span>
+            <input id="supabaseAnonKey" name="supabaseAnonKey" type="password" autocomplete="off" required>
+          </label>
+          <div class="button-row">
+            <button type="submit" class="btn btn-primary">Save connection</button>
+            <button type="button" id="clearConfigButton" class="btn btn-secondary">Clear</button>
+          </div>
+          <p class="help-text">Use the anon public key only. Never paste the service-role key into browser code.</p>
+        </form>
+
+        <form id="loginForm" class="admin-form login-form" autocomplete="on">
+          <div class="form-head">
+            <p class="eyebrow">Authorized Access</p>
+            <h2>Sign in</h2>
+          </div>
+          <label>
+            <span>Email</span>
+            <input id="adminEmail" name="email" type="email" autocomplete="email" required>
+          </label>
+          <label>
+            <span>Password</span>
+            <input id="adminPassword" name="password" type="password" autocomplete="current-password" required>
+          </label>
+          <button type="submit" class="btn btn-primary full-width">Open dashboard</button>
+        </form>
+
+        <div id="authStatus" class="status-message" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="dashboardView" class="admin-dashboard" hidden>
+      <aside class="admin-sidebar" aria-label="Admin navigation">
+        <div>
+          <a class="admin-brand" href="../index.html">PureForm</a>
+          <p class="sidebar-note">Admin dashboard</p>
+        </div>
+        <nav class="admin-nav" aria-label="Dashboard sections">
+          <button type="button" class="nav-tab is-active" data-view="overview">Overview</button>
+          <button type="button" class="nav-tab" data-view="listings">Listings</button>
+          <button type="button" class="nav-tab" data-view="content">Site Content</button>
+        </nav>
+        <div class="admin-user">
+          <span id="adminUserEmail">Signed in</span>
+          <button type="button" id="signOutButton" class="btn btn-secondary">Sign out</button>
+        </div>
+      </aside>
+
+      <div class="admin-main">
+        <header class="admin-topbar">
+          <div>
+            <p class="eyebrow">Supabase Backend</p>
+            <h1 id="viewTitle">Overview</h1>
+          </div>
+          <div class="topbar-actions">
+            <button type="button" id="refreshButton" class="btn btn-secondary">Refresh</button>
+            <a class="btn btn-primary" href="../index.html">View site</a>
+          </div>
+        </header>
+
+        <div id="dashboardStatus" class="status-message dashboard-status" role="status" aria-live="polite"></div>
+
+        <section id="overviewPanel" class="view-panel" aria-labelledby="overviewHeading">
+          <div class="section-head">
+            <p class="eyebrow">Control Room</p>
+            <h2 id="overviewHeading">Store health at a glance.</h2>
+          </div>
+          <div id="statsGrid" class="stats-grid"></div>
+          <div class="panel-grid">
+            <article class="admin-card">
+              <div class="card-head">
+                <h3>Inventory Watch</h3>
+                <span id="inventoryBadge" class="badge">0 units</span>
+              </div>
+              <div id="inventoryList" class="mini-list"></div>
+            </article>
+            <article class="admin-card">
+              <div class="card-head">
+                <h3>Active Discounts</h3>
+                <span id="discountBadge" class="badge">0 active</span>
+              </div>
+              <div id="discountList" class="mini-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="listingsPanel" class="view-panel" aria-labelledby="listingsHeading" hidden>
+          <div class="section-head split">
+            <div>
+              <p class="eyebrow">Listings</p>
+              <h2 id="listingsHeading">Products and services.</h2>
+            </div>
+            <button type="button" id="newListingButton" class="btn btn-primary">Add listing</button>
+          </div>
+
+          <div class="manager-grid">
+            <article class="admin-card table-card">
+              <div class="table-scroll">
+                <table class="admin-table">
+                  <caption>All listings</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Listing</th>
+                      <th scope="col">Price</th>
+                      <th scope="col">Discount</th>
+                      <th scope="col">Stock</th>
+                      <th scope="col">Visible</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="listingsTableBody"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="admin-card editor-card">
+              <form id="listingForm" class="admin-form dense-form">
+                <div class="form-head split">
+                  <div>
+                    <p class="eyebrow">Editor</p>
+                    <h3 id="listingFormTitle">New listing</h3>
+                  </div>
+                  <button type="button" id="deleteListingButton" class="text-button danger" hidden>Delete</button>
+                </div>
+                <input id="listingId" name="id" type="hidden">
+                <label>
+                  <span>Name</span>
+                  <input id="listingName" name="name" type="text" required>
+                </label>
+                <label>
+                  <span>Slug</span>
+                  <input id="listingSlug" name="slug" type="text" required>
+                </label>
+                <label>
+                  <span>Description</span>
+                  <textarea id="listingDescription" name="description" rows="4"></textarea>
+                </label>
+                <div class="form-grid two">
+                  <label>
+                    <span>Price (AED)</span>
+                    <input id="listingPrice" name="price" type="number" min="0" step="0.01" required>
+                  </label>
+                  <label>
+                    <span>Discount (%)</span>
+                    <input id="listingDiscount" name="discount" type="number" min="0" max="100" step="0.01">
+                  </label>
+                </div>
+                <div class="form-grid two">
+                  <label>
+                    <span>Inventory</span>
+                    <input id="listingInventory" name="inventory_quantity" type="number" min="0" step="1">
+                  </label>
+                  <label>
+                    <span>Status</span>
+                    <select id="listingStatus" name="inventory_status">
+                      <option value="in_stock">In stock</option>
+                      <option value="low_stock">Low stock</option>
+                      <option value="out_of_stock">Out of stock</option>
+                      <option value="preorder">Preorder</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="form-grid two">
+                  <label>
+                    <span>Sort order</span>
+                    <input id="listingSortOrder" name="sort_order" type="number" step="1">
+                  </label>
+                  <label class="check-row">
+                    <input id="listingVisible" name="visible" type="checkbox">
+                    <span>Visible on public site</span>
+                  </label>
+                </div>
+                <label>
+                  <span>Photo URLs</span>
+                  <textarea id="listingPhotos" name="photo_urls" rows="5" placeholder="One image URL per line"></textarea>
+                </label>
+                <div id="listingPhotoPreview" class="image-preview" aria-live="polite"></div>
+                <button type="submit" class="btn btn-primary full-width">Save listing</button>
+              </form>
+            </article>
+          </div>
+        </section>
+
+        <section id="contentPanel" class="view-panel" aria-labelledby="contentHeading" hidden>
+          <div class="section-head split">
+            <div>
+              <p class="eyebrow">Content Data</p>
+              <h2 id="contentHeading">Site-wide copy blocks.</h2>
+            </div>
+            <button type="button" id="newContentButton" class="btn btn-primary">Add block</button>
+          </div>
+
+          <div class="manager-grid">
+            <article class="admin-card table-card">
+              <div class="table-scroll">
+                <table class="admin-table">
+                  <caption>All content blocks</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Key</th>
+                      <th scope="col">Label</th>
+                      <th scope="col">Type</th>
+                      <th scope="col">Updated</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="contentTableBody"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="admin-card editor-card">
+              <form id="contentForm" class="admin-form dense-form">
+                <div class="form-head split">
+                  <div>
+                    <p class="eyebrow">Editor</p>
+                    <h3 id="contentFormTitle">New block</h3>
+                  </div>
+                  <button type="button" id="deleteContentButton" class="text-button danger" hidden>Delete</button>
+                </div>
+                <input id="contentId" name="id" type="hidden">
+                <label>
+                  <span>Key</span>
+                  <input id="contentKey" name="key" type="text" required>
+                </label>
+                <label>
+                  <span>Label</span>
+                  <input id="contentLabel" name="label" type="text" required>
+                </label>
+                <label>
+                  <span>Type</span>
+                  <select id="contentType" name="block_type">
+                    <option value="text">Text</option>
+                    <option value="rich_text">Rich text</option>
+                    <option value="url">URL</option>
+                    <option value="json">JSON</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Value</span>
+                  <textarea id="contentValue" name="value" rows="8"></textarea>
+                </label>
+                <button type="submit" class="btn btn-primary full-width">Save content</button>
+              </form>
+            </article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="../assets/pureform-supabase-config.js" defer></script>
+  <script src="../assets/pureform-admin.js" defer></script>
+</body>
+</html>

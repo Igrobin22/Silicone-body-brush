@@ -1,0 +1,273 @@
+-- PureForm admin dashboard schema for Supabase.
+-- Run this in the Supabase SQL editor before using /admin/.
+--
+-- Bootstrap:
+-- 1. Create an auth user in Supabase Authentication.
+-- 2. Replace the values below and run it once:
+--    insert into public.admin_profiles (id, email, role)
+--    values ('AUTH_USER_UUID', 'owner@example.com', 'admin');
+
+create extension if not exists pgcrypto;
+
+create table if not exists public.admin_profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text not null,
+  role text not null default 'admin',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint admin_profiles_role_check check (role in ('admin'))
+);
+
+create table if not exists public.site_listings (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  name text not null,
+  description text not null default '',
+  price numeric(10, 2) not null default 0,
+  discount numeric(5, 2) not null default 0,
+  inventory_quantity integer not null default 0,
+  inventory_status text not null default 'in_stock',
+  visible boolean not null default true,
+  photo_urls text[] not null default '{}',
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint site_listings_price_check check (price >= 0),
+  constraint site_listings_discount_check check (discount >= 0 and discount <= 100),
+  constraint site_listings_inventory_quantity_check check (inventory_quantity >= 0),
+  constraint site_listings_inventory_status_check check (
+    inventory_status in ('in_stock', 'low_stock', 'out_of_stock', 'preorder')
+  )
+);
+
+create table if not exists public.site_content_blocks (
+  id uuid primary key default gen_random_uuid(),
+  key text not null unique,
+  label text not null,
+  value text not null default '',
+  block_type text not null default 'text',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint site_content_blocks_type_check check (
+    block_type in ('text', 'rich_text', 'url', 'json')
+  )
+);
+
+create index if not exists admin_profiles_email_idx on public.admin_profiles (email);
+create index if not exists site_listings_visible_sort_idx on public.site_listings (visible, sort_order);
+create index if not exists site_listings_inventory_status_idx on public.site_listings (inventory_status);
+create index if not exists site_listings_updated_at_idx on public.site_listings (updated_at desc);
+create index if not exists site_content_blocks_key_idx on public.site_content_blocks (key);
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists admin_profiles_set_updated_at on public.admin_profiles;
+create trigger admin_profiles_set_updated_at
+before update on public.admin_profiles
+for each row execute function public.set_updated_at();
+
+drop trigger if exists site_listings_set_updated_at on public.site_listings;
+create trigger site_listings_set_updated_at
+before update on public.site_listings
+for each row execute function public.set_updated_at();
+
+drop trigger if exists site_content_blocks_set_updated_at on public.site_content_blocks;
+create trigger site_content_blocks_set_updated_at
+before update on public.site_content_blocks
+for each row execute function public.set_updated_at();
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1
+    from public.admin_profiles
+    where id = auth.uid()
+      and role = 'admin'
+  );
+$$;
+
+revoke all on function public.is_admin() from public;
+grant execute on function public.is_admin() to anon, authenticated;
+
+alter table public.admin_profiles enable row level security;
+alter table public.site_listings enable row level security;
+alter table public.site_content_blocks enable row level security;
+
+drop policy if exists admin_profiles_select_own on public.admin_profiles;
+drop policy if exists admin_profiles_select_own_or_admin on public.admin_profiles;
+create policy admin_profiles_select_own
+on public.admin_profiles
+for select
+to authenticated
+using (id = auth.uid());
+
+drop policy if exists admin_profiles_admin_insert on public.admin_profiles;
+create policy admin_profiles_admin_insert
+on public.admin_profiles
+for insert
+to authenticated
+with check (public.is_admin());
+
+drop policy if exists admin_profiles_admin_update on public.admin_profiles;
+create policy admin_profiles_admin_update
+on public.admin_profiles
+for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists admin_profiles_admin_delete on public.admin_profiles;
+create policy admin_profiles_admin_delete
+on public.admin_profiles
+for delete
+to authenticated
+using (public.is_admin());
+
+drop policy if exists site_listings_public_visible_select on public.site_listings;
+create policy site_listings_public_visible_select
+on public.site_listings
+for select
+to anon, authenticated
+using (visible = true or public.is_admin());
+
+drop policy if exists site_listings_admin_insert on public.site_listings;
+create policy site_listings_admin_insert
+on public.site_listings
+for insert
+to authenticated
+with check (public.is_admin());
+
+drop policy if exists site_listings_admin_update on public.site_listings;
+create policy site_listings_admin_update
+on public.site_listings
+for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists site_listings_admin_delete on public.site_listings;
+create policy site_listings_admin_delete
+on public.site_listings
+for delete
+to authenticated
+using (public.is_admin());
+
+drop policy if exists site_content_blocks_public_select on public.site_content_blocks;
+create policy site_content_blocks_public_select
+on public.site_content_blocks
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists site_content_blocks_admin_insert on public.site_content_blocks;
+create policy site_content_blocks_admin_insert
+on public.site_content_blocks
+for insert
+to authenticated
+with check (public.is_admin());
+
+drop policy if exists site_content_blocks_admin_update on public.site_content_blocks;
+create policy site_content_blocks_admin_update
+on public.site_content_blocks
+for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists site_content_blocks_admin_delete on public.site_content_blocks;
+create policy site_content_blocks_admin_delete
+on public.site_content_blocks
+for delete
+to authenticated
+using (public.is_admin());
+
+insert into public.site_listings (
+  slug,
+  name,
+  description,
+  price,
+  discount,
+  inventory_quantity,
+  inventory_status,
+  visible,
+  photo_urls,
+  sort_order
+)
+values
+  (
+    'grey-4-piece-silicone-brush-set',
+    'Grey 4-Piece Silicone Brush Set',
+    'A complete silicone brush set with a back scrubber, body brush, scalp massager, and face brush.',
+    87.78,
+    50,
+    24,
+    'in_stock',
+    true,
+    array[
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/main_img_voei63.png'
+    ],
+    10
+  ),
+  (
+    'black-4-piece-silicone-brush-set',
+    'Black 4-Piece Silicone Brush Set',
+    'The same four-piece PureForm routine in Black.',
+    87.78,
+    50,
+    18,
+    'in_stock',
+    true,
+    array[
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/main_img_voei63.png'
+    ],
+    20
+  ),
+  (
+    'pink-4-piece-silicone-brush-set',
+    'Pink 4-Piece Silicone Brush Set',
+    'A softer Pink finish for the same face, scalp, body, and back care routine.',
+    87.78,
+    50,
+    12,
+    'low_stock',
+    true,
+    array[
+      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/main_img_voei63.png'
+    ],
+    30
+  )
+on conflict (slug) do update
+set
+  name = excluded.name,
+  description = excluded.description,
+  price = excluded.price,
+  discount = excluded.discount,
+  inventory_quantity = excluded.inventory_quantity,
+  inventory_status = excluded.inventory_status,
+  visible = excluded.visible,
+  photo_urls = excluded.photo_urls,
+  sort_order = excluded.sort_order;
+
+insert into public.site_content_blocks (key, label, value, block_type)
+values
+  ('home.hero.title', 'Home hero title', 'Soft touch. Deep clean. Every day.', 'text'),
+  ('home.hero.body', 'Home hero body', 'A complete silicone brush set made for smoother cleansing, easier reach, and a fresher post-shower feel.', 'text'),
+  ('site.announcement', 'Announcement bar', 'Free delivery checks and 15-day returns on PureForm orders', 'text')
+on conflict (key) do update
+set
+  label = excluded.label,
+  value = excluded.value,
+  block_type = excluded.block_type;
