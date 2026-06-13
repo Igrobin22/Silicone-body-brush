@@ -287,11 +287,17 @@
                     <span>Visible on public site</span>
                   </label>
                 </div>
-                <label>
-                  <span>Photo URLs</span>
-                  <textarea id="listingPhotos" name="photo_urls" rows="5" placeholder="One image URL per line"></textarea>
-                </label>
-                <div id="listingPhotoPreview" class="image-preview" aria-live="polite"></div>
+                <div class="photo-url-editor" aria-labelledby="listingPhotosLabel">
+                  <div class="photo-url-editor-head">
+                    <div>
+                      <span id="listingPhotosLabel">Photo URLs</span>
+                      <small>Each URL gets its own preview.</small>
+                    </div>
+                    <button type="button" id="addListingPhotoButton" class="photo-add-button" aria-label="Add another photo URL">+</button>
+                  </div>
+                  <textarea id="listingPhotos" name="photo_urls" hidden aria-hidden="true" tabindex="-1"></textarea>
+                  <div id="listingPhotoPreview" class="photo-url-list" aria-live="polite" aria-label="Listing photo URL fields"></div>
+                </div>
                 <button type="submit" class="btn btn-primary full-width">Save listing</button>
               </form>
             </article>

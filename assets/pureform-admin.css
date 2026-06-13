@@ -826,18 +826,109 @@ a:focus-visible {
   accent-color: var(--dark);
 }
 
-.image-preview {
+.photo-url-editor {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
-.image-preview img {
-  width: 100%;
+.photo-url-editor-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.photo-url-editor-head span {
+  display: block;
+  color: var(--mid);
+  font-size: 12px;
+}
+
+.photo-url-editor-head small {
+  display: block;
+  margin-top: 3px;
+  color: var(--light);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.photo-add-button,
+.photo-remove-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .82);
+  color: var(--dark);
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms var(--ease);
+}
+
+.photo-add-button {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.photo-remove-button {
+  width: 34px;
+  height: 34px;
+  color: var(--mid);
+  font-size: 18px;
+}
+
+.photo-add-button:hover,
+.photo-remove-button:hover {
+  border-color: rgba(17, 17, 17, .25);
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.photo-url-list {
+  display: grid;
+  gap: 9px;
+}
+
+.photo-url-row {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) 34px;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .58);
+  padding: 8px;
+}
+
+.photo-url-row input {
+  min-width: 0;
+  min-height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .9);
+  font-size: 12px;
+}
+
+.photo-url-thumb {
+  position: relative;
+  display: grid;
+  width: 74px;
   aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--soft);
+  color: var(--light);
+  font-size: 10px;
+  text-align: center;
+}
+
+.photo-url-thumb img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 

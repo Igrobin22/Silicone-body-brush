@@ -94,6 +94,7 @@
     els.listingFormTitle = document.getElementById('listingFormTitle');
     els.deleteListingButton = document.getElementById('deleteListingButton');
     els.listingPhotoPreview = document.getElementById('listingPhotoPreview');
+    els.addListingPhotoButton = document.getElementById('addListingPhotoButton');
     els.newContentButton = document.getElementById('newContentButton');
     els.contentTableBody = document.getElementById('contentTableBody');
     els.contentForm = document.getElementById('contentForm');
@@ -146,6 +147,15 @@
     bind(els.listingsTableBody, 'change', onListingsTableChange);
     bind(els.listingForm, 'submit', onListingSubmit);
     bind(els.deleteListingButton, 'click', onDeleteListing);
+    bind(els.addListingPhotoButton, 'click', function () {
+      var input = addPhotoUrlField('');
+      syncPhotoUrlsFromFields();
+      if (input) {
+        input.focus();
+      }
+    });
+    bind(els.listingPhotoPreview, 'input', onPhotoUrlListInput);
+    bind(els.listingPhotoPreview, 'click', onPhotoUrlListClick);
     bind(document.getElementById('listingPhotos'), 'input', renderPhotoPreviewFromForm);
     bind(document.getElementById('listingName'), 'input', maybeFillSlug);
     bind(document.getElementById('listingPrice'), 'input', renderPricePreview);
@@ -1381,7 +1391,7 @@
       inventory_note: document.getElementById('listingInventoryNote').value.trim(),
       visible: document.getElementById('listingVisible').checked,
       sort_order: parseInteger(document.getElementById('listingSortOrder').value),
-      photo_urls: parsePhotoUrls(document.getElementById('listingPhotos').value)
+      photo_urls: getPhotoUrlsFromForm()
     };
   }
 
@@ -1401,16 +1411,167 @@
       return;
     }
 
-    var urls = parsePhotoUrls(photosInput.value).slice(0, 6);
+    var urls = parsePhotoUrls(photosInput.value);
     els.listingPhotoPreview.innerHTML = '';
 
-    urls.forEach(function (url) {
-      var img = document.createElement('img');
-      img.src = url;
-      img.alt = '';
-      img.loading = 'lazy';
-      els.listingPhotoPreview.appendChild(img);
+    (urls.length ? urls : ['']).forEach(function (url) {
+      addPhotoUrlField(url);
     });
+
+    syncPhotoUrlsFromFields();
+  }
+
+  function addPhotoUrlField(url) {
+    if (!els.listingPhotoPreview) {
+      return null;
+    }
+
+    var row = document.createElement('div');
+    row.className = 'photo-url-row';
+
+    var preview = document.createElement('div');
+    preview.className = 'photo-url-thumb';
+
+    var img = document.createElement('img');
+    img.alt = '';
+    img.loading = 'lazy';
+
+    var placeholder = document.createElement('span');
+    placeholder.textContent = 'Preview';
+
+    preview.appendChild(img);
+    preview.appendChild(placeholder);
+
+    var input = document.createElement('input');
+    input.type = 'url';
+    input.inputMode = 'url';
+    input.placeholder = 'https://res.cloudinary.com/...';
+    input.value = url || '';
+    input.dataset.photoUrlInput = 'true';
+
+    var removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.className = 'photo-remove-button';
+    removeButton.dataset.action = 'remove-photo-url';
+    removeButton.textContent = '×';
+
+    row.appendChild(preview);
+    row.appendChild(input);
+    row.appendChild(removeButton);
+    els.listingPhotoPreview.appendChild(row);
+
+    updatePhotoRowPreview(row);
+    refreshPhotoRowIndexes();
+
+    return input;
+  }
+
+  function onPhotoUrlListInput(event) {
+    var input = event.target.closest('[data-photo-url-input]');
+    if (!input) {
+      return;
+    }
+
+    updatePhotoRowPreview(input.closest('.photo-url-row'));
+    syncPhotoUrlsFromFields();
+  }
+
+  function onPhotoUrlListClick(event) {
+    var button = event.target.closest('[data-action="remove-photo-url"]');
+    if (!button) {
+      return;
+    }
+
+    var row = button.closest('.photo-url-row');
+    if (row) {
+      row.remove();
+    }
+
+    if (els.listingPhotoPreview && !els.listingPhotoPreview.querySelector('.photo-url-row')) {
+      addPhotoUrlField('');
+    }
+
+    refreshPhotoRowIndexes();
+    syncPhotoUrlsFromFields();
+  }
+
+  function updatePhotoRowPreview(row) {
+    if (!row) {
+      return;
+    }
+
+    var input = row.querySelector('[data-photo-url-input]');
+    var preview = row.querySelector('.photo-url-thumb');
+    var img = preview ? preview.querySelector('img') : null;
+    var placeholder = preview ? preview.querySelector('span') : null;
+    var url = input ? input.value.trim() : '';
+
+    if (!preview || !img || !placeholder) {
+      return;
+    }
+
+    preview.classList.remove('has-image');
+    img.hidden = true;
+    img.removeAttribute('src');
+    placeholder.hidden = false;
+    placeholder.textContent = url ? 'Loading' : 'Preview';
+
+    if (!url) {
+      return;
+    }
+
+    img.onload = function () {
+      preview.classList.add('has-image');
+      img.hidden = false;
+      placeholder.hidden = true;
+    };
+
+    img.onerror = function () {
+      preview.classList.remove('has-image');
+      img.hidden = true;
+      placeholder.hidden = false;
+      placeholder.textContent = 'No preview';
+    };
+
+    img.src = url;
+  }
+
+  function refreshPhotoRowIndexes() {
+    if (!els.listingPhotoPreview) {
+      return;
+    }
+
+    Array.prototype.slice.call(els.listingPhotoPreview.querySelectorAll('.photo-url-row')).forEach(function (row, index) {
+      var input = row.querySelector('[data-photo-url-input]');
+      var button = row.querySelector('[data-action="remove-photo-url"]');
+      var number = index + 1;
+
+      if (input) {
+        input.setAttribute('aria-label', 'Photo URL ' + number);
+      }
+
+      if (button) {
+        button.setAttribute('aria-label', 'Remove photo URL ' + number);
+      }
+    });
+  }
+
+  function getPhotoUrlsFromForm() {
+    syncPhotoUrlsFromFields();
+    return parsePhotoUrls(document.getElementById('listingPhotos').value);
+  }
+
+  function syncPhotoUrlsFromFields() {
+    var photosInput = document.getElementById('listingPhotos');
+    if (!photosInput || !els.listingPhotoPreview) {
+      return;
+    }
+
+    var urls = Array.prototype.slice.call(els.listingPhotoPreview.querySelectorAll('[data-photo-url-input]'))
+      .map(function (input) { return input.value.trim(); })
+      .filter(Boolean);
+
+    photosInput.value = urls.join('\n');
   }
 
   function renderPricePreview() {
