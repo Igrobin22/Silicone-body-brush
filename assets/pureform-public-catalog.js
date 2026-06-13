@@ -7,6 +7,12 @@
     'pureform-4pc-set-black',
     'pureform-4pc-set-pink'
   ];
+  var LEGACY_SLUG_ALIASES = {
+    'grey-4-piece-silicone-brush-set': 'pureform-4pc-set-grey',
+    'black-4-piece-silicone-brush-set': 'pureform-4pc-set-black',
+    'pink-4-piece-silicone-brush-set': 'pureform-4pc-set-pink'
+  };
+  var QUERY_SLUGS = OFFICIAL_SLUGS.concat(Object.keys(LEGACY_SLUG_ALIASES));
   var DEFAULT_SLUG = OFFICIAL_SLUGS[0];
   var config = window.PUREFORM_SUPABASE_CONFIG || {};
   var greyPhotos = [
@@ -36,7 +42,7 @@
       price: 87.78,
       discount: 50,
       discount_mode: 'ongoing',
-      inventory_quantity: 18,
+      inventory_quantity: 24,
       inventory_status: 'in_stock',
       inventory_note: 'Grey set / 4 tools',
       visible: true,
@@ -50,7 +56,7 @@
       price: 87.78,
       discount: 50,
       discount_mode: 'ongoing',
-      inventory_quantity: 24,
+      inventory_quantity: 18,
       inventory_status: 'in_stock',
       inventory_note: 'Black set / 4 tools',
       visible: true,
@@ -61,8 +67,8 @@
       slug: 'pureform-4pc-set-pink',
       name: 'Pink 4-Piece Silicone Brush Set',
       description: 'A softer Pink finish for the same complete face, scalp, body, and back silicone cleansing routine.',
-      price: 87.78,
-      discount: 50,
+      price: 42,
+      discount: 10,
       discount_mode: 'ongoing',
       inventory_quantity: 12,
       inventory_status: 'low_stock',
@@ -88,6 +94,17 @@
     return 'AED ' + (toNumber(amount, 0)).toFixed(2);
   }
 
+  function canonicalSlug(value) {
+    var slug = String(value || '').trim();
+    return LEGACY_SLUG_ALIASES[slug] || slug;
+  }
+
+  function canonicalSlugForColor(color) {
+    if (color === 'Pink') return 'pureform-4pc-set-pink';
+    if (color === 'Black') return 'pureform-4pc-set-black';
+    return 'pureform-4pc-set-grey';
+  }
+
   function sentenceCase(value) {
     return String(value || '')
       .replace(/_/g, ' ')
@@ -110,6 +127,7 @@
   }
 
   function fallbackPhotosForSlug(slug) {
+    slug = canonicalSlug(slug);
     if (slug === 'pureform-4pc-set-pink') return pinkPhotos.slice();
     if (slug === 'pureform-4pc-set-black') return ['assets/pureform-body-brush.png', 'assets/pureform-back-scrubber.png', 'assets/pureform-scalp-massager.png', 'assets/pureform-face-brush.png'];
     return greyPhotos.slice();
@@ -151,8 +169,9 @@
   }
 
   function normalizeListing(item) {
-    var slug = String(item && item.slug || '').trim();
-    var color = colorFromSlug(slug, item && item.name);
+    var rawSlug = String(item && item.slug || '').trim();
+    var color = colorFromSlug(rawSlug, item && item.name);
+    var slug = canonicalSlug(rawSlug) || canonicalSlugForColor(color);
     var photos = Array.isArray(item && item.photo_urls) ? item.photo_urls.filter(Boolean) : [];
     var regularPrice = toNumber(item && item.price, 0);
     var activeDiscount = isDiscountActive(item);
@@ -167,6 +186,7 @@
     return {
       id: slug,
       slug: slug,
+      sourceSlug: rawSlug,
       name: String(item && item.name || color + ' 4-Piece Silicone Brush Set').trim(),
       description: String(item && item.description || '').trim(),
       lead: String(item && item.description || '').trim(),
@@ -201,24 +221,50 @@
   }
 
   function normalizeListings(items) {
-    var seen = Object.create(null);
+    var bySlug = Object.create(null);
 
-    return (items || [])
-      .filter(function (item) {
-        return item && OFFICIAL_SLUGS.indexOf(item.slug) !== -1 && item.visible !== false;
-      })
+    (items || []).forEach(function (item) {
+      var slug = canonicalSlug(item && item.slug);
+      if (!item || OFFICIAL_SLUGS.indexOf(slug) === -1 || item.visible === false) {
+        return;
+      }
+
+      if (!bySlug[slug] || shouldPreferListing(item, bySlug[slug])) {
+        bySlug[slug] = item;
+      }
+    });
+
+    return OFFICIAL_SLUGS
+      .map(function (slug) { return bySlug[slug]; })
+      .filter(Boolean)
+      .map(normalizeListing)
       .sort(function (a, b) {
         return toNumber(a.sort_order, OFFICIAL_SLUGS.indexOf(a.slug) + 1) - toNumber(b.sort_order, OFFICIAL_SLUGS.indexOf(b.slug) + 1);
-      })
-      .reduce(function (list, item) {
-        if (seen[item.slug]) {
-          return list;
-        }
+      });
+  }
 
-        seen[item.slug] = true;
-        list.push(normalizeListing(item));
-        return list;
-      }, []);
+  function listingUpdatedTime(item) {
+    var time = Date.parse(item && item.updated_at || '');
+    return Number.isFinite(time) ? time : 0;
+  }
+
+  function shouldPreferListing(candidate, existing) {
+    var candidateUpdated = listingUpdatedTime(candidate);
+    var existingUpdated = listingUpdatedTime(existing);
+    var candidateSlug = String(candidate && candidate.slug || '').trim();
+    var existingSlug = String(existing && existing.slug || '').trim();
+    var candidateIsCanonical = candidateSlug === canonicalSlug(candidateSlug);
+    var existingIsCanonical = existingSlug === canonicalSlug(existingSlug);
+
+    if (candidateUpdated !== existingUpdated) {
+      return candidateUpdated > existingUpdated;
+    }
+
+    if (candidateIsCanonical !== existingIsCanonical) {
+      return candidateIsCanonical;
+    }
+
+    return toNumber(candidate && candidate.sort_order, 9999) < toNumber(existing && existing.sort_order, 9999);
   }
 
   function listingsToCatalog(listings) {
@@ -478,8 +524,8 @@
     });
     result = await client
       .from('site_listings')
-      .select('slug,name,description,price,discount,discount_mode,discount_starts_at,discount_ends_at,inventory_quantity,inventory_status,inventory_note,visible,photo_urls,sort_order')
-      .in('slug', OFFICIAL_SLUGS)
+      .select('id,slug,name,description,price,discount,discount_mode,discount_starts_at,discount_ends_at,inventory_quantity,inventory_status,inventory_note,visible,photo_urls,sort_order,updated_at')
+      .in('slug', QUERY_SLUGS)
       .eq('visible', true)
       .order('sort_order', { ascending: true })
       .order('name', { ascending: true });
@@ -497,8 +543,11 @@
       state.listings = listings;
       state.source = 'supabase';
     })
-    .catch(function () {
+    .catch(function (error) {
       state.source = 'fallback';
+      if (window.console && typeof window.console.warn === 'function') {
+        window.console.warn('PureForm catalog is using fallback data because Supabase listings could not be loaded.', error);
+      }
     })
     .then(function () {
       state.ready = true;
@@ -510,12 +559,14 @@
   window.PureFormCatalog = {
     defaultSlug: DEFAULT_SLUG,
     officialSlugs: OFFICIAL_SLUGS.slice(),
+    legacySlugAliases: Object.assign({}, LEGACY_SLUG_ALIASES),
     ready: readyPromise,
     formatAED: formatAED,
     getCatalogSync: getCatalogSync,
     getListingsSync: getListingsSync,
     getProduct: getProduct,
     isDiscountActive: isDiscountActive,
+    resolveSlug: canonicalSlug,
     renderPage: renderPage
   };
 

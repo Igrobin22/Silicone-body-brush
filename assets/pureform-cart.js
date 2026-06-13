@@ -24,8 +24,8 @@
     'pureform-4pc-set-pink': {
       id: 'pureform-4pc-set-pink',
       name: 'Pink 4-Piece Silicone Brush Set',
-      price: 43.89,
-      regularPrice: 87.78,
+      price: 37.80,
+      regularPrice: 42,
       image: 'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227618/main_img_without_bg_mbrxsg.png',
       meta: 'Pink set / 4 tools'
     }
@@ -38,11 +38,17 @@
   var aliases = {
     grey: 'pureform-4pc-set-grey',
     black: 'pureform-4pc-set-black',
-    pink: 'pureform-4pc-set-pink'
+    pink: 'pureform-4pc-set-pink',
+    'grey-4-piece-silicone-brush-set': 'pureform-4pc-set-grey',
+    'black-4-piece-silicone-brush-set': 'pureform-4pc-set-black',
+    'pink-4-piece-silicone-brush-set': 'pureform-4pc-set-pink'
   };
 
   function normalizeId(id) {
     var normalized = String(id || '').trim();
+    if (window.PureFormCatalog && typeof window.PureFormCatalog.resolveSlug === 'function') {
+      normalized = window.PureFormCatalog.resolveSlug(normalized);
+    }
     normalized = aliases[normalized] || normalized;
     return catalog[normalized] ? normalized : '';
   }

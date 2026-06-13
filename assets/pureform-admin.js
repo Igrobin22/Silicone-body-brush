@@ -4,6 +4,11 @@
   var SUPABASE_CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
   var STORAGE_KEY = 'pureform.admin.supabase';
   var DEFAULT_CONFIG = window.PUREFORM_SUPABASE_CONFIG || {};
+  var OFFICIAL_SLUG_BY_COLOR = {
+    grey: 'pureform-4pc-set-grey',
+    black: 'pureform-4pc-set-black',
+    pink: 'pureform-4pc-set-pink'
+  };
 
   var state = {
     supabase: null,
@@ -891,7 +896,7 @@
       return;
     }
 
-    slugInput.value = slugify(document.getElementById('listingName').value);
+    slugInput.value = officialSlugForName(document.getElementById('listingName').value) || slugify(document.getElementById('listingName').value);
   }
 
   function renderPhotoPreviewFromForm() {
@@ -1088,6 +1093,14 @@
       .trim()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
+  }
+
+  function officialSlugForName(value) {
+    var name = String(value || '').toLowerCase();
+    if (name.indexOf('pink') !== -1) return OFFICIAL_SLUG_BY_COLOR.pink;
+    if (name.indexOf('black') !== -1) return OFFICIAL_SLUG_BY_COLOR.black;
+    if (name.indexOf('grey') !== -1 || name.indexOf('gray') !== -1) return OFFICIAL_SLUG_BY_COLOR.grey;
+    return '';
   }
 
   function parseDecimal(value) {

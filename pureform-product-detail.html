@@ -865,7 +865,7 @@
           </details>
           <details>
             <summary>Transparent Price</summary>
-            <p id="productPriceNote">Price includes VAT. Delivery timing and COD availability are confirmed by support before finalizing the order.</p>
+            <p id="productPriceNote">AED 43.89 includes VAT. Discount applied from AED 87.78. Delivery timing and COD availability are confirmed by support before finalizing the order.</p>
           </details>
         </div>
       </aside>
@@ -877,7 +877,7 @@
 
       <aside class="pdp-buy">
         <div class="pdp-price-row">
-          <span class="pdp-price" id="productPrice">AED 87.78</span>
+          <span class="pdp-price" id="productPrice">AED 43.89</span>
           <span class="pdp-stars" aria-label="Rating 4.9 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
         </div>
 
@@ -956,6 +956,9 @@
       function getRequestedProduct() {
         var params = new URLSearchParams(window.location.search);
         var id = params.get('product') || params.get('bundle');
+        if (publicCatalog && typeof publicCatalog.resolveSlug === 'function') {
+          id = publicCatalog.resolveSlug(id);
+        }
         if (id === 'grey') id = 'pureform-4pc-set-grey';
         if (id === 'black') id = 'pureform-4pc-set-black';
         if (id === 'pink') id = 'pureform-4pc-set-pink';

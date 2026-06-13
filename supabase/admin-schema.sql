@@ -246,7 +246,7 @@ with duplicate_listings as (
     id,
     row_number() over (
       partition by lower(trim(name))
-      order by sort_order asc, updated_at desc, id
+      order by updated_at desc, sort_order asc, id
     ) as duplicate_rank
   from public.site_listings
 )
@@ -254,6 +254,55 @@ delete from public.site_listings target
 using duplicate_listings ranked
 where target.id = ranked.id
   and ranked.duplicate_rank > 1;
+
+with slug_map as (
+  select *
+  from (values
+    ('grey-4-piece-silicone-brush-set', 'pureform-4pc-set-grey'),
+    ('black-4-piece-silicone-brush-set', 'pureform-4pc-set-black'),
+    ('pink-4-piece-silicone-brush-set', 'pureform-4pc-set-pink')
+  ) as mapped(legacy_slug, canonical_slug)
+),
+canonical_duplicates as (
+  select
+    listing.id,
+    row_number() over (
+      partition by coalesce(slug_map.canonical_slug, listing.slug)
+      order by listing.updated_at desc, listing.sort_order asc, listing.id
+    ) as duplicate_rank
+  from public.site_listings listing
+  left join slug_map on listing.slug = slug_map.legacy_slug
+  where listing.slug in (
+    'grey-4-piece-silicone-brush-set',
+    'black-4-piece-silicone-brush-set',
+    'pink-4-piece-silicone-brush-set',
+    'pureform-4pc-set-grey',
+    'pureform-4pc-set-black',
+    'pureform-4pc-set-pink'
+  )
+)
+delete from public.site_listings target
+using canonical_duplicates ranked
+where target.id = ranked.id
+  and ranked.duplicate_rank > 1;
+
+with slug_map as (
+  select *
+  from (values
+    ('grey-4-piece-silicone-brush-set', 'pureform-4pc-set-grey'),
+    ('black-4-piece-silicone-brush-set', 'pureform-4pc-set-black'),
+    ('pink-4-piece-silicone-brush-set', 'pureform-4pc-set-pink')
+  ) as mapped(legacy_slug, canonical_slug)
+)
+update public.site_listings target
+set slug = slug_map.canonical_slug
+from slug_map
+where target.slug = slug_map.legacy_slug
+  and not exists (
+    select 1
+    from public.site_listings existing
+    where existing.slug = slug_map.canonical_slug
+  );
 
 insert into public.site_listings (
   slug,
@@ -273,7 +322,7 @@ insert into public.site_listings (
 )
 values
   (
-    'grey-4-piece-silicone-brush-set',
+    'pureform-4pc-set-grey',
     'Grey 4-Piece Silicone Brush Set',
     'A complete silicone brush set with a back scrubber, body brush, scalp massager, and face brush.',
     87.78,
@@ -294,7 +343,7 @@ values
     10
   ),
   (
-    'black-4-piece-silicone-brush-set',
+    'pureform-4pc-set-black',
     'Black 4-Piece Silicone Brush Set',
     'The same four-piece PureForm routine in Black.',
     87.78,
@@ -312,11 +361,11 @@ values
     20
   ),
   (
-    'pink-4-piece-silicone-brush-set',
+    'pureform-4pc-set-pink',
     'Pink 4-Piece Silicone Brush Set',
     'A softer Pink finish for the same face, scalp, body, and back care routine.',
-    87.78,
-    50,
+    42,
+    10,
     'ongoing',
     null,
     null,
@@ -338,21 +387,7 @@ values
     ],
     30
   )
-on conflict (slug) do update
-set
-  name = excluded.name,
-  description = excluded.description,
-  price = excluded.price,
-  discount = excluded.discount,
-  discount_mode = excluded.discount_mode,
-  discount_starts_at = excluded.discount_starts_at,
-  discount_ends_at = excluded.discount_ends_at,
-  inventory_quantity = excluded.inventory_quantity,
-  inventory_status = excluded.inventory_status,
-  inventory_note = excluded.inventory_note,
-  visible = excluded.visible,
-  photo_urls = excluded.photo_urls,
-  sort_order = excluded.sort_order;
+on conflict (slug) do nothing;
 
 insert into public.site_content_blocks (key, label, value, block_type)
 values
