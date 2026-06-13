@@ -99,12 +99,79 @@ create table if not exists public.site_content_blocks (
   )
 );
 
+create table if not exists public.site_orders (
+  id uuid primary key default gen_random_uuid(),
+  order_number text not null unique default ('PF-' || upper(substr(gen_random_uuid()::text, 1, 8))),
+  status text not null default 'new',
+  payment_status text not null default 'pending',
+  fulfillment_status text not null default 'unfulfilled',
+  contact text not null default '',
+  phone text not null default '',
+  first_name text not null default '',
+  last_name text not null default '',
+  country text not null default 'United Arab Emirates',
+  address text not null default '',
+  apartment text not null default '',
+  city text not null default '',
+  emirate text not null default '',
+  payment_preference text not null default '',
+  discount_code text not null default '',
+  customer_notes text not null default '',
+  admin_notes text not null default '',
+  line_items jsonb not null default '[]'::jsonb,
+  subtotal numeric(10, 2) not null default 0,
+  total numeric(10, 2) not null default 0,
+  currency text not null default 'AED',
+  source text not null default 'website',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint site_orders_status_check check (
+    status in ('new', 'confirmed', 'packing', 'shipped', 'completed', 'cancelled')
+  ),
+  constraint site_orders_payment_status_check check (
+    payment_status in ('pending', 'cod_pending', 'payment_link_sent', 'paid', 'refunded', 'cancelled')
+  ),
+  constraint site_orders_fulfillment_status_check check (
+    fulfillment_status in ('unfulfilled', 'reserved', 'packed', 'shipped', 'delivered', 'cancelled')
+  ),
+  constraint site_orders_line_items_check check (jsonb_typeof(line_items) = 'array'),
+  constraint site_orders_subtotal_check check (subtotal >= 0),
+  constraint site_orders_total_check check (total >= 0)
+);
+
+alter table public.site_orders
+  add column if not exists order_number text not null default ('PF-' || upper(substr(gen_random_uuid()::text, 1, 8))),
+  add column if not exists status text not null default 'new',
+  add column if not exists payment_status text not null default 'pending',
+  add column if not exists fulfillment_status text not null default 'unfulfilled',
+  add column if not exists contact text not null default '',
+  add column if not exists phone text not null default '',
+  add column if not exists first_name text not null default '',
+  add column if not exists last_name text not null default '',
+  add column if not exists country text not null default 'United Arab Emirates',
+  add column if not exists address text not null default '',
+  add column if not exists apartment text not null default '',
+  add column if not exists city text not null default '',
+  add column if not exists emirate text not null default '',
+  add column if not exists payment_preference text not null default '',
+  add column if not exists discount_code text not null default '',
+  add column if not exists customer_notes text not null default '',
+  add column if not exists admin_notes text not null default '',
+  add column if not exists line_items jsonb not null default '[]'::jsonb,
+  add column if not exists subtotal numeric(10, 2) not null default 0,
+  add column if not exists total numeric(10, 2) not null default 0,
+  add column if not exists currency text not null default 'AED',
+  add column if not exists source text not null default 'website';
+
 create index if not exists admin_profiles_email_idx on public.admin_profiles (email);
 create index if not exists site_listings_visible_sort_idx on public.site_listings (visible, sort_order);
 create index if not exists site_listings_inventory_status_idx on public.site_listings (inventory_status);
 create index if not exists site_listings_discount_window_idx on public.site_listings (discount_mode, discount_starts_at, discount_ends_at);
 create index if not exists site_listings_updated_at_idx on public.site_listings (updated_at desc);
 create index if not exists site_content_blocks_key_idx on public.site_content_blocks (key);
+create index if not exists site_orders_status_created_idx on public.site_orders (status, created_at desc);
+create index if not exists site_orders_created_idx on public.site_orders (created_at desc);
+create index if not exists site_orders_city_idx on public.site_orders (city);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -131,6 +198,11 @@ create trigger site_content_blocks_set_updated_at
 before update on public.site_content_blocks
 for each row execute function public.set_updated_at();
 
+drop trigger if exists site_orders_set_updated_at on public.site_orders;
+create trigger site_orders_set_updated_at
+before update on public.site_orders
+for each row execute function public.set_updated_at();
+
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -152,6 +224,7 @@ grant execute on function public.is_admin() to anon, authenticated;
 alter table public.admin_profiles enable row level security;
 alter table public.site_listings enable row level security;
 alter table public.site_content_blocks enable row level security;
+alter table public.site_orders enable row level security;
 
 drop policy if exists admin_profiles_select_own on public.admin_profiles;
 drop policy if exists admin_profiles_select_own_or_admin on public.admin_profiles;
@@ -241,6 +314,40 @@ for delete
 to authenticated
 using (public.is_admin());
 
+drop policy if exists site_orders_public_insert on public.site_orders;
+create policy site_orders_public_insert
+on public.site_orders
+for insert
+to anon, authenticated
+with check (
+  source = 'website'
+  and jsonb_typeof(line_items) = 'array'
+  and jsonb_array_length(line_items) > 0
+  and total >= 0
+);
+
+drop policy if exists site_orders_admin_select on public.site_orders;
+create policy site_orders_admin_select
+on public.site_orders
+for select
+to authenticated
+using (public.is_admin());
+
+drop policy if exists site_orders_admin_update on public.site_orders;
+create policy site_orders_admin_update
+on public.site_orders
+for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists site_orders_admin_delete on public.site_orders;
+create policy site_orders_admin_delete
+on public.site_orders
+for delete
+to authenticated
+using (public.is_admin());
+
 with duplicate_listings as (
   select
     id,
@@ -303,6 +410,16 @@ where target.slug = slug_map.legacy_slug
     from public.site_listings existing
     where existing.slug = slug_map.canonical_slug
   );
+
+update public.site_listings
+set
+  price = 42,
+  discount = 10,
+  discount_mode = 'ongoing',
+  discount_starts_at = null,
+  discount_ends_at = null
+where slug = 'pureform-4pc-set-pink'
+  and price > 200;
 
 insert into public.site_listings (
   slug,

@@ -69,6 +69,7 @@
         </div>
         <nav class="admin-nav" aria-label="Dashboard sections">
           <button type="button" class="nav-tab is-active" data-view="overview">Overview</button>
+          <button type="button" class="nav-tab" data-view="orders">Orders</button>
           <button type="button" class="nav-tab" data-view="listings">Listings</button>
           <button type="button" class="nav-tab" data-view="content">Site Content</button>
         </nav>
@@ -112,6 +113,106 @@
                 <span id="discountBadge" class="badge">0 active</span>
               </div>
               <div id="discountList" class="mini-list"></div>
+            </article>
+            <article class="admin-card">
+              <div class="card-head">
+                <h3>Recent Orders</h3>
+                <span id="recentOrdersBadge" class="badge">0 new</span>
+              </div>
+              <div id="recentOrdersList" class="mini-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="ordersPanel" class="view-panel" aria-labelledby="ordersHeading" hidden>
+          <div class="section-head split">
+            <div>
+              <p class="eyebrow">Orders</p>
+              <h2 id="ordersHeading">Order command center.</h2>
+            </div>
+            <div class="order-filter-tabs" aria-label="Filter orders">
+              <button type="button" class="order-filter-tab is-active" data-order-filter="all">All</button>
+              <button type="button" class="order-filter-tab" data-order-filter="new">New</button>
+              <button type="button" class="order-filter-tab" data-order-filter="open">Open</button>
+              <button type="button" class="order-filter-tab" data-order-filter="completed">Done</button>
+            </div>
+          </div>
+
+          <div class="manager-grid orders-manager-grid">
+            <article class="admin-card table-card">
+              <div class="table-scroll">
+                <table class="admin-table orders-table">
+                  <caption>Customer orders</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Order</th>
+                      <th scope="col">Customer</th>
+                      <th scope="col">Items</th>
+                      <th scope="col">Total</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Payment</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ordersTableBody"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="admin-card editor-card order-editor-card">
+              <form id="orderForm" class="admin-form dense-form">
+                <div class="form-head split">
+                  <div>
+                    <p class="eyebrow">Order Detail</p>
+                    <h3 id="orderFormTitle">Select an order</h3>
+                  </div>
+                </div>
+                <input id="orderId" name="id" type="hidden">
+                <div id="orderDetailSummary" class="order-detail-summary">
+                  <p class="empty-state">Choose an order to view customer, delivery, and line item details.</p>
+                </div>
+                <div id="orderItemsList" class="order-items-list"></div>
+                <div class="form-grid two">
+                  <label>
+                    <span>Order status</span>
+                    <select id="orderStatus" name="status">
+                      <option value="new">New</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="packing">Packing</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="completed">Completed</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Payment</span>
+                    <select id="orderPaymentStatus" name="payment_status">
+                      <option value="pending">Pending</option>
+                      <option value="cod_pending">COD pending</option>
+                      <option value="payment_link_sent">Payment link sent</option>
+                      <option value="paid">Paid</option>
+                      <option value="refunded">Refunded</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  <span>Fulfillment</span>
+                  <select id="orderFulfillmentStatus" name="fulfillment_status">
+                    <option value="unfulfilled">Unfulfilled</option>
+                    <option value="reserved">Reserved</option>
+                    <option value="packed">Packed</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Admin notes</span>
+                  <textarea id="orderAdminNotes" name="admin_notes" rows="4" placeholder="Internal delivery, payment, or customer follow-up notes"></textarea>
+                </label>
+                <button type="submit" class="btn btn-primary full-width">Save order</button>
+              </form>
             </article>
           </div>
         </section>

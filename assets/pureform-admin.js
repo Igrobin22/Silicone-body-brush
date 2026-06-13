@@ -9,6 +9,9 @@
     black: 'pureform-4pc-set-black',
     pink: 'pureform-4pc-set-pink'
   };
+  var ORDER_STATUS_OPTIONS = ['new', 'confirmed', 'packing', 'shipped', 'completed', 'cancelled'];
+  var PAYMENT_STATUS_OPTIONS = ['pending', 'cod_pending', 'payment_link_sent', 'paid', 'refunded', 'cancelled'];
+  var FULFILLMENT_STATUS_OPTIONS = ['unfulfilled', 'reserved', 'packed', 'shipped', 'delivered', 'cancelled'];
 
   var state = {
     supabase: null,
@@ -16,6 +19,9 @@
     session: null,
     profile: null,
     listings: [],
+    orders: [],
+    orderFilter: 'all',
+    ordersUnavailable: false,
     contentBlocks: [],
     activeView: 'overview',
     page: 'login'
@@ -62,6 +68,7 @@
     els.navTabs = Array.prototype.slice.call(document.querySelectorAll('.nav-tab'));
     els.panels = {
       overview: document.getElementById('overviewPanel'),
+      orders: document.getElementById('ordersPanel'),
       listings: document.getElementById('listingsPanel'),
       content: document.getElementById('contentPanel')
     };
@@ -70,6 +77,14 @@
     els.inventoryList = document.getElementById('inventoryList');
     els.discountBadge = document.getElementById('discountBadge');
     els.discountList = document.getElementById('discountList');
+    els.recentOrdersBadge = document.getElementById('recentOrdersBadge');
+    els.recentOrdersList = document.getElementById('recentOrdersList');
+    els.orderFilterTabs = Array.prototype.slice.call(document.querySelectorAll('[data-order-filter]'));
+    els.ordersTableBody = document.getElementById('ordersTableBody');
+    els.orderForm = document.getElementById('orderForm');
+    els.orderFormTitle = document.getElementById('orderFormTitle');
+    els.orderDetailSummary = document.getElementById('orderDetailSummary');
+    els.orderItemsList = document.getElementById('orderItemsList');
     els.newListingButton = document.getElementById('newListingButton');
     els.listingsTableBody = document.getElementById('listingsTableBody');
     els.listingForm = document.getElementById('listingForm');
@@ -95,6 +110,18 @@
         setView(button.dataset.view);
       });
     });
+
+    els.orderFilterTabs.forEach(function (button) {
+      button.addEventListener('click', function () {
+        state.orderFilter = button.dataset.orderFilter || 'all';
+        renderOrdersTable();
+        syncOrderFilterTabs();
+      });
+    });
+
+    bind(els.ordersTableBody, 'click', onOrdersTableClick);
+    bind(els.ordersTableBody, 'change', onOrdersTableChange);
+    bind(els.orderForm, 'submit', onOrderSubmit);
 
     bind(els.newListingButton, 'click', function () {
       fillListingForm();
@@ -368,6 +395,7 @@
     state.activeView = view;
     var titles = {
       overview: 'Overview',
+      orders: 'Orders',
       listings: 'Listings',
       content: 'Site Content'
     };
@@ -395,9 +423,13 @@
     setDashboardStatus('Refreshing dashboard data...', 'neutral');
 
     try {
-      await Promise.all([loadListings(), loadContentBlocks()]);
+      await Promise.all([loadListings(), loadOrders(), loadContentBlocks()]);
       renderDashboard();
-      setDashboardStatus('Dashboard updated.', 'success');
+      if (state.ordersUnavailable) {
+        setDashboardStatus('Dashboard updated. Run the updated Supabase SQL to enable checkout order capture.', 'neutral');
+      } else {
+        setDashboardStatus('Dashboard updated.', 'success');
+      }
     } catch (error) {
       setDashboardStatus('Could not load dashboard data: ' + getErrorMessage(error), 'error');
     }
@@ -430,10 +462,36 @@
     state.contentBlocks = result.data || [];
   }
 
+  async function loadOrders() {
+    var result = await state.supabase
+      .from('site_orders')
+      .select('id,order_number,status,payment_status,fulfillment_status,contact,phone,first_name,last_name,country,address,apartment,city,emirate,payment_preference,discount_code,customer_notes,admin_notes,line_items,subtotal,total,currency,source,created_at,updated_at')
+      .order('created_at', { ascending: false });
+
+    if (result.error) {
+      if (isMissingOrdersTableError(result.error)) {
+        state.orders = [];
+        state.ordersUnavailable = true;
+        return;
+      }
+
+      throw result.error;
+    }
+
+    state.orders = result.data || [];
+    state.ordersUnavailable = false;
+  }
+
   function renderDashboard() {
     renderStats();
+    renderOrdersTable();
     renderListingsTable();
     renderContentTable();
+
+    var orderId = document.getElementById('orderId');
+    if (orderId && !orderId.value) {
+      fillOrderForm(state.orders[0]);
+    }
 
     var listingId = document.getElementById('listingId');
     if (listingId && !listingId.value) {
@@ -452,7 +510,12 @@
     }
 
     var totalListings = state.listings.length;
-    var visibleListings = state.listings.filter(function (item) { return item.visible; }).length;
+    var totalOrders = state.orders.length;
+    var newOrders = state.orders.filter(function (order) { return order.status === 'new'; }).length;
+    var openOrders = state.orders.filter(isOpenOrder).length;
+    var orderRevenue = state.orders.reduce(function (sum, order) {
+      return order.status === 'cancelled' ? sum : sum + Number(order.total || 0);
+    }, 0);
     var activeDiscounts = state.listings.filter(isDiscountActive).length;
     var inventoryUnits = state.listings.reduce(function (sum, item) {
       return sum + Number(item.inventory_quantity || 0);
@@ -462,8 +525,10 @@
     }).length;
 
     var cards = [
-      { label: 'Total listings', value: totalListings },
-      { label: 'Visible', value: visibleListings },
+      { label: 'New orders', value: newOrders },
+      { label: 'Open orders', value: openOrders },
+      { label: 'Revenue', value: formatCurrency(orderRevenue) },
+      { label: 'Listings', value: totalListings },
       { label: 'Inventory units', value: inventoryUnits },
       { label: 'Discounts', value: activeDiscounts },
       { label: 'Low or out', value: lowStock }
@@ -485,7 +550,26 @@
       els.statsGrid.appendChild(article);
     });
 
-    els.inventoryBadge.textContent = inventoryUnits + ' units';
+    if (els.recentOrdersBadge) {
+      els.recentOrdersBadge.textContent = totalOrders + ' total';
+    }
+
+    renderMiniList(
+      els.recentOrdersList,
+      state.orders.slice(0, 5),
+      function (order) {
+        return {
+          title: orderNumber(order),
+          meta: customerName(order) + ' / ' + itemSummary(order),
+          value: formatCurrency(order.total)
+        };
+      },
+      state.ordersUnavailable ? 'Run the updated Supabase SQL to create the orders table.' : 'No customer orders yet.'
+    );
+
+    if (els.inventoryBadge) {
+      els.inventoryBadge.textContent = inventoryUnits + ' units';
+    }
     renderMiniList(
       els.inventoryList,
       state.listings.slice().sort(function (a, b) {
@@ -504,7 +588,9 @@
     var discountItems = state.listings.filter(function (item) {
       return isDiscountActive(item);
     });
-    els.discountBadge.textContent = discountItems.length + ' active';
+    if (els.discountBadge) {
+      els.discountBadge.textContent = discountItems.length + ' active';
+    }
     renderMiniList(
       els.discountList,
       discountItems,
@@ -553,6 +639,312 @@
       row.appendChild(copy);
       row.appendChild(value);
       container.appendChild(row);
+    });
+  }
+
+  function syncOrderFilterTabs() {
+    els.orderFilterTabs.forEach(function (button) {
+      button.classList.toggle('is-active', button.dataset.orderFilter === state.orderFilter);
+    });
+  }
+
+  function filteredOrders() {
+    if (state.orderFilter === 'new') {
+      return state.orders.filter(function (order) { return order.status === 'new'; });
+    }
+
+    if (state.orderFilter === 'open') {
+      return state.orders.filter(isOpenOrder);
+    }
+
+    if (state.orderFilter === 'completed') {
+      return state.orders.filter(function (order) {
+        return order.status === 'completed' || order.status === 'cancelled';
+      });
+    }
+
+    return state.orders;
+  }
+
+  function isOpenOrder(order) {
+    return order && order.status !== 'completed' && order.status !== 'cancelled';
+  }
+
+  function renderOrdersTable() {
+    if (!els.ordersTableBody) {
+      return;
+    }
+
+    var orders = filteredOrders();
+    var selectedId = document.getElementById('orderId') ? document.getElementById('orderId').value : '';
+    els.ordersTableBody.innerHTML = '';
+    syncOrderFilterTabs();
+
+    if (state.ordersUnavailable) {
+      appendEmptyRow(els.ordersTableBody, 7, 'Orders are not available yet. Run supabase/admin-schema.sql in Supabase to create site_orders.');
+      return;
+    }
+
+    if (!orders.length) {
+      appendEmptyRow(els.ordersTableBody, 7, 'No orders match this view.');
+      return;
+    }
+
+    orders.forEach(function (order) {
+      var row = document.createElement('tr');
+      row.dataset.id = order.id;
+      row.className = selectedId === order.id ? 'is-selected' : '';
+
+      var orderCell = document.createElement('td');
+      var code = document.createElement('strong');
+      var time = document.createElement('span');
+      code.className = 'order-code';
+      code.textContent = orderNumber(order);
+      time.className = 'listing-meta';
+      time.textContent = formatDateTime(order.created_at);
+      orderCell.appendChild(code);
+      orderCell.appendChild(time);
+
+      var customerCell = document.createElement('td');
+      var customer = document.createElement('div');
+      var name = document.createElement('span');
+      var contact = document.createElement('span');
+      customer.className = 'order-customer';
+      name.className = 'listing-title';
+      name.textContent = customerName(order);
+      contact.className = 'listing-meta';
+      contact.textContent = customerContact(order);
+      customer.appendChild(name);
+      customer.appendChild(contact);
+      customerCell.appendChild(customer);
+
+      var itemsCell = document.createElement('td');
+      itemsCell.textContent = itemSummary(order);
+
+      var totalCell = document.createElement('td');
+      totalCell.textContent = formatCurrency(order.total);
+
+      var statusCell = document.createElement('td');
+      statusCell.appendChild(orderSelect(order, 'status', ORDER_STATUS_OPTIONS, 'quick-order-status'));
+
+      var paymentCell = document.createElement('td');
+      paymentCell.appendChild(orderSelect(order, 'payment_status', PAYMENT_STATUS_OPTIONS, 'quick-payment-status'));
+
+      var actionsCell = document.createElement('td');
+      var actionRow = document.createElement('div');
+      actionRow.className = 'action-row';
+      actionRow.appendChild(actionButton('View', 'view-order'));
+      if (order.status !== 'completed' && order.status !== 'cancelled') {
+        actionRow.appendChild(actionButton('Complete', 'complete-order'));
+      }
+      actionsCell.appendChild(actionRow);
+
+      row.appendChild(orderCell);
+      row.appendChild(customerCell);
+      row.appendChild(itemsCell);
+      row.appendChild(totalCell);
+      row.appendChild(statusCell);
+      row.appendChild(paymentCell);
+      row.appendChild(actionsCell);
+      els.ordersTableBody.appendChild(row);
+    });
+  }
+
+  function orderSelect(order, field, options, action) {
+    var select = document.createElement('select');
+    select.className = 'quick-select status-' + String(order[field] || '').replace(/_/g, '-');
+    select.dataset.action = action;
+    select.setAttribute('aria-label', statusLabel(field) + ' for ' + orderNumber(order));
+
+    options.forEach(function (value) {
+      var option = document.createElement('option');
+      option.value = value;
+      option.textContent = statusLabel(value);
+      option.selected = value === order[field];
+      select.appendChild(option);
+    });
+
+    return select;
+  }
+
+  async function onOrdersTableClick(event) {
+    var button = event.target.closest('button[data-action]');
+    if (!button) {
+      return;
+    }
+
+    var row = button.closest('tr');
+    var order = row ? findOrder(row.dataset.id) : null;
+    if (!order) {
+      return;
+    }
+
+    if (button.dataset.action === 'view-order') {
+      fillOrderForm(order);
+      return;
+    }
+
+    if (button.dataset.action === 'complete-order') {
+      await updateOrder(order.id, {
+        status: 'completed',
+        fulfillment_status: order.fulfillment_status === 'cancelled' ? 'cancelled' : 'delivered'
+      }, 'Order marked complete.');
+    }
+  }
+
+  async function onOrdersTableChange(event) {
+    var input = event.target;
+    if (!input.dataset.action) {
+      return;
+    }
+
+    var row = input.closest('tr');
+    var order = row ? findOrder(row.dataset.id) : null;
+    if (!order) {
+      return;
+    }
+
+    if (input.dataset.action === 'quick-order-status') {
+      await updateOrder(order.id, { status: input.value }, 'Order status updated.');
+    }
+
+    if (input.dataset.action === 'quick-payment-status') {
+      await updateOrder(order.id, { payment_status: input.value }, 'Payment status updated.');
+    }
+  }
+
+  async function onOrderSubmit(event) {
+    event.preventDefault();
+
+    var id = document.getElementById('orderId').value;
+    if (!id) {
+      setDashboardStatus('Select an order before saving.', 'error');
+      return;
+    }
+
+    await updateOrder(id, {
+      status: document.getElementById('orderStatus').value,
+      payment_status: document.getElementById('orderPaymentStatus').value,
+      fulfillment_status: document.getElementById('orderFulfillmentStatus').value,
+      admin_notes: document.getElementById('orderAdminNotes').value.trim()
+    }, 'Order saved.');
+  }
+
+  async function updateOrder(id, payload, successMessage) {
+    try {
+      setDashboardStatus('Updating order...', 'neutral');
+      var result = await state.supabase.from('site_orders').update(payload).eq('id', id).select().single();
+      if (result.error) {
+        throw result.error;
+      }
+
+      await loadOrders();
+      renderStats();
+      renderOrdersTable();
+      fillOrderForm(findOrder(id) || result.data);
+      setDashboardStatus(successMessage || 'Order updated.', 'success');
+    } catch (error) {
+      setDashboardStatus('Order update failed: ' + getErrorMessage(error), 'error');
+      renderOrdersTable();
+    }
+  }
+
+  function fillOrderForm(order) {
+    var controls = [
+      document.getElementById('orderStatus'),
+      document.getElementById('orderPaymentStatus'),
+      document.getElementById('orderFulfillmentStatus'),
+      document.getElementById('orderAdminNotes')
+    ];
+    var saveButton = els.orderForm ? els.orderForm.querySelector('button[type="submit"]') : null;
+
+    if (!order) {
+      document.getElementById('orderId').value = '';
+      els.orderFormTitle.textContent = 'Select an order';
+      els.orderDetailSummary.innerHTML = state.ordersUnavailable
+        ? '<p class="empty-state">Run the updated Supabase SQL before managing customer orders.</p>'
+        : '<p class="empty-state">Choose an order to view customer, delivery, and line item details.</p>';
+      els.orderItemsList.innerHTML = '';
+      controls.forEach(function (control) {
+        if (control) control.disabled = true;
+      });
+      if (saveButton) saveButton.disabled = true;
+      renderOrdersTable();
+      return;
+    }
+
+    document.getElementById('orderId').value = order.id;
+    els.orderFormTitle.textContent = orderNumber(order);
+    document.getElementById('orderStatus').value = order.status || 'new';
+    document.getElementById('orderPaymentStatus').value = order.payment_status || 'pending';
+    document.getElementById('orderFulfillmentStatus').value = order.fulfillment_status || 'unfulfilled';
+    document.getElementById('orderAdminNotes').value = order.admin_notes || '';
+    controls.forEach(function (control) {
+      if (control) control.disabled = false;
+    });
+    if (saveButton) saveButton.disabled = false;
+    renderOrderSummary(order);
+    renderOrderItems(order);
+    renderOrdersTable();
+  }
+
+  function renderOrderSummary(order) {
+    var details = [
+      { label: 'Customer', value: customerName(order) },
+      { label: 'Contact', value: customerContact(order) },
+      { label: 'Delivery', value: orderAddress(order) },
+      { label: 'Payment', value: order.payment_preference || statusLabel(order.payment_status) },
+      { label: 'Customer notes', value: order.customer_notes || 'None' },
+      { label: 'Placed', value: formatDateTime(order.created_at) }
+    ];
+
+    els.orderDetailSummary.innerHTML = '';
+    details.forEach(function (detail) {
+      var item = document.createElement('div');
+      var label = document.createElement('span');
+      var value = document.createElement('strong');
+      label.textContent = detail.label;
+      value.textContent = detail.value || 'Not provided';
+      item.appendChild(label);
+      item.appendChild(value);
+      els.orderDetailSummary.appendChild(item);
+    });
+  }
+
+  function renderOrderItems(order) {
+    var items = getOrderItems(order);
+    els.orderItemsList.innerHTML = '';
+
+    if (!items.length) {
+      var empty = document.createElement('p');
+      empty.className = 'empty-state';
+      empty.textContent = 'No line items saved with this order.';
+      els.orderItemsList.appendChild(empty);
+      return;
+    }
+
+    items.forEach(function (item) {
+      var row = document.createElement('div');
+      var image = document.createElement('img');
+      var copy = document.createElement('div');
+      var title = document.createElement('strong');
+      var meta = document.createElement('span');
+      var total = document.createElement('b');
+
+      row.className = 'order-item';
+      image.src = item.image || '../assets/pureform-body-brush.webp';
+      image.alt = '';
+      image.loading = 'lazy';
+      title.textContent = item.name || 'PureForm item';
+      meta.textContent = (item.meta || '') + ' / Qty ' + Number(item.quantity || 1);
+      total.textContent = formatCurrency(item.line_total || Number(item.price || 0) * Number(item.quantity || 1));
+
+      copy.appendChild(title);
+      copy.appendChild(meta);
+      row.appendChild(image);
+      row.appendChild(copy);
+      row.appendChild(total);
+      els.orderItemsList.appendChild(row);
     });
   }
 
@@ -1062,6 +1454,12 @@
     });
   }
 
+  function findOrder(id) {
+    return state.orders.find(function (item) {
+      return item.id === id;
+    });
+  }
+
   function findContentBlock(id) {
     return state.contentBlocks.find(function (item) {
       return item.id === id;
@@ -1078,6 +1476,73 @@
     return listing && Array.isArray(listing.photo_urls) && listing.photo_urls.length
       ? listing.photo_urls[0]
       : '';
+  }
+
+  function getOrderItems(order) {
+    return order && Array.isArray(order.line_items) ? order.line_items : [];
+  }
+
+  function orderNumber(order) {
+    return order && order.order_number ? order.order_number : 'Order';
+  }
+
+  function customerName(order) {
+    var firstName = String(order && order.first_name ? order.first_name : '').trim();
+    var lastName = String(order && order.last_name ? order.last_name : '').trim();
+    var fullName = (firstName + ' ' + lastName).trim();
+    return fullName || 'Guest customer';
+  }
+
+  function customerContact(order) {
+    var contact = String(order && order.contact ? order.contact : '').trim();
+    var phone = String(order && order.phone ? order.phone : '').trim();
+
+    if (contact && phone) {
+      return contact + ' / ' + phone;
+    }
+
+    return contact || phone || 'No contact saved';
+  }
+
+  function orderAddress(order) {
+    var parts = [
+      order && order.address,
+      order && order.apartment,
+      order && order.city,
+      order && order.emirate,
+      order && order.country
+    ].map(function (part) {
+      return String(part || '').trim();
+    }).filter(Boolean);
+
+    return parts.length ? parts.join(', ') : 'No address saved';
+  }
+
+  function itemSummary(order) {
+    var items = getOrderItems(order);
+    var count = items.reduce(function (sum, item) {
+      return sum + Number(item.quantity || 1);
+    }, 0);
+
+    if (!items.length) {
+      return 'No items';
+    }
+
+    if (items.length === 1) {
+      return count + ' x ' + (items[0].name || 'PureForm item');
+    }
+
+    return count + ' items / ' + items.length + ' products';
+  }
+
+  function isMissingOrdersTableError(error) {
+    var message = getErrorMessage(error).toLowerCase();
+    var code = String(error && error.code || '').toUpperCase();
+
+    return code === 'PGRST205'
+      || (message.indexOf('site_orders') !== -1 && message.indexOf('schema cache') !== -1)
+      || (message.indexOf('site_orders') !== -1 && message.indexOf('not found') !== -1)
+      || message.indexOf('could not find the table') !== -1;
   }
 
   function parsePhotoUrls(value) {
