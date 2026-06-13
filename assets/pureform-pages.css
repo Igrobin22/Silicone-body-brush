@@ -1339,6 +1339,14 @@ h1 {
   line-height: 1.5;
 }
 
+.checkout-status.is-error {
+  color: #9b1c1c;
+}
+
+.checkout-status.is-success {
+  color: #166534;
+}
+
 .checkout-summary-list {
   display: grid;
   gap: .8rem;

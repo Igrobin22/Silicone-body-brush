@@ -150,7 +150,7 @@
             <div class="checkout-step-title">
               <h2 id="paymentTitle">Payment</h2>
             </div>
-            <p class="checkout-payment-note">No card details are collected on this static checkout. Secure payment options are confirmed after the request is sent.</p>
+            <p class="checkout-payment-note">No card details are collected here. The request is saved securely, then payment and delivery are confirmed by support.</p>
             <div class="checkout-payment-options">
               <label class="checkout-payment-option">
                 <input type="radio" name="payment" value="Cash on delivery" checked>
@@ -209,6 +209,8 @@
     (function () {
       'use strict';
 
+      var SUPABASE_CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+      var config = window.PUREFORM_SUPABASE_CONFIG || {};
       var cart = window.PureFormCart;
       var form = document.getElementById('checkoutForm');
       var summaryList = document.getElementById('checkoutSummaryList');
@@ -222,6 +224,7 @@
       var submitButton = document.getElementById('checkoutSubmit');
       var cityInput = document.getElementById('checkout-city');
       var shippingMethod = document.getElementById('shippingMethod');
+      var supabaseClientPromise = null;
 
       if (!cart || !form || !summaryList) {
         return;
@@ -232,8 +235,10 @@
         return selected ? selected.value : 'Cash on delivery';
       }
 
-      function setStatus(message) {
+      function setStatus(message, type) {
         status.textContent = message || '';
+        status.classList.toggle('is-error', type === 'error');
+        status.classList.toggle('is-success', type === 'success');
       }
 
       function renderSummary() {
@@ -310,36 +315,108 @@
         shippingNode.textContent = 'Confirmed after request';
       }
 
-      function buildOrderBody(data) {
-        var lines = [
-          'PureForm checkout request',
-          '',
-          'Contact: ' + (data.get('contact') || ''),
-          'Delivery phone: ' + (data.get('phone') || ''),
-          'Name: ' + (data.get('first_name') || '') + ' ' + (data.get('last_name') || ''),
-          'Country: ' + (data.get('country') || ''),
-          'Address: ' + (data.get('address') || ''),
-          'Apartment / suite: ' + (data.get('apartment') || ''),
-          'City: ' + (data.get('city') || ''),
-          'Emirate: ' + (data.get('emirate') || ''),
-          'Shipping: Confirm before finalizing',
-          'Payment preference: ' + getSelectedPayment(),
-          'Discount code: ' + (discountInput.value.trim() || 'None'),
-          '',
-          'Cart:'
-        ];
+      function createOrderNumber() {
+        var now = new Date();
+        var datePart = now.getFullYear().toString().slice(-2)
+          + String(now.getMonth() + 1).padStart(2, '0')
+          + String(now.getDate()).padStart(2, '0');
+        var randomPart;
 
-        cart.getLineItems().forEach(function (item) {
-          lines.push('- ' + item.name + ' x ' + item.quantity + ' = ' + cart.formatAED(item.lineTotal));
+        if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+          var bytes = new Uint8Array(2);
+          window.crypto.getRandomValues(bytes);
+          randomPart = Array.prototype.map.call(bytes, function (byte) {
+            return byte.toString(16).padStart(2, '0');
+          }).join('').toUpperCase();
+        } else {
+          randomPart = Math.floor(Math.random() * 65535).toString(16).padStart(4, '0').toUpperCase();
+        }
+
+        return 'PF-' + datePart + '-' + randomPart;
+      }
+
+      function getPaymentStatus(paymentPreference) {
+        if (paymentPreference === 'Cash on delivery') {
+          return 'cod_pending';
+        }
+
+        return 'pending';
+      }
+
+      function getOrderItems() {
+        return cart.getLineItems().map(function (item) {
+          return {
+            id: item.id,
+            name: item.name,
+            meta: item.meta,
+            image: item.image,
+            price: Number(item.price) || 0,
+            quantity: Number(item.quantity) || 1,
+            line_total: Number(item.lineTotal) || 0
+          };
         });
+      }
 
-        lines.push('Subtotal: ' + cart.formatAED(cart.getSubtotal()));
-        lines.push('Total to confirm: ' + cart.formatAED(cart.getSubtotal()));
-        lines.push('');
-        lines.push('Order notes:');
-        lines.push(data.get('notes') || '');
+      function buildOrderPayload(data) {
+        var paymentPreference = getSelectedPayment();
+        var subtotal = Number(cart.getSubtotal()) || 0;
 
-        return lines.join('\n');
+        return {
+          order_number: createOrderNumber(),
+          status: 'new',
+          payment_status: getPaymentStatus(paymentPreference),
+          fulfillment_status: 'unfulfilled',
+          contact: String(data.get('contact') || '').trim(),
+          phone: String(data.get('phone') || '').trim(),
+          first_name: String(data.get('first_name') || '').trim(),
+          last_name: String(data.get('last_name') || '').trim(),
+          country: String(data.get('country') || 'United Arab Emirates').trim(),
+          address: String(data.get('address') || '').trim(),
+          apartment: String(data.get('apartment') || '').trim(),
+          city: String(data.get('city') || '').trim(),
+          emirate: String(data.get('emirate') || '').trim(),
+          payment_preference: paymentPreference,
+          discount_code: String(discountInput.value || '').trim(),
+          customer_notes: String(data.get('notes') || '').trim(),
+          line_items: getOrderItems(),
+          subtotal: subtotal,
+          total: subtotal,
+          currency: 'AED',
+          source: 'website'
+        };
+      }
+
+      async function getSupabaseClient() {
+        if (!config.url || !config.anonKey) {
+          throw new Error('Supabase is not configured for checkout orders.');
+        }
+
+        if (!supabaseClientPromise) {
+          supabaseClientPromise = import(SUPABASE_CDN).then(function (supabaseModule) {
+            return supabaseModule.createClient(config.url, config.anonKey, {
+              auth: {
+                persistSession: false,
+                autoRefreshToken: false,
+                detectSessionInUrl: false
+              }
+            });
+          });
+        }
+
+        return supabaseClientPromise;
+      }
+
+      async function saveOrder(payload) {
+        var client = await getSupabaseClient();
+        var result = await client
+          .from('site_orders')
+          .insert(payload);
+
+        if (result.error) {
+          throw result.error;
+        }
+
+        return payload;
       }
 
       document.querySelectorAll('[data-payment-choice]').forEach(function (button) {
@@ -370,14 +447,13 @@
 
       cityInput.addEventListener('input', updateShippingCopy);
 
-      form.addEventListener('submit', function (event) {
+      form.addEventListener('submit', async function (event) {
         var data;
-        var subject;
-        var body;
+        var payload;
 
         if (!cart.getCount()) {
           event.preventDefault();
-          setStatus('Your cart is empty. Add a product before checkout.');
+          setStatus('Your cart is empty. Add a product before checkout.', 'error');
           return;
         }
 
@@ -387,13 +463,27 @@
 
         event.preventDefault();
         data = new FormData(form);
-        subject = 'PureForm checkout request';
-        body = buildOrderBody(data);
-        setStatus('Opening your email app with the checkout request.');
-        window.location.href = 'mailto:hello@pureform.ae?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+        payload = buildOrderPayload(data);
+        submitButton.disabled = true;
+        submitButton.setAttribute('aria-disabled', 'true');
+        setStatus('Saving your order request...', 'neutral');
+
+        try {
+          await saveOrder(payload);
+          cart.clearCart();
+          renderSummary();
+          form.reset();
+          updateShippingCopy();
+          setStatus('Order ' + payload.order_number + ' received. PureForm will confirm delivery and payment details shortly.', 'success');
+        } catch (error) {
+          submitButton.disabled = false;
+          submitButton.removeAttribute('aria-disabled');
+          setStatus('Order could not be saved to Supabase: ' + (error && error.message ? error.message : 'Unknown error') + '. Please try again after the order table is installed.', 'error');
+        }
       });
 
       window.addEventListener('pureform:cart-change', renderSummary);
+      window.addEventListener('pureform:catalog-ready', renderSummary);
       updateShippingCopy();
       renderSummary();
     })();
