@@ -12,6 +12,7 @@
   var ORDER_STATUS_OPTIONS = ['new', 'confirmed', 'packing', 'shipped', 'completed', 'cancelled'];
   var PAYMENT_STATUS_OPTIONS = ['pending', 'cod_pending', 'payment_link_sent', 'paid', 'refunded', 'cancelled'];
   var FULFILLMENT_STATUS_OPTIONS = ['unfulfilled', 'reserved', 'packed', 'shipped', 'delivered', 'cancelled'];
+  var VALID_ADMIN_VIEWS = ['overview', 'orders', 'listings', 'content'];
 
   var state = {
     supabase: null,
@@ -34,8 +35,10 @@
   function init() {
     collectElements();
     state.page = document.body.dataset.adminPage || (els.dashboardView && !els.authView ? 'dashboard' : 'login');
+    state.activeView = getRouteState().view;
     document.body.classList.toggle('has-default-supabase-config', hasConfig(DEFAULT_CONFIG));
     bindEvents();
+    setView(state.activeView, { skipRoute: true });
     var config = loadConfig();
     fillConfigForm(config);
 
@@ -106,9 +109,20 @@
     bind(els.refreshButton, 'click', loadDashboardData);
 
     els.navTabs.forEach(function (button) {
-      button.addEventListener('click', function () {
-        setView(button.dataset.view);
+      button.addEventListener('click', function (event) {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button) {
+          return;
+        }
+
+        event.preventDefault();
+        setView(button.dataset.view, { push: true });
       });
+    });
+
+    window.addEventListener('popstate', function () {
+      var route = getRouteState();
+      setView(route.view, { skipRoute: true });
+      applyRouteSelection(route);
     });
 
     els.orderFilterTabs.forEach(function (button) {
@@ -125,7 +139,7 @@
 
     bind(els.newListingButton, 'click', function () {
       fillListingForm();
-      setView('listings');
+      setView('listings', { push: true, action: 'new' });
     });
 
     bind(els.listingsTableBody, 'click', onListingsTableClick);
@@ -142,7 +156,7 @@
 
     bind(els.newContentButton, 'click', function () {
       fillContentForm();
-      setView('content');
+      setView('content', { push: true, action: 'new' });
     });
 
     bind(els.contentTableBody, 'click', onContentTableClick);
@@ -388,10 +402,12 @@
       els.adminUserEmail.textContent = (state.profile && state.profile.email) || (state.session && state.session.user.email) || 'Admin';
     }
 
-    setView(state.activeView || 'overview');
+    setView(getRouteState().view, { skipRoute: true });
   }
 
-  function setView(view) {
+  function setView(view, options) {
+    options = options || {};
+    view = normalizeView(view);
     state.activeView = view;
     var titles = {
       overview: 'Overview',
@@ -412,7 +428,103 @@
 
     els.navTabs.forEach(function (button) {
       button.classList.toggle('is-active', button.dataset.view === view);
+      if (button.dataset.view === view) {
+        button.setAttribute('aria-current', 'page');
+      } else {
+        button.removeAttribute('aria-current');
+      }
     });
+
+    if (!options.skipRoute) {
+      updateAdminRoute(Object.assign({}, options, { view: view }));
+    }
+  }
+
+  function normalizeView(view) {
+    return VALID_ADMIN_VIEWS.indexOf(view) !== -1 ? view : 'overview';
+  }
+
+  function getRouteState() {
+    var params = new URLSearchParams(window.location.search);
+    return {
+      view: normalizeView(params.get('view') || 'overview'),
+      order: params.get('order') || '',
+      listing: params.get('listing') || '',
+      block: params.get('block') || '',
+      action: params.get('action') || ''
+    };
+  }
+
+  function updateAdminRoute(options) {
+    if (!isDashboardPage()) {
+      return;
+    }
+
+    var nextUrl = new URL(window.location.href);
+    var view = normalizeView(options.view);
+    nextUrl.search = '';
+
+    if (view !== 'overview') {
+      nextUrl.searchParams.set('view', view);
+    }
+
+    if (options.order) {
+      nextUrl.searchParams.set('order', options.order);
+    }
+
+    if (options.listing) {
+      nextUrl.searchParams.set('listing', options.listing);
+    }
+
+    if (options.block) {
+      nextUrl.searchParams.set('block', options.block);
+    }
+
+    if (options.action) {
+      nextUrl.searchParams.set('action', options.action);
+    }
+
+    if (nextUrl.href === window.location.href) {
+      return;
+    }
+
+    if (options.replace) {
+      window.history.replaceState({ view: view }, '', nextUrl.href);
+    } else {
+      window.history.pushState({ view: view }, '', nextUrl.href);
+    }
+  }
+
+  function applyRouteSelection(route) {
+    route = route || getRouteState();
+    setView(route.view, { skipRoute: true });
+
+    if (route.view === 'orders') {
+      fillOrderForm(route.order ? findOrder(route.order) : state.orders[0]);
+      return;
+    }
+
+    if (route.view === 'listings') {
+      fillListingForm(route.action === 'new' ? null : findListing(route.listing));
+      return;
+    }
+
+    if (route.view === 'content') {
+      fillContentForm(route.action === 'new' ? null : findContentBlock(route.block));
+      return;
+    }
+
+    if (document.getElementById('orderId') && !document.getElementById('orderId').value) {
+      fillOrderForm(state.orders[0]);
+    }
+
+    if (document.getElementById('listingId') && !document.getElementById('listingId').value) {
+      fillListingForm();
+    }
+
+    if (document.getElementById('contentId') && !document.getElementById('contentId').value) {
+      fillContentForm();
+    }
   }
 
   async function loadDashboardData() {
@@ -487,21 +599,7 @@
     renderOrdersTable();
     renderListingsTable();
     renderContentTable();
-
-    var orderId = document.getElementById('orderId');
-    if (orderId && !orderId.value) {
-      fillOrderForm(state.orders[0]);
-    }
-
-    var listingId = document.getElementById('listingId');
-    if (listingId && !listingId.value) {
-      fillListingForm();
-    }
-
-    var contentId = document.getElementById('contentId');
-    if (contentId && !contentId.value) {
-      fillContentForm();
-    }
+    applyRouteSelection();
   }
 
   function renderStats() {
@@ -781,6 +879,7 @@
 
     if (button.dataset.action === 'view-order') {
       fillOrderForm(order);
+      setView('orders', { push: true, order: order.id });
       return;
     }
 
@@ -789,6 +888,7 @@
         status: 'completed',
         fulfillment_status: order.fulfillment_status === 'cancelled' ? 'cancelled' : 'delivered'
       }, 'Order marked complete.');
+      setView('orders', { replace: true, order: order.id });
     }
   }
 
@@ -828,6 +928,7 @@
       fulfillment_status: document.getElementById('orderFulfillmentStatus').value,
       admin_notes: document.getElementById('orderAdminNotes').value.trim()
     }, 'Order saved.');
+    setView('orders', { replace: true, order: id });
   }
 
   async function updateOrder(id, payload, successMessage) {
@@ -1127,6 +1228,7 @@
 
     if (button.dataset.action === 'edit-listing') {
       fillListingForm(listing);
+      setView('listings', { push: true, listing: listing.id });
       return;
     }
 
@@ -1184,6 +1286,7 @@
       await loadListings();
       renderDashboard();
       fillListingForm(result.data);
+      setView('listings', { replace: true, listing: result.data.id });
       setDashboardStatus('Listing saved.', 'success');
     } catch (error) {
       setDashboardStatus('Listing save failed: ' + getErrorMessage(error), 'error');
@@ -1211,6 +1314,7 @@
       await loadListings();
       renderDashboard();
       fillListingForm();
+      setView('listings', { replace: true });
       setDashboardStatus('Listing deleted.', 'success');
     } catch (error) {
       setDashboardStatus('Listing delete failed: ' + getErrorMessage(error), 'error');
@@ -1361,6 +1465,7 @@
 
     if (button.dataset.action === 'edit-content') {
       fillContentForm(block);
+      setView('content', { push: true, block: block.id });
       return;
     }
 
@@ -1404,6 +1509,7 @@
       await loadContentBlocks();
       renderDashboard();
       fillContentForm(result.data);
+      setView('content', { replace: true, block: result.data.id });
       setDashboardStatus('Content block saved.', 'success');
     } catch (error) {
       setDashboardStatus('Content save failed: ' + getErrorMessage(error), 'error');
@@ -1431,6 +1537,7 @@
       await loadContentBlocks();
       renderDashboard();
       fillContentForm();
+      setView('content', { replace: true });
       setDashboardStatus('Content block deleted.', 'success');
     } catch (error) {
       setDashboardStatus('Content delete failed: ' + getErrorMessage(error), 'error');
@@ -1727,11 +1834,53 @@
 
   function redirectToDashboard() {
     var url = new URL('dashboard.html', window.location.href);
+    var route = getRouteState();
+    if (route.view !== 'overview') {
+      url.searchParams.set('view', route.view);
+    }
+
+    if (route.order) {
+      url.searchParams.set('order', route.order);
+    }
+
+    if (route.listing) {
+      url.searchParams.set('listing', route.listing);
+    }
+
+    if (route.block) {
+      url.searchParams.set('block', route.block);
+    }
+
+    if (route.action) {
+      url.searchParams.set('action', route.action);
+    }
+
     window.location.href = url.href;
   }
 
   function redirectToLogin() {
     var url = new URL('index.html', window.location.href);
+    var route = getRouteState();
+    if (route.view !== 'overview') {
+      url.searchParams.set('view', route.view);
+    }
+
+    if (route.order) {
+      url.searchParams.set('order', route.order);
+    }
+
+    if (route.listing) {
+      url.searchParams.set('listing', route.listing);
+    }
+
+    if (route.block) {
+      url.searchParams.set('block', route.block);
+    }
+
+    if (route.action) {
+      url.searchParams.set('action', route.action);
+    }
+
     window.location.href = url.href;
   }
 })();
