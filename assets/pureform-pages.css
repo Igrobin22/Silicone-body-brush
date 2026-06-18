@@ -1074,6 +1074,13 @@ h1 {
   width: 100%;
 }
 
+.cart-summary .btn-p.is-empty-cart {
+  border: .5px solid rgba(28, 32, 30, .12);
+  background: rgba(255, 255, 255, .82);
+  box-shadow: none;
+  color: var(--dark);
+}
+
 .cart-summary-actions {
   display: grid;
   gap: .7rem;

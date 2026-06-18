@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Review your PureForm cart and continue shopping the 4-piece silicone brush set in Grey, Black, and Pink.">
   <title>Cart | PureForm</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -83,7 +84,7 @@
           <div class="cart-summary-line"><span>Returns</span><strong>15 days</strong></div>
           <p class="cart-summary-note">Add your city and preferred payment method at checkout. COD availability is confirmed before finalizing.</p>
           <div class="cart-summary-actions">
-            <a class="btn-p Btn buy-pay-button" id="cartCheckoutLink" href="checkout.html" aria-disabled="true"><span>Continue to checkout</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
+            <a class="btn-p Btn buy-pay-button is-empty-cart" id="cartCheckoutLink" href="products.html#set-colors"><span>Choose a set first</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
             <button class="btn-s" id="cartClearButton" type="button" disabled>Clear cart</button>
           </div>
           <p class="cart-summary-status" id="cartStatus" aria-live="polite"></p>
@@ -279,6 +280,7 @@
         var lineItems = cart.getLineItems();
         var count = cart.getCount();
         var hasItems = lineItems.length > 0;
+        var checkoutLabel = checkoutLink.querySelector('span');
 
         if (emptyState) {
           emptyState.hidden = hasItems;
@@ -297,7 +299,11 @@
         summaryCount.textContent = count + (count === 1 ? ' item' : ' items');
         subtotal.textContent = cart.formatAED(cart.getSubtotal());
         checkoutLink.href = hasItems ? cart.getCheckoutUrl() : 'products.html#set-colors';
-        checkoutLink.toggleAttribute('aria-disabled', !hasItems);
+        checkoutLink.classList.toggle('is-empty-cart', !hasItems);
+        checkoutLink.setAttribute('aria-label', hasItems ? 'Continue to checkout' : 'Choose a PureForm set first');
+        if (checkoutLabel) {
+          checkoutLabel.textContent = hasItems ? 'Continue to checkout' : 'Choose a set first';
+        }
         clearButton.disabled = !hasItems;
       }
 

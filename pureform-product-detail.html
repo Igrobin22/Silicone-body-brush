@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="View PureForm product details, gallery, quantity, availability, delivery, returns, and order support.">
   <title>PureForm Product Detail</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -509,6 +510,238 @@
       font-weight: 500;
     }
 
+    .pdp-followup-section {
+      padding: clamp(3.2rem, 7vw, 6rem) clamp(1rem, 5vw, 5rem);
+      border-top: 1px solid rgba(17, 17, 17, .1);
+      background: #fff;
+    }
+
+    .pdp-followup-section + .pdp-followup-section {
+      padding-top: clamp(2.8rem, 5vw, 4.5rem);
+    }
+
+    .pdp-followup-section[hidden] {
+      display: none;
+    }
+
+    .pdp-section-head {
+      display: grid;
+      grid-template-columns: minmax(0, .85fr) minmax(280px, .42fr);
+      gap: clamp(1.2rem, 4vw, 4rem);
+      align-items: end;
+      margin-bottom: clamp(1.35rem, 3vw, 2.4rem);
+    }
+
+    .pdp-section-kicker {
+      margin-bottom: .7rem;
+      color: var(--light);
+      font-size: 11px;
+      letter-spacing: .22em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .pdp-section-head h2 {
+      max-width: 11em;
+      font-family: var(--serif);
+      font-size: clamp(2.1rem, 4.4vw, 4.65rem);
+      font-weight: 400;
+      letter-spacing: .01em;
+      line-height: .96;
+    }
+
+    .pdp-section-copy {
+      color: var(--mid);
+      font-size: 14.5px;
+      line-height: 1.55;
+    }
+
+    .pdp-related-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(1rem, 2vw, 1.4rem);
+    }
+
+    .pdp-related-card {
+      display: grid;
+      gap: .9rem;
+      min-height: 100%;
+      border: 1px solid rgba(17, 17, 17, .1);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(220, 238, 231, .48), transparent 44%),
+        #fafaf8;
+      color: inherit;
+      overflow: hidden;
+      padding: clamp(.75rem, 1.7vw, 1rem);
+      text-decoration: none;
+      transition: border-color var(--pdp-motion-fast) ease, box-shadow var(--pdp-motion-fast) var(--pdp-ease-out), transform var(--pdp-motion-fast) var(--pdp-ease-out);
+    }
+
+    .pdp-related-media {
+      position: relative;
+      display: grid;
+      min-height: clamp(210px, 25vw, 360px);
+      place-items: center;
+      overflow: hidden;
+      border-radius: 18px;
+      background: #efefee;
+    }
+
+    .pdp-related-media img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform var(--pdp-motion-med) var(--pdp-ease-out);
+    }
+
+    .pdp-related-badge {
+      position: absolute;
+      top: .75rem;
+      left: .75rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .82);
+      color: #111;
+      font-size: 10px;
+      letter-spacing: .12em;
+      line-height: 1;
+      padding: .5rem .7rem;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+    }
+
+    .pdp-related-info {
+      display: grid;
+      gap: .42rem;
+      padding: .1rem .15rem .25rem;
+    }
+
+    .pdp-related-info h3 {
+      font-family: var(--serif);
+      font-size: clamp(1.25rem, 2.1vw, 1.75rem);
+      font-weight: 400;
+      line-height: 1.02;
+    }
+
+    .pdp-related-price {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem .55rem;
+      align-items: baseline;
+      color: var(--mid);
+      font-size: 13px;
+    }
+
+    .pdp-related-price strong {
+      color: #111;
+      font-weight: 500;
+    }
+
+    .pdp-related-price del {
+      color: var(--light);
+      font-size: 12px;
+    }
+
+    .pdp-related-meta {
+      color: var(--mid);
+      font-size: 12.5px;
+      line-height: 1.4;
+    }
+
+    .pdp-reviews-section {
+      background:
+        radial-gradient(circle at 0% 0%, rgba(220, 238, 231, .38), transparent 34%),
+        radial-gradient(circle at 100% 8%, rgba(246, 219, 228, .3), transparent 30%),
+        #fbfbfa;
+    }
+
+    .pdp-review-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(.85rem, 1.6vw, 1.2rem);
+    }
+
+    .pdp-review-card {
+      display: grid;
+      gap: .85rem;
+      min-height: 100%;
+      border: 1px solid rgba(17, 17, 17, .1);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .78);
+      box-shadow: 0 18px 48px rgba(17, 17, 17, .05);
+      overflow: hidden;
+      padding: .8rem;
+    }
+
+    .pdp-review-photo {
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #eee;
+    }
+
+    .pdp-review-photo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .pdp-review-meta {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: .75rem;
+      color: var(--mid);
+      font-size: 12px;
+    }
+
+    .pdp-review-meta strong {
+      display: block;
+      margin-bottom: .15rem;
+      color: #111;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .pdp-review-rating {
+      color: #111;
+      font-size: 12px;
+      letter-spacing: .06em;
+      white-space: nowrap;
+    }
+
+    .pdp-review-card p {
+      color: var(--mid);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .pdp-review-date {
+      color: var(--light);
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .pdp-related-card:focus-visible {
+      outline: 2px solid rgba(17, 17, 17, .32);
+      outline-offset: 4px;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .pdp-related-card:hover {
+        border-color: rgba(17, 17, 17, .2);
+        box-shadow: 0 22px 58px rgba(17, 17, 17, .08);
+        transform: translateY(-2px);
+      }
+
+      .pdp-related-card:hover .pdp-related-media img {
+        transform: scale(1.035);
+      }
+    }
+
     @media (max-width: 1100px) {
       .pdp-grid {
         grid-template-columns: 1fr;
@@ -558,6 +791,14 @@
 
       .pdp-normal-content {
         grid-template-columns: 1fr;
+      }
+
+      .pdp-section-head {
+        grid-template-columns: 1fr;
+      }
+
+      .pdp-review-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
@@ -676,6 +917,10 @@
 
       .pdp-gallery-shell {
         order: -1;
+        width: 100vw;
+        margin-right: calc(50% - 50vw);
+        margin-left: calc(50% - 50vw);
+        overflow: hidden;
       }
 
       .pdp-gallery {
@@ -694,16 +939,19 @@
       }
 
       .pdp-gallery-frame {
-        flex: 0 0 100%;
-        min-width: 100%;
+        flex: 0 0 100vw;
+        min-width: 100vw;
         min-height: min(54vh, 500px);
         scroll-snap-align: start;
         scroll-snap-stop: always;
       }
 
       .pdp-gallery-frame img {
-        width: min(82%, 360px);
-        height: auto;
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        object-fit: cover;
+        object-position: center center;
       }
 
       .pdp-gallery-dots {
@@ -777,6 +1025,82 @@
       .pdp-normal-list {
         gap: 1rem;
       }
+
+      .pdp-followup-section {
+        padding: 2.65rem clamp(.9rem, 4vw, 1.15rem);
+      }
+
+      .pdp-section-head {
+        gap: .85rem;
+        margin-bottom: 1rem;
+      }
+
+      .pdp-section-kicker {
+        margin-bottom: .55rem;
+        font-size: 10px;
+      }
+
+      .pdp-section-head h2 {
+        font-size: clamp(2rem, 10vw, 3.05rem);
+      }
+
+      .pdp-section-copy {
+        max-width: 30rem;
+        font-size: 13.5px;
+      }
+
+      .pdp-related-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .72rem;
+      }
+
+      .pdp-related-card {
+        border-radius: 18px;
+        gap: .65rem;
+        padding: .55rem;
+      }
+
+      .pdp-related-media {
+        min-height: 0;
+        aspect-ratio: 1 / 1.08;
+        border-radius: 14px;
+      }
+
+      .pdp-related-badge {
+        top: .5rem;
+        left: .5rem;
+        font-size: 8px;
+        letter-spacing: .1em;
+        padding: .38rem .48rem;
+      }
+
+      .pdp-related-info h3 {
+        font-size: clamp(1rem, 5.2vw, 1.24rem);
+      }
+
+      .pdp-related-price,
+      .pdp-related-meta {
+        font-size: 11.5px;
+      }
+
+      .pdp-review-grid {
+        display: flex;
+        gap: .82rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        margin-inline: calc(clamp(.9rem, 4vw, 1.15rem) * -1);
+        padding-inline: clamp(.9rem, 4vw, 1.15rem);
+      }
+
+      .pdp-review-grid::-webkit-scrollbar {
+        display: none;
+      }
+
+      .pdp-review-card {
+        flex: 0 0 min(82vw, 320px);
+        scroll-snap-align: start;
+      }
     }
 
     @media (max-width: 420px) {
@@ -785,7 +1109,8 @@
       }
 
       .pdp-gallery-frame img {
-        width: min(88%, 344px);
+        width: 100%;
+        height: 100%;
       }
 
       .pdp-quantity-control {
@@ -903,6 +1228,64 @@
       </aside>
     </section>
 
+    <section class="pdp-followup-section pdp-related-section" id="otherProducts" aria-labelledby="otherProductsTitle">
+      <div class="pdp-section-head">
+        <div>
+          <p class="pdp-section-kicker">Other listings</p>
+          <h2 id="otherProductsTitle">Choose another set.</h2>
+        </div>
+        <p class="pdp-section-copy">Compare the other PureForm colors before checkout. Each listing keeps its own photos, price, discount, and stock details from the catalog.</p>
+      </div>
+      <div class="pdp-related-grid" id="relatedProductsGrid" aria-live="polite"></div>
+    </section>
+
+    <section class="pdp-followup-section pdp-reviews-section" aria-labelledby="pdpReviewsTitle">
+      <div class="pdp-section-head">
+        <div>
+          <p class="pdp-section-kicker">Customer reviews</p>
+          <h2 id="pdpReviewsTitle">What customers notice first.</h2>
+        </div>
+        <p class="pdp-section-copy">Daily-use notes from customers who switched to quick-rinse silicone tools.</p>
+      </div>
+      <div class="pdp-review-grid">
+        <article class="pdp-review-card">
+          <figure class="pdp-review-photo">
+            <img src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780243836/b49922d6-d5cd-4254-b166-be53bd47132e_675x1200_tspgdx.avif" alt="Customer photo for Mariam A. PureForm review" loading="lazy" decoding="async">
+          </figure>
+          <div class="pdp-review-meta">
+            <div><strong>Mariam A.</strong><span>Dubai, UAE</span></div>
+            <div class="pdp-review-rating" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          </div>
+          <p>The long handle makes the back brush useful every day. It rinses quickly and feels cleaner than my old sponge.</p>
+          <span class="pdp-review-date">March 2026</span>
+        </article>
+
+        <article class="pdp-review-card">
+          <figure class="pdp-review-photo">
+            <img src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780243837/8bee4d53-eb50-45e4-902f-f91f232f7588_svrxkv.avif" alt="Customer photo for Sara J. PureForm review" loading="lazy" decoding="async">
+          </figure>
+          <div class="pdp-review-meta">
+            <div><strong>Sara J.</strong><span>London, UK</span></div>
+            <div class="pdp-review-rating" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          </div>
+          <p>The silicone bristles are gentle but still effective. The face brush and body brush are the pieces I use most.</p>
+          <span class="pdp-review-date">February 2026</span>
+        </article>
+
+        <article class="pdp-review-card">
+          <figure class="pdp-review-photo">
+            <img src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780243837/4925d2f8-b8b1-43c6-9189-79b093734edc_675x1200_lltijt.avif" alt="Customer photo for Priya S. PureForm review" loading="lazy" decoding="async">
+          </figure>
+          <div class="pdp-review-meta">
+            <div><strong>Priya S.</strong><span>Mumbai, India</span></div>
+            <div class="pdp-review-rating" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          </div>
+          <p>I like that each brush has a clear job. The scalp massager is relaxing and the set dries fast after use.</p>
+          <span class="pdp-review-date">January 2026</span>
+        </article>
+      </div>
+    </section>
+
     <section class="pdp-normal-content" aria-label="PureForm routine details">
       <h2>Build a cleaner shower routine.</h2>
       <ul class="pdp-normal-list">
@@ -940,6 +1323,8 @@
       var productGalleryDots = document.getElementById('productGalleryDots');
       var availabilityLine = document.getElementById('availabilityLine');
       var productJsonLd = document.getElementById('productJsonLd');
+      var relatedProductsSection = document.getElementById('otherProducts');
+      var relatedProductsGrid = document.getElementById('relatedProductsGrid');
       var quantityButtons = Array.prototype.slice.call(document.querySelectorAll('[data-quantity-action]'));
       var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
       var activeProductId = fallbackId;
@@ -1122,6 +1507,15 @@
         return product && (product.lead || product.description) || 'A complete PureForm silicone brush set for face, scalp, body, and back care.';
       }
 
+      function getSortedProducts() {
+        return Object.keys(products)
+          .map(function (key) { return products[key]; })
+          .filter(Boolean)
+          .sort(function (a, b) {
+            return (Number(a.sort_order) || 999) - (Number(b.sort_order) || 999);
+          });
+      }
+
       function isProductAvailable(product) {
         return product && product.inventory_status !== 'out_of_stock' && (product.inventory_quantity === undefined || Number(product.inventory_quantity) > 0);
       }
@@ -1136,6 +1530,81 @@
         }
 
         return 'Available / delivery confirmed by city';
+      }
+
+      function relatedBadgeText(product) {
+        if (!isProductAvailable(product)) {
+          return 'Out of stock';
+        }
+
+        if (product && product.discountActive && product.discountLabel) {
+          return product.discountLabel.toUpperCase();
+        }
+
+        return product && product.inventoryStatusText ? product.inventoryStatusText : 'Available';
+      }
+
+      function renderRelatedProducts() {
+        var related = getSortedProducts().filter(function (product) {
+          return product && product.id !== activeProductId;
+        });
+
+        if (!relatedProductsSection || !relatedProductsGrid) {
+          return;
+        }
+
+        relatedProductsGrid.replaceChildren();
+        relatedProductsSection.hidden = related.length === 0;
+
+        related.forEach(function (product, index) {
+          var card = document.createElement('a');
+          var media = document.createElement('div');
+          var badge = document.createElement('span');
+          var image = document.createElement('img');
+          var info = document.createElement('div');
+          var title = document.createElement('h3');
+          var price = document.createElement('p');
+          var current = document.createElement('strong');
+          var meta = document.createElement('p');
+
+          card.className = 'pdp-related-card';
+          card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(product.id);
+          card.setAttribute('aria-label', 'View ' + product.name);
+
+          media.className = 'pdp-related-media';
+          badge.className = 'pdp-related-badge';
+          badge.textContent = relatedBadgeText(product);
+          image.src = product.image || getProductImages(product)[0];
+          image.alt = product.name;
+          image.decoding = 'async';
+          if (index) {
+            image.loading = 'lazy';
+          }
+
+          info.className = 'pdp-related-info';
+          title.textContent = product.name;
+          price.className = 'pdp-related-price';
+          current.textContent = getPriceText(product);
+          price.appendChild(current);
+
+          if (product.discountActive && product.regularPrice > product.price) {
+            var compare = document.createElement('del');
+            compare.textContent = product.regularPriceText;
+            price.appendChild(compare);
+          }
+
+          meta.className = 'pdp-related-meta';
+          meta.textContent = product.meta || product.inventory_note || '4-piece PureForm set';
+
+          media.appendChild(badge);
+          media.appendChild(image);
+          info.appendChild(title);
+          info.appendChild(price);
+          info.appendChild(meta);
+          card.appendChild(media);
+          card.appendChild(info);
+          relatedProductsGrid.appendChild(card);
+        });
       }
 
       function updateOrderLink() {
@@ -1260,6 +1729,7 @@
         productPriceNote.textContent = priceNote + ' Delivery timing, COD availability, and quantity details are confirmed by support.';
         availabilityLine.textContent = getAvailabilityText(product);
         renderGallery(product);
+        renderRelatedProducts();
         updateOrderLink();
         updateStructuredData(activeProductId, product);
         document.title = product.name + ' | PureForm';
