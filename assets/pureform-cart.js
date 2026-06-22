@@ -200,10 +200,12 @@
         id: item.id,
         name: product.name,
         price: Number(product.price) || 0,
+        regularPrice: Number(product.regularPrice) || Number(product.price) || 0,
         image: product.image,
         meta: product.meta,
         quantity: quantity,
-        lineTotal: (Number(product.price) || 0) * quantity
+        lineTotal: (Number(product.price) || 0) * quantity,
+        lineSavings: Math.max(0, ((Number(product.regularPrice) || Number(product.price) || 0) - (Number(product.price) || 0)) * quantity)
       };
     });
   }
@@ -217,6 +219,12 @@
   function getSubtotal(items) {
     return getLineItems(items).reduce(function (sum, item) {
       return sum + item.lineTotal;
+    }, 0);
+  }
+
+  function getSavings(items) {
+    return getLineItems(items).reduce(function (sum, item) {
+      return sum + item.lineSavings;
     }, 0);
   }
 
@@ -257,6 +265,7 @@
     getCheckoutUrl: getCheckoutUrl,
     getCount: getCount,
     getLineItems: getLineItems,
+    getSavings: getSavings,
     getSubtotal: getSubtotal,
     getSummaryText: getSummaryText,
     removeItem: removeItem,

@@ -118,6 +118,15 @@
     </section>
   </main>
 
+  <aside class="cart-sticky-checkout" id="cartStickyCheckout" aria-label="Sticky checkout summary" hidden>
+    <div class="cart-sticky-saved" id="cartStickySaved" hidden>AED 0.00 saved</div>
+    <div class="cart-sticky-total">
+      <span>Total</span>
+      <strong id="cartStickyTotal">AED 0.00</strong>
+    </div>
+    <a class="cart-sticky-button" id="cartStickyCheckoutLink" href="checkout.html">Checkout</a>
+  </aside>
+
   <footer class="site-footer">
     <div class="footer-grid">
       <div>
@@ -177,6 +186,10 @@
       var checkoutLink = document.getElementById('cartCheckoutLink');
       var clearButton = document.getElementById('cartClearButton');
       var status = document.getElementById('cartStatus');
+      var stickyCheckout = document.getElementById('cartStickyCheckout');
+      var stickyTotal = document.getElementById('cartStickyTotal');
+      var stickySaved = document.getElementById('cartStickySaved');
+      var stickyCheckoutLink = document.getElementById('cartStickyCheckoutLink');
 
       if (!cart || !itemsList) {
         return;
@@ -188,6 +201,27 @@
         }
 
         status.textContent = message || '';
+      }
+
+      function updateStickyCheckout(hasItems) {
+        var subtotalValue = cart.getSubtotal();
+        var savingsValue = typeof cart.getSavings === 'function' ? cart.getSavings() : 0;
+
+        if (!stickyCheckout || !stickyTotal || !stickySaved || !stickyCheckoutLink) {
+          return;
+        }
+
+        stickyCheckout.hidden = !hasItems;
+        document.body.classList.toggle('has-cart-sticky', hasItems);
+
+        if (!hasItems) {
+          return;
+        }
+
+        stickyTotal.textContent = cart.formatAED(subtotalValue);
+        stickyCheckoutLink.href = cart.getCheckoutUrl();
+        stickySaved.hidden = savingsValue <= 0;
+        stickySaved.textContent = cart.formatAED(savingsValue) + ' saved';
       }
 
       function renderItem(item) {
@@ -305,6 +339,7 @@
           checkoutLabel.textContent = hasItems ? 'Continue to checkout' : 'Choose a set first';
         }
         clearButton.disabled = !hasItems;
+        updateStickyCheckout(hasItems);
       }
 
       itemsList.addEventListener('click', function (event) {
