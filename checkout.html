@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Complete your PureForm checkout with contact, delivery, shipping, payment preference, and order summary details.">
+  <meta name="description" content="Complete your PureForm checkout with contact, delivery, shipping, card payment, and order summary details.">
   <title>Checkout | PureForm</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,25 +53,9 @@
   <main class="checkout-page">
     <div class="checkout-shell">
       <section class="checkout-panel" aria-labelledby="checkoutTitle">
-        <div class="checkout-head">
-          <p class="eyebrow">Checkout</p>
-          <h1 class="checkout-title" id="checkoutTitle">Complete your order.</h1>
-          <p class="checkout-subtitle">Share the details PureForm needs to confirm delivery, payment preference, and availability before your order is finalized.</p>
-        </div>
+        <h1 class="sr-only" id="checkoutTitle">Complete your PureForm order</h1>
 
         <form class="checkout-form" id="checkoutForm" action="mailto:hello@pureform.ae" method="post" enctype="text/plain">
-          <section class="checkout-step" aria-labelledby="quickCheckoutTitle">
-            <div class="checkout-step-title">
-              <h2 id="quickCheckoutTitle">Quick checkout</h2>
-            </div>
-            <div class="checkout-express" aria-label="Quick checkout choices">
-              <button type="button" data-payment-choice="cash-on-delivery">Cash on delivery</button>
-              <button type="button" data-payment-choice="payment-link">Payment link</button>
-              <button type="button" data-payment-choice="confirm-options">Ask support</button>
-            </div>
-            <p class="checkout-helper">Choose one to preselect your payment preference below.</p>
-          </section>
-
           <section class="checkout-step" aria-labelledby="contactTitle">
             <div class="checkout-step-title">
               <h2 id="contactTitle">Contact</h2>
@@ -147,27 +131,6 @@
             <div class="checkout-shipping-method" id="shippingMethod">Enter your delivery city to confirm timing and available delivery options.</div>
           </section>
 
-          <section class="checkout-step" aria-labelledby="paymentTitle">
-            <div class="checkout-step-title">
-              <h2 id="paymentTitle">Payment</h2>
-            </div>
-            <p class="checkout-payment-note">No card details are collected here. The request is saved securely, then payment and delivery are confirmed by support.</p>
-            <div class="checkout-payment-options">
-              <label class="checkout-payment-option">
-                <input type="radio" name="payment" value="Cash on delivery" checked>
-                <span class="checkout-payment-copy"><strong>Cash on delivery</strong><span>Pay when the delivery option is confirmed for your city.</span></span>
-              </label>
-              <label class="checkout-payment-option">
-                <input type="radio" name="payment" value="Secure payment link">
-                <span class="checkout-payment-copy"><strong>Secure payment link</strong><span>Request a card/payment link after PureForm confirms stock and delivery.</span></span>
-              </label>
-              <label class="checkout-payment-option">
-                <input type="radio" name="payment" value="Confirm payment options">
-                <span class="checkout-payment-copy"><strong>Confirm payment options</strong><span>Ask support to confirm the available payment methods before finalizing.</span></span>
-              </label>
-            </div>
-          </section>
-
           <section class="checkout-step" aria-labelledby="notesTitle">
             <div class="checkout-step-title">
               <h2 id="notesTitle">Order notes</h2>
@@ -232,8 +195,7 @@
       }
 
       function getSelectedPayment() {
-        var selected = form.querySelector('input[name="payment"]:checked');
-        return selected ? selected.value : 'Cash on delivery';
+        return 'Card payment';
       }
 
       function setStatus(message, type) {
@@ -336,11 +298,7 @@
         return 'PF-' + datePart + '-' + randomPart;
       }
 
-      function getPaymentStatus(paymentPreference) {
-        if (paymentPreference === 'Cash on delivery') {
-          return 'cod_pending';
-        }
-
+      function getPaymentStatus() {
         return 'pending';
       }
 
@@ -420,21 +378,6 @@
         return payload;
       }
 
-      document.querySelectorAll('[data-payment-choice]').forEach(function (button) {
-        button.addEventListener('click', function () {
-          var value = button.getAttribute('data-payment-choice');
-          var targetValue = value === 'payment-link' ? 'Secure payment link' : value === 'confirm-options' ? 'Confirm payment options' : 'Cash on delivery';
-          var option = Array.prototype.find.call(form.querySelectorAll('input[name="payment"]'), function (input) {
-            return input.value === targetValue;
-          });
-
-          if (option) {
-            option.checked = true;
-            setStatus(targetValue + ' selected.');
-          }
-        });
-      });
-
       discountButton.addEventListener('click', function () {
         var code = discountInput.value.trim();
 
@@ -475,7 +418,7 @@
           renderSummary();
           form.reset();
           updateShippingCopy();
-          setStatus('Order ' + payload.order_number + ' received. PureForm will confirm delivery and payment details shortly.', 'success');
+          setStatus('Order ' + payload.order_number + ' received. PureForm will confirm delivery details shortly.', 'success');
         } catch (error) {
           submitButton.disabled = false;
           submitButton.removeAttribute('aria-disabled');

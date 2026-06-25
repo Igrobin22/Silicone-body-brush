@@ -139,14 +139,6 @@
               </select>
             </div>
 
-            <div class="form-field">
-              <label for="payment-preference">Payment</label>
-              <select id="payment-preference" name="payment_preference" autocomplete="off">
-                <option value="cash-on-delivery">Cash on delivery</option>
-                <option value="confirm-options">Confirm payment options</option>
-                <option value="card-transfer">Card or transfer if available</option>
-              </select>
-            </div>
           </div>
 
           <label for="customer-message">Message</label>
@@ -273,7 +265,7 @@
         });
 
         lines.push('Subtotal: ' + window.PureFormCart.formatAED(window.PureFormCart.getSubtotal()));
-        lines.push('Please confirm availability, delivery timing, and payment options for my city.');
+        lines.push('Please confirm availability and delivery timing for my city. I will pay by card.');
         return lines.join('\n');
       }
 
@@ -347,7 +339,6 @@
           'Topic: ' + getSelectedText(topic),
           'Product: ' + getSelectedText(product),
           'Bundle: ' + getSelectedText(bundle),
-          'Payment: ' + getSelectedText(document.getElementById('payment-preference')),
           '',
           'Message:',
           data.get('message') || ''
