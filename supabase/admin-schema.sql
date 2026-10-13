@@ -115,6 +115,10 @@ create table if not exists public.site_orders (
   city text not null default '',
   emirate text not null default '',
   payment_preference text not null default '',
+  payment_provider text not null default 'stripe',
+  payment_session_id text not null default '',
+  payment_intent_id text not null default '',
+  payment_reference text not null default '',
   discount_code text not null default '',
   customer_notes text not null default '',
   admin_notes text not null default '',
@@ -123,13 +127,14 @@ create table if not exists public.site_orders (
   total numeric(10, 2) not null default 0,
   currency text not null default 'AED',
   source text not null default 'website',
+  paid_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint site_orders_status_check check (
     status in ('new', 'confirmed', 'packing', 'shipped', 'completed', 'cancelled')
   ),
   constraint site_orders_payment_status_check check (
-    payment_status in ('pending', 'cod_pending', 'payment_link_sent', 'paid', 'refunded', 'cancelled')
+    payment_status in ('pending', 'requires_payment', 'paid', 'failed', 'refunded', 'cancelled')
   ),
   constraint site_orders_fulfillment_status_check check (
     fulfillment_status in ('unfulfilled', 'reserved', 'packed', 'shipped', 'delivered', 'cancelled')
@@ -154,6 +159,10 @@ alter table public.site_orders
   add column if not exists city text not null default '',
   add column if not exists emirate text not null default '',
   add column if not exists payment_preference text not null default '',
+  add column if not exists payment_provider text not null default 'stripe',
+  add column if not exists payment_session_id text not null default '',
+  add column if not exists payment_intent_id text not null default '',
+  add column if not exists payment_reference text not null default '',
   add column if not exists discount_code text not null default '',
   add column if not exists customer_notes text not null default '',
   add column if not exists admin_notes text not null default '',
@@ -161,7 +170,28 @@ alter table public.site_orders
   add column if not exists subtotal numeric(10, 2) not null default 0,
   add column if not exists total numeric(10, 2) not null default 0,
   add column if not exists currency text not null default 'AED',
-  add column if not exists source text not null default 'website';
+  add column if not exists source text not null default 'website',
+  add column if not exists paid_at timestamptz;
+
+update public.site_orders
+set
+  payment_status = case
+    when payment_status in ('cod_pending', 'payment_link_sent') then 'pending'
+    else payment_status
+  end,
+  payment_provider = coalesce(nullif(payment_provider, ''), 'stripe'),
+  currency = 'AED'
+where payment_status in ('cod_pending', 'payment_link_sent')
+  or coalesce(payment_provider, '') = ''
+  or currency <> 'AED';
+
+alter table public.site_orders
+  drop constraint if exists site_orders_payment_status_check;
+
+alter table public.site_orders
+  add constraint site_orders_payment_status_check check (
+    payment_status in ('pending', 'requires_payment', 'paid', 'failed', 'refunded', 'cancelled')
+  );
 
 create index if not exists admin_profiles_email_idx on public.admin_profiles (email);
 create index if not exists site_listings_visible_sort_idx on public.site_listings (visible, sort_order);
@@ -172,6 +202,10 @@ create index if not exists site_content_blocks_key_idx on public.site_content_bl
 create index if not exists site_orders_status_created_idx on public.site_orders (status, created_at desc);
 create index if not exists site_orders_created_idx on public.site_orders (created_at desc);
 create index if not exists site_orders_city_idx on public.site_orders (city);
+create index if not exists site_orders_payment_status_idx on public.site_orders (payment_status, created_at desc);
+create unique index if not exists site_orders_payment_session_id_idx
+on public.site_orders (payment_session_id)
+where payment_session_id <> '';
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -202,6 +236,76 @@ drop trigger if exists site_orders_set_updated_at on public.site_orders;
 create trigger site_orders_set_updated_at
 before update on public.site_orders
 for each row execute function public.set_updated_at();
+
+create or replace function public.apply_paid_site_order(
+  p_order_id uuid,
+  p_payment_session_id text,
+  p_payment_intent_id text,
+  p_paid_total numeric,
+  p_payment_reference text
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  order_record public.site_orders%rowtype;
+  item jsonb;
+  item_slug text;
+  item_quantity integer;
+begin
+  select *
+  into order_record
+  from public.site_orders
+  where id = p_order_id
+  for update;
+
+  if not found then
+    raise exception 'site order % was not found', p_order_id;
+  end if;
+
+  update public.site_orders
+  set
+    status = case when status = 'new' then 'confirmed' else status end,
+    payment_status = 'paid',
+    fulfillment_status = case when fulfillment_status = 'unfulfilled' then 'reserved' else fulfillment_status end,
+    payment_provider = 'stripe',
+    payment_session_id = coalesce(nullif(p_payment_session_id, ''), payment_session_id),
+    payment_intent_id = coalesce(nullif(p_payment_intent_id, ''), payment_intent_id),
+    payment_reference = coalesce(nullif(p_payment_reference, ''), payment_reference),
+    total = greatest(0, coalesce(p_paid_total, total)),
+    paid_at = coalesce(paid_at, now())
+  where id = p_order_id;
+
+  if order_record.payment_status = 'paid' then
+    return;
+  end if;
+
+  for item in
+    select value
+    from jsonb_array_elements(order_record.line_items)
+  loop
+    item_slug = item ->> 'id';
+    item_quantity = greatest(0, coalesce((item ->> 'quantity')::integer, 0));
+
+    if item_slug is not null and item_quantity > 0 then
+      update public.site_listings
+      set
+        inventory_quantity = greatest(0, inventory_quantity - item_quantity),
+        inventory_status = case
+          when greatest(0, inventory_quantity - item_quantity) = 0 then 'out_of_stock'
+          when greatest(0, inventory_quantity - item_quantity) <= 5 then 'low_stock'
+          else inventory_status
+        end
+      where slug = item_slug;
+    end if;
+  end loop;
+end;
+$$;
+
+revoke all on function public.apply_paid_site_order(uuid, text, text, numeric, text) from public;
+grant execute on function public.apply_paid_site_order(uuid, text, text, numeric, text) to service_role;
 
 create or replace function public.is_admin()
 returns boolean
@@ -315,16 +419,6 @@ to authenticated
 using (public.is_admin());
 
 drop policy if exists site_orders_public_insert on public.site_orders;
-create policy site_orders_public_insert
-on public.site_orders
-for insert
-to anon, authenticated
-with check (
-  source = 'website'
-  and jsonb_typeof(line_items) = 'array'
-  and jsonb_array_length(line_items) > 0
-  and total >= 0
-);
 
 drop policy if exists site_orders_admin_select on public.site_orders;
 create policy site_orders_admin_select
@@ -511,7 +605,7 @@ values
   ('home.hero.title', 'Home hero title', 'Soft touch. Deep clean. Every day.', 'text'),
   ('home.hero.body', 'Home hero body', 'A complete silicone brush set made for smoother cleansing, easier reach, and a fresher post-shower feel.', 'text'),
   ('site.announcement', 'Announcement bar', 'Free delivery checks and 15-day returns on PureForm orders', 'text'),
-  ('sidebar.announcement', 'Sidebar announcement', 'Need help choosing a set? Support can confirm color, stock, delivery, and COD availability.', 'text'),
+  ('sidebar.announcement', 'Sidebar announcement', 'Need help choosing a set? Support can confirm color, stock, UAE delivery, and secure card checkout.', 'text'),
   ('popup.message', 'Popup message', 'Add the exact popup copy here once the popup purpose is confirmed.', 'text')
 on conflict (key) do update
 set

@@ -151,9 +151,9 @@
                     <span>Payment</span>
                     <select id="orderPaymentStatus" name="payment_status">
                       <option value="pending">Pending</option>
-                      <option value="cod_pending">COD pending</option>
-                      <option value="payment_link_sent">Payment link sent</option>
+                      <option value="requires_payment">Requires payment</option>
                       <option value="paid">Paid</option>
+                      <option value="failed">Failed</option>
                       <option value="refunded">Refunded</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
@@ -276,7 +276,7 @@
                 </div>
                 <label>
                   <span>Inventory details</span>
-                  <textarea id="listingInventoryNote" name="inventory_note" rows="3" placeholder="Example: Low stock, shipment expected Friday, or COD availability note"></textarea>
+                  <textarea id="listingInventoryNote" name="inventory_note" rows="3" placeholder="Example: Low stock, shipment expected Friday, or UAE delivery note"></textarea>
                 </label>
                 <div class="form-grid two">
                   <label>

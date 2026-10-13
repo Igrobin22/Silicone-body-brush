@@ -55,7 +55,7 @@
       <section class="checkout-panel" aria-labelledby="checkoutTitle">
         <h1 class="sr-only" id="checkoutTitle">Complete your PureForm order</h1>
 
-        <form class="checkout-form" id="checkoutForm" action="mailto:hello@pureform.ae" method="post" enctype="text/plain">
+        <form class="checkout-form" id="checkoutForm">
           <section class="checkout-step" aria-labelledby="contactTitle">
             <div class="checkout-step-title">
               <h2 id="contactTitle">Contact</h2>
@@ -68,7 +68,7 @@
               </div>
               <div class="checkout-field">
                 <label for="checkout-phone">Phone for delivery</label>
-                <input id="checkout-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+971 50 000 0000">
+                <input id="checkout-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+971 50 000 0000" required>
               </div>
             </div>
           </section>
@@ -131,6 +131,21 @@
             <div class="checkout-shipping-method" id="shippingMethod">Enter your delivery city to confirm timing and available delivery options.</div>
           </section>
 
+          <section class="checkout-step" aria-labelledby="paymentTitle">
+            <div class="checkout-step-title">
+              <h2 id="paymentTitle">Payment</h2>
+            </div>
+            <div class="checkout-payment-options" aria-label="Available payment method">
+              <div class="checkout-payment-option is-selected">
+                <span class="checkout-payment-mark" aria-hidden="true"></span>
+                <div class="checkout-payment-copy">
+                  <strong>Secure card checkout</strong>
+                  <span>Cards are processed by the hosted payment gateway. PureForm never stores card numbers or security codes.</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <section class="checkout-step" aria-labelledby="notesTitle">
             <div class="checkout-step-title">
               <h2 id="notesTitle">Order notes</h2>
@@ -142,7 +157,7 @@
           </section>
 
           <div class="checkout-actions">
-            <button class="btn-p Btn buy-pay-button" type="submit" id="checkoutSubmit"><span>Place order request</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
+            <button class="btn-p Btn buy-pay-button" type="submit" id="checkoutSubmit"><span>Continue to secure card payment</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
             <p class="checkout-status" id="checkoutStatus" aria-live="polite"></p>
           </div>
         </form>
@@ -159,7 +174,7 @@
         <div class="checkout-totals">
           <div class="checkout-total-line"><span>Subtotal</span><strong id="checkoutSubtotal">AED 0.00</strong></div>
           <div class="checkout-total-line"><span>Shipping</span><strong id="checkoutShipping">Enter delivery city</strong></div>
-          <div class="checkout-total-line"><span>Discount</span><strong id="checkoutDiscount">Confirmed by support</strong></div>
+          <div class="checkout-total-line"><span>Discount</span><strong id="checkoutDiscount">Catalog offers included</strong></div>
           <div class="checkout-total-line is-total"><span>Total</span><strong id="checkoutTotal">AED 0.00</strong></div>
         </div>
       </aside>
@@ -173,7 +188,6 @@
     (function () {
       'use strict';
 
-      var SUPABASE_CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
       var config = window.PUREFORM_SUPABASE_CONFIG || {};
       var cart = window.PureFormCart;
       var form = document.getElementById('checkoutForm');
@@ -188,14 +202,27 @@
       var submitButton = document.getElementById('checkoutSubmit');
       var cityInput = document.getElementById('checkout-city');
       var shippingMethod = document.getElementById('shippingMethod');
-      var supabaseClientPromise = null;
+      var countryInput = document.getElementById('checkout-country');
+      var emirateInput = document.getElementById('checkout-emirate');
 
       if (!cart || !form || !summaryList) {
         return;
       }
 
       function getSelectedPayment() {
-        return 'Card payment';
+        return 'Secure card checkout';
+      }
+
+      function checkoutEndpoint() {
+        if (config.checkoutFunctionUrl) {
+          return config.checkoutFunctionUrl;
+        }
+
+        if (!config.url) {
+          return '';
+        }
+
+        return String(config.url).replace(/\/+$/, '') + '/functions/v1/create-checkout-session';
       }
 
       function setStatus(message, type) {
@@ -274,57 +301,23 @@
           return;
         }
 
-        shippingMethod.textContent = 'PureForm will confirm delivery timing and availability for ' + city + ' before finalizing the order.';
-        shippingNode.textContent = 'Confirmed after request';
-      }
-
-      function createOrderNumber() {
-        var now = new Date();
-        var datePart = now.getFullYear().toString().slice(-2)
-          + String(now.getMonth() + 1).padStart(2, '0')
-          + String(now.getDate()).padStart(2, '0');
-        var randomPart;
-
-        if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
-          var bytes = new Uint8Array(2);
-          window.crypto.getRandomValues(bytes);
-          randomPart = Array.prototype.map.call(bytes, function (byte) {
-            return byte.toString(16).padStart(2, '0');
-          }).join('').toUpperCase();
-        } else {
-          randomPart = Math.floor(Math.random() * 65535).toString(16).padStart(4, '0').toUpperCase();
-        }
-
-        return 'PF-' + datePart + '-' + randomPart;
-      }
-
-      function getPaymentStatus() {
-        return 'pending';
+        shippingMethod.textContent = 'PureForm ships within the UAE only. Delivery timing for ' + city + ' is confirmed before dispatch.';
+        shippingNode.textContent = 'Calculated by city';
       }
 
       function getOrderItems() {
-        return cart.getLineItems().map(function (item) {
+        return cart.getCart().map(function (item) {
           return {
             id: item.id,
-            name: item.name,
-            meta: item.meta,
-            image: item.image,
-            price: Number(item.price) || 0,
-            quantity: Number(item.quantity) || 1,
-            line_total: Number(item.lineTotal) || 0
+            quantity: Number(item.quantity) || 1
           };
         });
       }
 
       function buildOrderPayload(data) {
         var paymentPreference = getSelectedPayment();
-        var subtotal = Number(cart.getSubtotal()) || 0;
 
         return {
-          order_number: createOrderNumber(),
-          status: 'new',
-          payment_status: getPaymentStatus(paymentPreference),
-          fulfillment_status: 'unfulfilled',
           contact: String(data.get('contact') || '').trim(),
           phone: String(data.get('phone') || '').trim(),
           first_name: String(data.get('first_name') || '').trim(),
@@ -337,56 +330,66 @@
           payment_preference: paymentPreference,
           discount_code: String(discountInput.value || '').trim(),
           customer_notes: String(data.get('notes') || '').trim(),
-          line_items: getOrderItems(),
-          subtotal: subtotal,
-          total: subtotal,
-          currency: 'AED',
-          source: 'website'
+          line_items: getOrderItems()
         };
       }
 
-      async function getSupabaseClient() {
-        if (!config.url || !config.anonKey) {
-          throw new Error('Supabase is not configured for checkout orders.');
+      function validateUaeOnly() {
+        if (countryInput.value !== 'United Arab Emirates') {
+          setStatus('PureForm checkout is available in the United Arab Emirates only.', 'error');
+          return false;
         }
 
-        if (!supabaseClientPromise) {
-          supabaseClientPromise = import(SUPABASE_CDN).then(function (supabaseModule) {
-            return supabaseModule.createClient(config.url, config.anonKey, {
-              auth: {
-                persistSession: false,
-                autoRefreshToken: false,
-                detectSessionInUrl: false
-              }
-            });
-          });
+        if (!emirateInput.value) {
+          setStatus('Select the delivery emirate before secure card payment.', 'error');
+          return false;
         }
 
-        return supabaseClientPromise;
+        return true;
       }
 
-      async function saveOrder(payload) {
-        var client = await getSupabaseClient();
-        var result = await client
-          .from('site_orders')
-          .insert(payload);
+      async function createCheckoutSession(payload) {
+        var endpoint = checkoutEndpoint();
+        var response;
+        var result;
 
-        if (result.error) {
-          throw result.error;
+        if (!endpoint || !config.anonKey) {
+          throw new Error('Secure card checkout is missing the Supabase function URL or anon key.');
         }
 
-        return payload;
+        response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + config.anonKey,
+            'apikey': config.anonKey
+          },
+          body: JSON.stringify(payload)
+        });
+        result = await response.json().catch(function () {
+          return {};
+        });
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Secure card checkout could not be started.');
+        }
+
+        if (!result.checkout_url) {
+          throw new Error('Secure card checkout did not return a payment URL.');
+        }
+
+        return result;
       }
 
       discountButton.addEventListener('click', function () {
         var code = discountInput.value.trim();
 
         if (!code) {
-          discountStatus.textContent = 'Enter a code and PureForm will confirm whether it applies.';
+          discountStatus.textContent = 'Enter a code to verify it before secure card checkout.';
           return;
         }
 
-        discountStatus.textContent = code.toUpperCase() + ' saved. The final discount will be confirmed before payment.';
+        discountStatus.textContent = code.toUpperCase() + ' will be verified before the secure card step.';
       });
 
       cityInput.addEventListener('input', updateShippingCopy);
@@ -406,28 +409,48 @@
         }
 
         event.preventDefault();
+        if (!validateUaeOnly()) {
+          return;
+        }
+
         data = new FormData(form);
         payload = buildOrderPayload(data);
         submitButton.disabled = true;
         submitButton.setAttribute('aria-disabled', 'true');
-        setStatus('Saving your order request...', 'neutral');
+        setStatus('Opening secure card checkout...', 'neutral');
 
         try {
-          await saveOrder(payload);
-          cart.clearCart();
-          renderSummary();
-          form.reset();
-          updateShippingCopy();
-          setStatus('Order ' + payload.order_number + ' received. PureForm will confirm delivery details shortly.', 'success');
+          var session = await createCheckoutSession(payload);
+          window.location.assign(session.checkout_url);
         } catch (error) {
           submitButton.disabled = false;
           submitButton.removeAttribute('aria-disabled');
-          setStatus('Order could not be saved to Supabase: ' + (error && error.message ? error.message : 'Unknown error') + '. Please try again after the order table is installed.', 'error');
+          setStatus((error && error.message ? error.message : 'Secure card checkout could not be started.') + ' No card details were collected.', 'error');
         }
       });
 
+      function handlePaymentReturn() {
+        var params = new URLSearchParams(window.location.search);
+        var paymentState = params.get('payment');
+        var orderNumber = params.get('order') || '';
+
+        if (paymentState === 'success') {
+          cart.clearCart();
+          form.reset();
+          updateShippingCopy();
+          setStatus('Payment received for ' + (orderNumber || 'your order') + '. PureForm will prepare your UAE delivery next.', 'success');
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        if (paymentState === 'cancelled') {
+          setStatus('Secure card payment was cancelled. Your cart is still here when you are ready.', 'error');
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+
       window.addEventListener('pureform:cart-change', renderSummary);
       window.addEventListener('pureform:catalog-ready', renderSummary);
+      handlePaymentReturn();
       updateShippingCopy();
       renderSummary();
     })();

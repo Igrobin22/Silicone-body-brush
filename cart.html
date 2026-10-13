@@ -251,7 +251,7 @@
         name.href = productUrl;
         name.textContent = item.name;
         meta.className = 'cart-item-meta';
-        meta.textContent = item.meta;
+        meta.textContent = item.meta + (item.inventoryQuantity !== null ? ' / ' + item.inventoryQuantity + ' available' : '');
         price.className = 'cart-item-price';
         price.textContent = cart.formatAED(item.price) + ' each';
 
@@ -267,6 +267,9 @@
         input.type = 'number';
         input.inputMode = 'numeric';
         input.min = '1';
+        if (item.inventoryQuantity !== null) {
+          input.max = String(item.inventoryQuantity);
+        }
         input.step = '1';
         input.value = item.quantity;
         input.dataset.cartQuantity = item.id;
@@ -275,6 +278,7 @@
         increase.type = 'button';
         increase.textContent = '+';
         increase.dataset.cartAction = 'increase';
+        increase.disabled = item.inventoryQuantity !== null && item.quantity >= item.inventoryQuantity;
         increase.setAttribute('aria-label', 'Increase quantity for ' + item.name);
 
         quantity.appendChild(decrease);

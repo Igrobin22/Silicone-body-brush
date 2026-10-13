@@ -1190,7 +1190,7 @@
           </details>
           <details>
             <summary>Transparent Price</summary>
-            <p id="productPriceNote">AED 43.89 includes VAT. Discount applied from AED 87.78. Delivery timing and COD availability are confirmed by support before finalizing the order.</p>
+            <p id="productPriceNote">AED 43.89 includes VAT. Discount applied from AED 87.78. Delivery timing and secure card payment are confirmed before finalizing the order.</p>
           </details>
         </div>
       </aside>
@@ -1291,7 +1291,7 @@
       <ul class="pdp-normal-list">
         <li><strong>Separate tools for separate moments.</strong>Use the face brush, scalp massager, body brush, and back scrubber without mixing delicate and body care.</li>
         <li><strong>Quick-rinse silicone.</strong>The flexible bristles rinse clean after use and dry faster than absorbent shower tools.</li>
-        <li><strong>Order support before checkout.</strong>Delivery city, COD availability, and preferred color are confirmed before the order is finalized.</li>
+        <li><strong>Order support before checkout.</strong>Delivery city, secure card payment, and preferred color are confirmed before the order is finalized.</li>
       </ul>
     </section>
   </main>
@@ -1482,6 +1482,16 @@
         return Math.max(1, parseInt(value, 10) || 1);
       }
 
+      function getMaxQuantity(product) {
+        var inventoryQuantity = parseInt(product && product.inventory_quantity, 10);
+
+        if (!isProductAvailable(product)) {
+          return 0;
+        }
+
+        return Number.isFinite(inventoryQuantity) ? Math.max(0, inventoryQuantity) : Infinity;
+      }
+
       function getProductImages(product) {
         var images = product && Array.isArray(product.images) ? product.images.filter(Boolean) : [];
         if (!images.length && product && product.image) {
@@ -1620,19 +1630,30 @@
       }
 
       function setQuantity(value) {
-        selectedQuantity = clampQuantity(value);
+        var product = products[activeProductId] || products[fallbackId];
+        var maxQuantity = getMaxQuantity(product);
+        selectedQuantity = maxQuantity > 0 ? Math.min(clampQuantity(value), maxQuantity) : 1;
 
         if (productQuantityInput) {
           productQuantityInput.value = selectedQuantity;
+          if (Number.isFinite(maxQuantity) && maxQuantity > 0) {
+            productQuantityInput.max = String(maxQuantity);
+          } else {
+            productQuantityInput.removeAttribute('max');
+          }
         }
 
         if (productQuantityNote) {
-          productQuantityNote.textContent = selectedQuantity + (selectedQuantity === 1 ? ' set' : ' sets');
+          productQuantityNote.textContent = Number.isFinite(maxQuantity) && maxQuantity > 0
+            ? selectedQuantity + (selectedQuantity === 1 ? ' set' : ' sets') + ' / ' + maxQuantity + ' available'
+            : selectedQuantity + (selectedQuantity === 1 ? ' set' : ' sets');
         }
 
         quantityButtons.forEach(function (button) {
           if (button.getAttribute('data-quantity-action') === 'decrease') {
             button.disabled = selectedQuantity <= 1;
+          } else {
+            button.disabled = maxQuantity <= 0 || (Number.isFinite(maxQuantity) && selectedQuantity >= maxQuantity);
           }
         });
 
@@ -1726,11 +1747,11 @@
         productFitIntro.textContent = product.name + ' details are confirmed before checkout.';
         renderFitList(product.fit || []);
         productCare.textContent = 'PureForm tools are made from soft silicone. Rinse after every use, shake off water, and let the piece dry in open air.';
-        productPriceNote.textContent = priceNote + ' Delivery timing, COD availability, and quantity details are confirmed by support.';
+        productPriceNote.textContent = priceNote + ' Delivery timing, secure card payment, and quantity details are confirmed by support.';
         availabilityLine.textContent = getAvailabilityText(product);
         renderGallery(product);
         renderRelatedProducts();
-        updateOrderLink();
+        setQuantity(selectedQuantity);
         updateStructuredData(activeProductId, product);
         document.title = product.name + ' | PureForm';
 

@@ -10,7 +10,7 @@
     pink: 'pureform-4pc-set-pink'
   };
   var ORDER_STATUS_OPTIONS = ['new', 'confirmed', 'packing', 'shipped', 'completed', 'cancelled'];
-  var PAYMENT_STATUS_OPTIONS = ['pending', 'cod_pending', 'payment_link_sent', 'paid', 'refunded', 'cancelled'];
+  var PAYMENT_STATUS_OPTIONS = ['pending', 'requires_payment', 'paid', 'failed', 'refunded', 'cancelled'];
   var FULFILLMENT_STATUS_OPTIONS = ['unfulfilled', 'reserved', 'packed', 'shipped', 'delivered', 'cancelled'];
   var VALID_ADMIN_VIEWS = ['overview', 'orders', 'listings', 'content'];
 
@@ -587,7 +587,7 @@
   async function loadOrders() {
     var result = await state.supabase
       .from('site_orders')
-      .select('id,order_number,status,payment_status,fulfillment_status,contact,phone,first_name,last_name,country,address,apartment,city,emirate,payment_preference,discount_code,customer_notes,admin_notes,line_items,subtotal,total,currency,source,created_at,updated_at')
+      .select('id,order_number,status,payment_status,fulfillment_status,contact,phone,first_name,last_name,country,address,apartment,city,emirate,payment_preference,payment_provider,payment_session_id,payment_intent_id,payment_reference,paid_at,discount_code,customer_notes,admin_notes,line_items,subtotal,total,currency,source,created_at,updated_at')
       .order('created_at', { ascending: false });
 
     if (result.error) {
@@ -1005,6 +1005,7 @@
       { label: 'Contact', value: customerContact(order) },
       { label: 'Delivery', value: orderAddress(order) },
       { label: 'Payment', value: order.payment_preference || statusLabel(order.payment_status) },
+      { label: 'Gateway', value: paymentReference(order) },
       { label: 'Customer notes', value: order.customer_notes || 'None' },
       { label: 'Placed', value: formatDateTime(order.created_at) }
     ];
@@ -1784,6 +1785,14 @@
     }).filter(Boolean);
 
     return parts.length ? parts.join(', ') : 'No address saved';
+  }
+
+  function paymentReference(order) {
+    var provider = String(order && order.payment_provider || 'stripe').trim();
+    var reference = String(order && (order.payment_reference || order.payment_session_id || order.payment_intent_id) || '').trim();
+    var paidAt = order && order.paid_at ? ' / paid ' + formatDateTime(order.paid_at) : '';
+
+    return (provider ? statusLabel(provider) : 'Stripe') + (reference ? ' / ' + reference : '') + paidAt;
   }
 
   function itemSummary(order) {

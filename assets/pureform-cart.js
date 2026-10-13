@@ -57,6 +57,30 @@
     return Math.max(1, parseInt(quantity, 10) || 1);
   }
 
+  function getMaxQuantity(product) {
+    var rawQuantity = parseInt(product && product.inventory_quantity, 10);
+
+    if (!product) {
+      return 0;
+    }
+
+    if (product.inventory_status === 'out_of_stock') {
+      return 0;
+    }
+
+    return Number.isFinite(rawQuantity) ? Math.max(0, rawQuantity) : Infinity;
+  }
+
+  function clampQuantityForProduct(product, quantity) {
+    var maxQuantity = getMaxQuantity(product);
+
+    if (maxQuantity <= 0) {
+      return 0;
+    }
+
+    return Math.min(clampQuantity(quantity), maxQuantity);
+  }
+
   function formatAED(amount) {
     return 'AED ' + (Number(amount) || 0).toFixed(2);
   }
@@ -93,10 +117,11 @@
   function sanitizeCart(items) {
     return items.reduce(function (cart, item) {
       var id = normalizeId(item && item.id);
-      var quantity = clampQuantity(item && item.quantity);
+      var product = id ? catalog[id] : null;
+      var quantity = clampQuantityForProduct(product, item && item.quantity);
       var existing;
 
-      if (!id) {
+      if (!id || !quantity) {
         return cart;
       }
 
@@ -105,7 +130,7 @@
       });
 
       if (existing) {
-        existing.quantity += quantity;
+        existing.quantity = clampQuantityForProduct(product, existing.quantity + quantity);
         return cart;
       }
 
@@ -140,20 +165,30 @@
     var productId = normalizeId(id);
     var cart;
     var existing;
+    var product;
+    var nextQuantity;
 
     if (!productId) {
       return getCart();
     }
 
+    product = catalog[productId];
     cart = getCart();
     existing = cart.find(function (item) {
       return item.id === productId;
     });
 
     if (existing) {
-      existing.quantity += clampQuantity(quantity);
+      nextQuantity = clampQuantityForProduct(product, existing.quantity + clampQuantity(quantity));
+      if (nextQuantity <= 0) {
+        return removeItem(productId);
+      }
+      existing.quantity = nextQuantity;
     } else {
-      cart.push({ id: productId, quantity: clampQuantity(quantity) });
+      nextQuantity = clampQuantityForProduct(product, quantity);
+      if (nextQuantity > 0) {
+        cart.push({ id: productId, quantity: nextQuantity });
+      }
     }
 
     return saveCart(cart);
@@ -162,18 +197,22 @@
   function setQuantity(id, quantity) {
     var productId = normalizeId(id);
     var numericQuantity = parseInt(quantity, 10);
+    var product = productId ? catalog[productId] : null;
+    var nextQuantity;
     var cart;
 
     if (!productId) {
       return getCart();
     }
 
-    if (!numericQuantity || numericQuantity < 1) {
+    nextQuantity = clampQuantityForProduct(product, numericQuantity);
+
+    if (!numericQuantity || numericQuantity < 1 || nextQuantity <= 0) {
       return removeItem(productId);
     }
 
     cart = getCart().map(function (item) {
-      return item.id === productId ? { id: productId, quantity: numericQuantity } : item;
+      return item.id === productId ? { id: productId, quantity: nextQuantity } : item;
     });
 
     return saveCart(cart);
@@ -203,6 +242,8 @@
         regularPrice: Number(product.regularPrice) || Number(product.price) || 0,
         image: product.image,
         meta: product.meta,
+        inventoryQuantity: Number.isFinite(parseInt(product.inventory_quantity, 10)) ? Math.max(0, parseInt(product.inventory_quantity, 10)) : null,
+        inventoryStatus: product.inventory_status || 'in_stock',
         quantity: quantity,
         lineTotal: (Number(product.price) || 0) * quantity,
         lineSavings: Math.max(0, ((Number(product.regularPrice) || Number(product.price) || 0) - (Number(product.price) || 0)) * quantity)
