@@ -21,8 +21,8 @@
   --mint: #dceee7;
   --gold: #eadfc4;
   --glass: rgba(255, 255, 255, .64);
-  --serif: 'Fraunces', Georgia, serif;
-  --sans: 'DM Sans', Arial, sans-serif;
+  --heading: 'Montserrat', Arial, sans-serif;
+  --sans: 'Open Sans', Arial, sans-serif;
   --ease-out: cubic-bezier(.23, 1, .32, 1);
   --ease-soft: cubic-bezier(.22, 1, .36, 1);
   --motion-fast: 160ms;
@@ -36,6 +36,7 @@ html {
 
 body {
   font-family: var(--sans);
+  font-size-adjust: from-font;
   background:
     linear-gradient(115deg, rgba(220, 238, 231, .72), transparent 34%),
     linear-gradient(245deg, rgba(246, 219, 228, .78), transparent 38%),
@@ -46,6 +47,21 @@ body {
 
 a {
   color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--heading);
+  font-size-adjust: from-font;
+  text-wrap: balance;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--sans);
 }
 
 nav {
@@ -63,10 +79,10 @@ nav {
 }
 
 .nav-logo {
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: 24px;
   font-weight: 400;
-  letter-spacing: .05em;
+  letter-spacing: 0;
   text-decoration: none;
 }
 
@@ -81,7 +97,7 @@ nav {
   font-size: 12px;
   font-weight: 400;
   color: var(--mid);
-  letter-spacing: .05em;
+  letter-spacing: 0;
   transition: color var(--motion-fast) ease, transform var(--motion-fast) var(--ease-out);
 }
 
@@ -117,7 +133,7 @@ nav {
   min-height: 38px;
   padding: 10px 24px;
   font-size: 13px;
-  letter-spacing: .04em;
+  letter-spacing: 0;
   box-shadow: 0 10px 22px rgba(17, 17, 17, .14);
 }
 
@@ -158,23 +174,23 @@ main {
 
 .eyebrow {
   font-size: 11px;
-  letter-spacing: .2em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--light);
-  font-weight: 300;
+  font-weight: 400;
   margin-bottom: 1.2rem;
 }
 
 h1,
 .section-title {
-  font-family: var(--serif);
-  font-weight: 400;
-  letter-spacing: -.01em;
+  font-family: var(--heading);
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 h1 {
   font-size: clamp(3.2rem, 6vw, 6.4rem);
-  line-height: .92;
+  line-height: 1.1;
   margin-bottom: 1.4rem;
 }
 
@@ -182,7 +198,7 @@ h1 {
   max-width: 620px;
   color: var(--mid);
   font-size: 15px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.9;
 }
 
@@ -275,7 +291,7 @@ h1 {
   color: var(--dark);
   font-size: 15px;
   font-weight: 400;
-  letter-spacing: .01em;
+  letter-spacing: 0;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -324,7 +340,7 @@ h1 {
   cursor: pointer;
   font-size: 15px;
   font-weight: 500;
-  letter-spacing: .04em;
+  letter-spacing: 0;
   list-style: none;
   text-transform: uppercase;
 }
@@ -516,7 +532,7 @@ h1 {
 .pf-catalog-compare-price {
   color: var(--light);
   font-size: .82em;
-  font-weight: 300;
+  font-weight: 400;
   text-decoration-thickness: 1px;
 }
 
@@ -551,7 +567,7 @@ h1 {
 .section-copy {
   color: var(--mid);
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.75;
   padding: 1.2rem 1.3rem;
   border: 0.5px solid rgba(255, 255, 255, .7);
@@ -664,16 +680,16 @@ h1 {
 
 .card-kicker {
   font-size: 10px;
-  letter-spacing: .16em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--light);
   margin-bottom: .8rem;
 }
 
 .card-title {
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: clamp(1.6rem, 2.2vw, 2.25rem);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.08;
   margin-bottom: .75rem;
   position: relative;
@@ -684,7 +700,7 @@ h1 {
   align-items: center;
   gap: .55rem;
   font-size: 10px;
-  letter-spacing: .16em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--light);
   margin-bottom: .9rem;
@@ -713,10 +729,10 @@ h1 {
 }
 
 .set-price {
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: 2.35rem;
-  font-weight: 300;
-  letter-spacing: -.02em;
+  font-weight: 400;
+  letter-spacing: 0;
   margin-top: 1.25rem;
 }
 
@@ -725,7 +741,7 @@ h1 {
 .review-card p {
   color: var(--mid);
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.8;
   position: relative;
 }
@@ -760,7 +776,7 @@ h1 {
   margin: -.15rem 0 .85rem;
   color: var(--dark);
   font-size: 12px;
-  letter-spacing: .12em;
+  letter-spacing: 0;
   line-height: 1;
 }
 
@@ -768,7 +784,7 @@ h1 {
   flex: 0 0 auto;
   color: var(--light);
   font-size: 10px;
-  letter-spacing: .08em;
+  letter-spacing: 0;
 }
 
 .detail-list {
@@ -784,7 +800,7 @@ h1 {
   color: var(--mid);
   font-size: 14px;
   line-height: 1.75;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .detail-list strong {
@@ -823,23 +839,23 @@ h1 {
   margin-bottom: .5rem;
   color: var(--light);
   font-size: 10px;
-  letter-spacing: .16em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .buyer-confidence-item strong {
   display: block;
   margin-bottom: .35rem;
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: 1.35rem;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.05;
 }
 
 .buyer-confidence-item p {
   color: var(--mid);
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.6;
 }
 
@@ -863,7 +879,7 @@ h1 {
   color: var(--dark);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: .12em;
+  letter-spacing: 0;
   text-decoration: none;
   text-transform: uppercase;
 }
@@ -955,9 +971,9 @@ h1 {
 
 .cart-item-name {
   color: var(--dark);
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: clamp(1.35rem, 2.2vw, 1.8rem);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.05;
   text-decoration: none;
 }
@@ -966,7 +982,7 @@ h1 {
 .cart-item-price {
   color: var(--mid);
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .cart-item-controls {
@@ -1023,16 +1039,16 @@ h1 {
   color: var(--mid);
   cursor: pointer;
   font: 500 11px/1 var(--sans);
-  letter-spacing: .12em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .cart-item-total {
   align-self: start;
   color: var(--dark);
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: 1.55rem;
-  font-weight: 300;
+  font-weight: 400;
   white-space: nowrap;
 }
 
@@ -1047,9 +1063,9 @@ h1 {
 }
 
 .cart-summary h3 {
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: 2rem;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1;
   margin-bottom: 1rem;
 }
@@ -1071,7 +1087,7 @@ h1 {
 .cart-summary-note {
   color: var(--mid);
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.65;
   margin: 1rem 0;
 }
@@ -1100,7 +1116,7 @@ h1 {
   min-height: 1.2rem;
   color: var(--mid);
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.5;
 }
 
@@ -1176,9 +1192,9 @@ body.has-cart-sticky {
 
 .cart-sticky-total strong {
   color: var(--dark);
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: clamp(1.75rem, 4vw, 2.25rem);
-  font-weight: 300;
+  font-weight: 400;
   line-height: .95;
   white-space: nowrap;
 }
@@ -1258,7 +1274,7 @@ body.has-cart-sticky {
   margin-top: .8rem;
   color: var(--mid);
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.8;
 }
 
@@ -1283,9 +1299,9 @@ body.has-cart-sticky {
 
 .checkout-step-title h2,
 .checkout-summary h2 {
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: clamp(1.8rem, 3vw, 2.6rem);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1;
 }
 
@@ -1316,8 +1332,8 @@ body.has-cart-sticky {
 .checkout-helper {
   color: var(--light);
   font-size: 11px;
-  font-weight: 300;
-  letter-spacing: .08em;
+  font-weight: 400;
+  letter-spacing: 0;
 }
 
 .checkout-field label {
@@ -1440,7 +1456,7 @@ body.has-cart-sticky {
 .checkout-payment-copy span {
   color: var(--mid);
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.5;
 }
 
@@ -1449,8 +1465,18 @@ body.has-cart-sticky {
   gap: .8rem;
 }
 
-.checkout-actions .btn-p {
+.checkout-actions .btn-p.buy-pay-button {
   width: 100%;
+  min-height: 48px;
+  height: auto;
+  padding: 12px 18px;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+.checkout-actions .btn-p span {
+  min-width: 0;
+  white-space: normal;
 }
 
 .checkout-status {
@@ -1594,9 +1620,9 @@ body.has-cart-sticky {
 }
 
 .checkout-total-line.is-total strong {
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: 2rem;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .checkout-empty {
@@ -1610,7 +1636,7 @@ body.has-cart-sticky {
   min-height: 44px;
   padding: 12px 28px;
   font-size: 12px;
-  letter-spacing: .05em;
+  letter-spacing: 0;
   box-shadow: 0 8px 18px rgba(28, 35, 32, .07);
 }
 
@@ -1681,7 +1707,7 @@ body.has-cart-sticky {
 
 .form-grid label {
   font-size: 11px;
-  letter-spacing: .14em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--light);
   margin-bottom: -.6rem;
@@ -1720,7 +1746,7 @@ body.has-cart-sticky {
 .form-note {
   color: var(--light);
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.65;
 }
 
@@ -1787,11 +1813,11 @@ body.has-cart-sticky {
 }
 
 .footer-logo {
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: 24px;
   font-weight: 400;
   color: rgba(255, 255, 255, .78);
-  letter-spacing: .06em;
+  letter-spacing: 0;
 }
 
 .footer-links {
@@ -2175,7 +2201,7 @@ body.has-cart-sticky {
     background: rgba(255, 255, 255, .66);
     color: var(--mid);
     font-size: 10.5px;
-    letter-spacing: .04em;
+    letter-spacing: 0;
     white-space: nowrap;
   }
 

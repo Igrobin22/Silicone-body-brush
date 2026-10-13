@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,700&family=DM+Sans:wght@300;400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,400..700;1,400..700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
   <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
@@ -32,8 +32,8 @@
       --dark: #050505;
       --mid: #505050;
       --light: #b8b8b8;
-      --serif: 'Fraunces', Georgia, serif;
-      --sans: 'DM Sans', Arial, sans-serif;
+      --heading: 'Montserrat', Arial, sans-serif;
+      --sans: 'Open Sans', Arial, sans-serif;
       --pdp-header-height: 106px;
       --pdp-ease-out: cubic-bezier(.23, 1, .32, 1);
       --pdp-motion-fast: 160ms;
@@ -50,11 +50,27 @@
       background: var(--white);
       color: var(--dark);
       font-family: var(--sans);
+      font-size-adjust: from-font;
       overflow-x: clip;
     }
 
     a {
       color: inherit;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: var(--heading);
+      font-size-adjust: from-font;
+      text-wrap: balance;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family: var(--sans);
     }
 
     main {
@@ -90,14 +106,14 @@
     .pdp-status {
       margin-bottom: .75rem;
       font-size: 14px;
-      letter-spacing: .02em;
+      letter-spacing: 0;
     }
 
     .pdp-copy h1 {
       max-width: 13.5em;
       font-size: clamp(1.75rem, 1.8vw, 2.25rem);
-      font-weight: 400;
-      letter-spacing: .01em;
+      font-weight: 500;
+      letter-spacing: 0;
       line-height: 1.08;
       margin-bottom: 1.15rem;
     }
@@ -106,7 +122,7 @@
       max-width: 31rem;
       margin-bottom: 1.35rem;
       font-size: 14.5px;
-      letter-spacing: .02em;
+      letter-spacing: 0;
       line-height: 1.28;
     }
 
@@ -126,7 +142,7 @@
       list-style: none;
       cursor: pointer;
       font-size: 14.5px;
-      letter-spacing: .02em;
+      letter-spacing: 0;
       text-transform: uppercase;
       transition: color var(--pdp-motion-fast) ease, transform var(--pdp-motion-fast) var(--pdp-ease-out);
       user-select: none;
@@ -290,12 +306,12 @@
     .pdp-price {
       font-size: clamp(1.7rem, 1.8vw, 2rem);
       font-weight: 500;
-      letter-spacing: .01em;
+      letter-spacing: 0;
     }
 
     .pdp-stars {
       font-size: 16px;
-      letter-spacing: .08em;
+      letter-spacing: 0;
     }
 
     .pdp-option-section {
@@ -309,7 +325,7 @@
       justify-content: space-between;
       margin-bottom: .55rem;
       font-size: 14px;
-      letter-spacing: .02em;
+      letter-spacing: 0;
     }
 
     .pdp-quantity-note {
@@ -415,7 +431,7 @@
       color: #fff;
       font-size: 13px;
       font-weight: 500;
-      letter-spacing: .03em;
+      letter-spacing: 0;
       text-decoration: none;
       text-transform: uppercase;
       transition: background var(--pdp-motion-fast) ease, box-shadow var(--pdp-motion-fast) var(--pdp-ease-out), color var(--pdp-motion-fast) ease, transform var(--pdp-motion-fast) var(--pdp-ease-out);
@@ -485,7 +501,7 @@
       max-width: 10em;
       font-size: clamp(2.4rem, 5vw, 5.3rem);
       font-weight: 400;
-      letter-spacing: .01em;
+      letter-spacing: 0;
       line-height: .96;
     }
 
@@ -536,17 +552,17 @@
       margin-bottom: .7rem;
       color: var(--light);
       font-size: 11px;
-      letter-spacing: .22em;
+      letter-spacing: 0;
       line-height: 1;
       text-transform: uppercase;
     }
 
     .pdp-section-head h2 {
       max-width: 11em;
-      font-family: var(--serif);
+      font-family: var(--heading);
       font-size: clamp(2.1rem, 4.4vw, 4.65rem);
       font-weight: 400;
-      letter-spacing: .01em;
+      letter-spacing: 0;
       line-height: .96;
     }
 
@@ -604,7 +620,7 @@
       background: rgba(255, 255, 255, .82);
       color: #111;
       font-size: 10px;
-      letter-spacing: .12em;
+      letter-spacing: 0;
       line-height: 1;
       padding: .5rem .7rem;
       text-transform: uppercase;
@@ -618,7 +634,7 @@
     }
 
     .pdp-related-info h3 {
-      font-family: var(--serif);
+      font-family: var(--heading);
       font-size: clamp(1.25rem, 2.1vw, 1.75rem);
       font-weight: 400;
       line-height: 1.02;
@@ -708,7 +724,7 @@
     .pdp-review-rating {
       color: #111;
       font-size: 12px;
-      letter-spacing: .06em;
+      letter-spacing: 0;
       white-space: nowrap;
     }
 
@@ -721,7 +737,7 @@
     .pdp-review-date {
       color: var(--light);
       font-size: 11px;
-      letter-spacing: .06em;
+      letter-spacing: 0;
       text-transform: uppercase;
     }
 
@@ -1070,7 +1086,7 @@
         top: .5rem;
         left: .5rem;
         font-size: 8px;
-        letter-spacing: .1em;
+        letter-spacing: 0;
         padding: .38rem .48rem;
       }
 

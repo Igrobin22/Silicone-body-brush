@@ -17,35 +17,35 @@ colors:
   gold: "#EADFC4"
 typography:
   display:
-    fontFamily: Cormorant Garamond
+    fontFamily: Montserrat
     fontSize: 96px
-    fontWeight: 300
-    lineHeight: 0.92
+    fontWeight: 500
+    lineHeight: 1.1
     letterSpacing: 0em
   headline:
-    fontFamily: Cormorant Garamond
+    fontFamily: Montserrat
     fontSize: 48px
-    fontWeight: 300
-    lineHeight: 1.05
+    fontWeight: 500
+    lineHeight: 1.2
     letterSpacing: 0em
   body:
-    fontFamily: DM Sans
+    fontFamily: Open Sans
     fontSize: 15px
-    fontWeight: 300
+    fontWeight: 400
     lineHeight: 1.9
     letterSpacing: 0em
   label:
-    fontFamily: DM Sans
+    fontFamily: Open Sans
     fontSize: 11px
     fontWeight: 400
     lineHeight: 1.2
-    letterSpacing: 0.18em
+    letterSpacing: 0em
   button:
-    fontFamily: DM Sans
+    fontFamily: Open Sans
     fontSize: 13px
     fontWeight: 400
     lineHeight: 1
-    letterSpacing: 0.04em
+    letterSpacing: 0em
 spacing:
   xs: 4px
   sm: 8px
@@ -110,11 +110,13 @@ White and off-white surfaces are essential. Prefer `surface`, `surface-soft`, an
 
 ## Typography
 
-Use Cormorant Garamond for brand, hero, and editorial headings. It should feel airy and elegant with light weights and generous line-height control.
+Use Montserrat for the PureForm wordmark, hero, section headings, and product titles. Use regular to medium weights (400 to 500) for a familiar, clean storefront feel, with enough line height for multi-line headings.
 
-Use DM Sans for navigation, body copy, product facts, buttons, and utility labels. Body copy should stay small, composed, and readable, usually 13px to 15px with long line height.
+Use Open Sans for navigation, body copy, product facts, forms, buttons, and utility labels. Body copy uses regular weight (400), usually 13px to 15px with comfortable line height; controls and important details can use 500 to 600. Larger price totals may use Montserrat to match nearby headings.
 
-Labels and eyebrows are uppercase with wide tracking. They should be used sparingly to create quiet hierarchy, not as decorative filler.
+Use normal letter spacing (0) throughout. Labels and eyebrows may be uppercase, used sparingly to create quiet hierarchy.
+
+Load the same Montserrat and Open Sans Google Fonts request on every storefront and admin page, with `display=swap` and preconnections to the font hosts. Use Arial and the browser sans-serif as fallbacks. Normalize fallback size with `font-size-adjust: from-font` where supported; older browsers retain the normal fallback stack.
 
 ## Layout
 
@@ -140,7 +142,7 @@ Avoid mixing sharp boxes with highly rounded controls in the same cluster. Keep 
 
 Primary buttons are dark, pill-shaped, compact, and high contrast. Secondary buttons are light or translucent, with a subtle border and the same pill geometry.
 
-Navigation is fixed, white or glass-white, and restrained. The PureForm wordmark uses the serif family; links stay small, uppercase-feeling, and quiet until hover or active state.
+Navigation is fixed, white or glass-white, and restrained. The PureForm wordmark uses Montserrat; links use Open Sans and stay small, uppercase-feeling, and quiet until hover or active state.
 
 Product cards should emphasize image, product name, shade/material details, and a clear CTA. Keep them more editorial than marketplace-like: fewer badges, cleaner spacing, and no loud sale treatments.
 

@@ -53,8 +53,8 @@ body > nav.site-header {
   background: #000;
   color: #fff;
   font-size: 12px;
-  font-weight: 300;
-  letter-spacing: .03em;
+  font-weight: 400;
+  letter-spacing: 0;
 }
 
 .promo-message {
@@ -121,8 +121,8 @@ body > nav.site-header {
 .nav-action-link {
   color: var(--mid);
   font-size: 13px;
-  font-weight: 300;
-  letter-spacing: .04em;
+  font-weight: 400;
+  letter-spacing: 0;
   text-transform: uppercase;
   text-decoration: none;
   transition: color var(--pf-motion-fast) ease, transform var(--pf-motion-fast) var(--pf-ease-out);
@@ -146,10 +146,10 @@ body > nav.site-header {
 .site-header .nav-logo {
   justify-self: center;
   color: var(--dark) !important;
-  font-family: var(--serif);
+  font-family: var(--heading);
   font-size: 24px !important;
   font-weight: 400;
-  letter-spacing: .05em !important;
+  letter-spacing: 0;
   line-height: 1;
   text-decoration: none;
   text-transform: none;
@@ -268,7 +268,7 @@ body > nav.site-header + .hero,
 
   .site-header .nav-logo {
     font-size: 23px !important;
-    letter-spacing: .05em !important;
+    letter-spacing: 0;
   }
 
   .nav-actions {
@@ -322,7 +322,7 @@ body > nav.site-header + .hero,
     overflow: visible;
     color: var(--dark) !important;
     font-size: 22px !important;
-    letter-spacing: .16em !important;
+    letter-spacing: 0;
     text-overflow: clip;
     transform: translateX(-50%);
     white-space: nowrap;
@@ -355,7 +355,7 @@ body > nav.site-header + .hero,
     background: rgba(255, 255, 255, .66);
     color: var(--mid);
     font-size: 10.5px;
-    letter-spacing: .04em;
+    letter-spacing: 0;
     white-space: nowrap;
   }
 
@@ -518,10 +518,10 @@ body > nav.site-header + .hero,
 
   .pf-mobile-sidebar-brand strong {
     display: block;
-    font-family: var(--serif);
+    font-family: var(--heading);
     font-size: 26px;
     font-weight: 400;
-    letter-spacing: .05em;
+    letter-spacing: 0;
     line-height: 1;
   }
 
@@ -530,7 +530,7 @@ body > nav.site-header + .hero,
     margin-top: .35rem;
     color: var(--light);
     font-size: 10px;
-    letter-spacing: .16em;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
@@ -547,7 +547,7 @@ body > nav.site-header + .hero,
     color: var(--dark);
     cursor: pointer;
     font-size: 24px;
-    font-weight: 300;
+    font-weight: 400;
     line-height: 1;
   }
 
@@ -589,7 +589,7 @@ body > nav.site-header + .hero,
     border-radius: 14px;
     color: var(--mid);
     font-size: 14px;
-    letter-spacing: .02em;
+    letter-spacing: 0;
     padding: 0 .9rem;
     text-decoration: none;
     transition: background var(--pf-motion-fast) ease, border-color var(--pf-motion-fast) ease, color var(--pf-motion-fast) ease, transform var(--pf-motion-fast) var(--pf-ease-out);
@@ -636,7 +636,7 @@ body > nav.site-header + .hero,
     background: linear-gradient(135deg, #111, #343434);
     color: var(--white);
     font-size: 12px;
-    letter-spacing: .08em;
+    letter-spacing: 0;
     text-decoration: none;
     text-transform: uppercase;
   }
@@ -645,7 +645,7 @@ body > nav.site-header + .hero,
 @media (max-width: 380px) {
   body > nav.site-header .nav-logo {
     font-size: 20px !important;
-    letter-spacing: .13em !important;
+    letter-spacing: 0;
   }
 
   .pf-mobile-menu-button {
@@ -774,7 +774,7 @@ body > nav.site-header + .hero,
     justify-self: center !important;
     color: #050505 !important;
     font-size: 24px !important;
-    letter-spacing: .05em !important;
+    letter-spacing: 0;
     transform: none !important;
   }
 
