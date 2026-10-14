@@ -87,7 +87,7 @@
     window.setTimeout(function () {
       img.dataset.pfFallbackTimer = 'false';
 
-      if (!img.complete || img.naturalWidth === 0) {
+      if (img.complete && img.naturalWidth === 0) {
         useFallbackImage(img);
       }
     }, delay);
@@ -199,7 +199,7 @@
     var productName = document.getElementById('productName');
     var productPrice = document.getElementById('productPrice');
     var productCompare = document.getElementById('productCompare');
-    var detailHero = document.querySelector('.detail-hero');
+    var detailHero = document.querySelector('.detail-hero, .pdp-grid');
 
     if (!productOrderLink || !productName || !productPrice || !detailHero || document.querySelector('.pf-sticky-order')) {
       return;
@@ -221,28 +221,39 @@
     var stickyPrice = sticky.querySelector('.pf-sticky-price');
     var stickyCompare = sticky.querySelector('.pf-sticky-compare');
     var stickyLink = sticky.querySelector('a');
+    var stickyLabel = stickyLink.querySelector('span');
 
     function syncSticky() {
       stickyTitle.textContent = productName.textContent;
       stickyPrice.textContent = productPrice.textContent;
       stickyCompare.textContent = productCompare ? productCompare.textContent : '';
       stickyLink.href = productOrderLink.href;
+      var disabled = productOrderLink.getAttribute('aria-disabled') === 'true';
+      stickyLink.setAttribute('aria-disabled', String(disabled));
+      stickyLabel.textContent = disabled ? 'Out of stock' : 'Add to cart';
     }
 
     function setStickyVisibility() {
-      var rect = detailHero.getBoundingClientRect();
-      sticky.classList.toggle('is-visible', rect.bottom < window.innerHeight * 0.72);
+      var visible = window.matchMedia('(max-width: 820px)').matches && productOrderLink.getBoundingClientRect().bottom < 72;
+      sticky.classList.toggle('is-visible', visible);
+      sticky.inert = !visible;
+      document.body.classList.toggle('pf-has-sticky-order', visible);
     }
 
     syncSticky();
     setStickyVisibility();
     window.addEventListener('scroll', setStickyVisibility, { passive: true });
+    window.addEventListener('resize', setStickyVisibility);
+    stickyLink.addEventListener('click', function (event) {
+      event.preventDefault();
+      productOrderLink.click();
+    });
 
     if ('MutationObserver' in window) {
       var mutationObserver = new MutationObserver(syncSticky);
       mutationObserver.observe(productName, { childList: true });
       mutationObserver.observe(productPrice, { childList: true });
-      mutationObserver.observe(productOrderLink, { attributes: true, attributeFilter: ['href'] });
+      mutationObserver.observe(productOrderLink, { attributes: true, attributeFilter: ['href', 'aria-disabled'], childList: true, subtree: true });
     }
   }
 

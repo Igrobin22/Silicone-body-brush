@@ -20,9 +20,10 @@
 </head>
 
 <body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
   <nav class="site-header" aria-label="Primary navigation">
     <div class="promo-bar">
-      <div class="promo-message">Free delivery checks and 15-day returns on PureForm orders</div>
+      <div class="promo-message">UAE delivery &middot; 15-day returns</div>
       <div class="promo-links">
         <a href="policy.html#delivery">UAE (AED) - EN</a>
         <a href="contact.html">Support</a>
@@ -30,18 +31,15 @@
     </div>
     <div class="nav-main">
       <ul class="nav-links">
-        <li><a href="products.html">Products</a></li>
-        <li><a href="about.html">About</a></li>
+        <li><a href="products.html">Shop</a></li>
+        <li><a href="index.html#included">The set</a></li>
         <li><a href="reviews.html">Reviews</a></li>
-        <li><a href="policy.html">Policy</a></li>
         <li><a href="faq.html">FAQ</a></li>
       </ul>
       <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
       <div class="nav-actions" aria-label="Shop utilities">
         <a class="nav-action-link" href="contact.html">Support</a>
-        <a class="nav-icon nav-search" href="products.html#set-colors" aria-label="Search products">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
-        </a>
+
         <a class="nav-icon nav-cart is-active" href="cart.html" aria-label="Open cart">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 8.5h11l-.8 11h-9.4l-.8-11Z"></path><path d="M9 8.5V6.8a3 3 0 0 1 6 0v1.7"></path></svg>
           <span class="nav-cart-count" aria-label="0 items in cart">0</span>
@@ -50,7 +48,7 @@
     </div>
   </nav>
 
-  <main class="checkout-page">
+  <main id="main-content" class="checkout-page">
     <div class="checkout-shell">
       <section class="checkout-panel" aria-labelledby="checkoutTitle">
         <h1 class="sr-only" id="checkoutTitle">Complete your PureForm order</h1>
@@ -164,7 +162,9 @@
       </section>
 
       <aside class="checkout-summary" aria-labelledby="checkoutSummaryTitle">
+        <button class="checkout-summary-toggle" type="button" aria-expanded="false" aria-controls="checkoutSummaryContent"><span>Order summary</span><strong id="checkoutMobileTotal">AED 0.00</strong></button>
         <h2 id="checkoutSummaryTitle">Order summary</h2>
+        <div id="checkoutSummaryContent" class="checkout-summary-content">
         <div class="checkout-summary-list" id="checkoutSummaryList" aria-live="polite"></div>
         <div class="checkout-discount">
           <input id="discountCode" type="text" autocomplete="off" placeholder="Discount code" aria-label="Discount code">
@@ -176,6 +176,7 @@
           <div class="checkout-total-line"><span>Shipping</span><strong id="checkoutShipping">Enter delivery city</strong></div>
           <div class="checkout-total-line"><span>Discount</span><strong id="checkoutDiscount">Catalog offers included</strong></div>
           <div class="checkout-total-line is-total"><span>Total</span><strong id="checkoutTotal">AED 0.00</strong></div>
+        </div>
         </div>
       </aside>
     </div>
@@ -194,6 +195,8 @@
       var summaryList = document.getElementById('checkoutSummaryList');
       var subtotalNode = document.getElementById('checkoutSubtotal');
       var totalNode = document.getElementById('checkoutTotal');
+      var mobileTotalNode = document.getElementById('checkoutMobileTotal');
+      var summaryToggle = document.querySelector('.checkout-summary-toggle');
       var shippingNode = document.getElementById('checkoutShipping');
       var discountInput = document.getElementById('discountCode');
       var discountButton = document.getElementById('discountApply');
@@ -212,6 +215,12 @@
       function getSelectedPayment() {
         return 'Secure card checkout';
       }
+
+      summaryToggle.addEventListener('click', function () {
+        var expanded = summaryToggle.getAttribute('aria-expanded') !== 'true';
+        summaryToggle.setAttribute('aria-expanded', String(expanded));
+        summaryToggle.closest('.checkout-summary').classList.toggle('is-expanded', expanded);
+      });
 
       function checkoutEndpoint() {
         if (config.checkoutFunctionUrl) {
@@ -246,6 +255,7 @@
           submitButton.setAttribute('aria-disabled', 'true');
           subtotalNode.textContent = cart.formatAED(0);
           totalNode.textContent = cart.formatAED(0);
+          mobileTotalNode.textContent = cart.formatAED(0);
           return;
         }
 
@@ -290,6 +300,7 @@
         submitButton.removeAttribute('aria-disabled');
         subtotalNode.textContent = cart.formatAED(subtotal);
         totalNode.textContent = cart.formatAED(subtotal);
+        mobileTotalNode.textContent = cart.formatAED(subtotal);
       }
 
       function updateShippingCopy() {

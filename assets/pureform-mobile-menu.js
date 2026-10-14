@@ -34,6 +34,9 @@
   sidebar.id = 'pfMobileSidebar';
   sidebar.setAttribute('aria-hidden', 'true');
   sidebar.setAttribute('inert', '');
+  sidebar.setAttribute('role', 'dialog');
+  sidebar.setAttribute('aria-modal', 'true');
+  sidebar.setAttribute('aria-label', 'Navigation');
   sidebar.innerHTML = [
     '<div class="pf-mobile-sidebar-header">',
     '  <div class="pf-mobile-sidebar-brand">',
@@ -42,17 +45,11 @@
     '  </div>',
     '  <button class="pf-mobile-sidebar-close" type="button" aria-label="Close navigation menu">&times;</button>',
     '</div>',
-    '<div class="pf-mobile-sidebar-search">',
-    '  <input type="search" placeholder="Search pages" aria-label="Search navigation pages">',
-    '</div>',
     '<div class="pf-mobile-sidebar-list" role="navigation" aria-label="Mobile navigation"></div>',
-    '<div class="pf-mobile-sidebar-empty">No matching page found.</div>',
     '<div class="pf-mobile-sidebar-footer"></div>'
   ].join('');
 
   const list = sidebar.querySelector('.pf-mobile-sidebar-list');
-  const searchInput = sidebar.querySelector('input[type="search"]');
-  const emptyState = sidebar.querySelector('.pf-mobile-sidebar-empty');
   const closeButton = sidebar.querySelector('.pf-mobile-sidebar-close');
   const footer = sidebar.querySelector('.pf-mobile-sidebar-footer');
 
@@ -74,11 +71,11 @@
     list.appendChild(cartItem);
   }
 
-  if (cta) {
+  {
     const ctaLink = document.createElement('a');
     ctaLink.className = 'pf-mobile-sidebar-cta';
-    ctaLink.href = cta.getAttribute('href') || 'products.html#offers';
-    ctaLink.textContent = cta.textContent.trim() || 'Shop the set';
+    ctaLink.href = cta ? cta.getAttribute('href') : 'products.html';
+    ctaLink.textContent = 'Shop the sets';
     footer.appendChild(ctaLink);
   }
 
@@ -86,12 +83,24 @@
     return globalThis.matchMedia('(max-width: 820px)').matches;
   }
 
+  const backgroundState = new Map();
+
   function openMenu() {
     if (!isMobile()) {
       return;
     }
+    if (sidebar.classList.contains('is-open')) {
+      closeMenu();
+      return;
+    }
+    if (backgroundState.size) return;
 
     document.body.classList.add('pf-mobile-menu-lock');
+    Array.from(document.body.children).forEach(function (element) {
+      if (element === menuButton || element === sidebar || element === overlay || element.tagName === 'SCRIPT') return;
+      backgroundState.set(element, element.inert);
+      element.inert = true;
+    });
     overlay.removeAttribute('hidden');
     requestAnimationFrame(function () {
       overlay.classList.add('is-open');
@@ -99,17 +108,21 @@
       menuButton.setAttribute('aria-expanded', 'true');
       sidebar.setAttribute('aria-hidden', 'false');
       sidebar.removeAttribute('inert');
-      searchInput.focus();
+      closeButton.focus();
     });
   }
 
   function closeMenu() {
+    const wasOpen = sidebar.classList.contains('is-open');
     document.body.classList.remove('pf-mobile-menu-lock');
     overlay.classList.remove('is-open');
     sidebar.classList.remove('is-open');
     menuButton.setAttribute('aria-expanded', 'false');
     sidebar.setAttribute('aria-hidden', 'true');
     sidebar.setAttribute('inert', '');
+    backgroundState.forEach(function (wasInert, element) { element.inert = wasInert; });
+    backgroundState.clear();
+    if (wasOpen && isMobile()) menuButton.focus();
 
     globalThis.setTimeout(function () {
       if (!overlay.classList.contains('is-open')) {
@@ -118,23 +131,9 @@
     }, 260);
   }
 
-  function filterLinks() {
-    const query = searchInput.value.trim().toLowerCase();
-    let visibleCount = 0;
-
-    Array.prototype.forEach.call(list.querySelectorAll('.pf-mobile-sidebar-link'), function (link) {
-      const isVisible = !query || link.dataset.label.indexOf(query) !== -1;
-      link.style.display = isVisible ? '' : 'none';
-      visibleCount += isVisible ? 1 : 0;
-    });
-
-    emptyState.classList.toggle('is-visible', visibleCount === 0);
-  }
-
   menuButton.addEventListener('click', openMenu);
   closeButton.addEventListener('click', closeMenu);
   overlay.addEventListener('click', closeMenu);
-  searchInput.addEventListener('input', filterLinks);
 
   sidebar.addEventListener('click', function (event) {
     if (event.target.closest('a')) {
@@ -145,6 +144,18 @@
   globalThis.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
       closeMenu();
+    }
+    if (event.key === 'Tab' && sidebar.classList.contains('is-open')) {
+      const items = Array.from(sidebar.querySelectorAll('button, a[href]'));
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
   });
 

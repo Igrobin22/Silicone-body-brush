@@ -18,13 +18,13 @@ colors:
 typography:
   display:
     fontFamily: Montserrat
-    fontSize: 96px
+    fontSize: 56px
     fontWeight: 500
     lineHeight: 1.1
     letterSpacing: 0em
   headline:
     fontFamily: Montserrat
-    fontSize: 48px
+    fontSize: 32px
     fontWeight: 500
     lineHeight: 1.2
     letterSpacing: 0em
@@ -120,9 +120,19 @@ Load the same Montserrat and Open Sans Google Fonts request on every storefront 
 
 ## Layout
 
-Lead with product imagery. The home page can use a full first-viewport hero with product art, soft radial or linear washes, and minimal overlaid copy. Interior pages should use a fixed 72px nav and generous top padding so content never hides behind the header.
+Lead with product imagery. The home page uses a full-width product photograph with unframed overlaid copy, a clear product name, a catalog-derived starting price, and a direct shopping action. Let the next section remain visible at the bottom of the first viewport. Keep the original neutral, mint and rose palette.
 
-Desktop layouts should use wide gutters, two-column hero sections, and product grids that breathe. Mobile layouts should collapse to a single column, keep CTAs full width where useful, and preserve enough vertical spacing that the site still feels premium.
+Use one homepage collection, followed by the four included tools, customer notes, and practical delivery/payment/return questions. Avoid repeating the same three products or displaying unconfigured promotion codes. Section layouts are unframed, with restrained borders and shared horizontal gutters.
+
+The shared header is sticky: 106px on desktop including the announcement, and 72px on mobile. Keep Shop, The set, Reviews and FAQ as the main navigation, with support and the cart accessible. The cart remains visible on mobile. Avoid adding duplicate top padding beneath the sticky header.
+
+Desktop product grids use three columns for the three listings. Mobile product grids use two columns, with readable names, prices, stock/offer labels, and square inspectable imagery. Color, in-stock and price-sort controls must update the displayed catalog and product count.
+
+Product pages use a gallery beside the title, price, color-listing links, quantity and Add to cart on desktop. Mobile places the gallery first, followed by the same purchase information; care details follow the buying controls. Images remain contained and swipeable at every width. A mobile purchase bar appears after the main buying action scrolls out of view and uses the same cart behavior and stock checks.
+
+On mobile checkout, show a compact expandable order summary with the current total above the contact and delivery fields. Keep the full summary visible beside the form on desktop.
+
+Reserve large display typography for the homepage hero. Information-page titles use 40px on desktop and 28px on mobile; section headings use 32px and 26px. Checkout headings remain at 24px to 26px. Supporting hero images are capped at 260px on desktop and 180px on mobile, and customer photos at 200px to 220px. Main product galleries and collection imagery remain large enough to inspect.
 
 Use section padding around 5rem on desktop and reduce gradually on mobile. Keep repeated product and review cards on predictable grids with stable dimensions so hover states do not shift the layout.
 

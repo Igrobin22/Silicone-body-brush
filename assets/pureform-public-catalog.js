@@ -305,7 +305,7 @@
   }
 
   function inventoryBadgeText(item) {
-    if (item.inventory_quantity <= 0) return 'Out of stock';
+    if (item.inventory_quantity <= 0 || item.inventory_status === 'out_of_stock') return 'Out of stock';
     if (item.discountActive) return item.discountLabel.toUpperCase();
     return item.inventoryStatusText;
   }
@@ -321,13 +321,15 @@
       var imageWrap = createElement('div', 'pcard-imgwrap');
       var picture = createElement('picture', 'pcard-picture');
       var img = createElement('img', 'pcard-img');
-      var name = createElement('div', 'pcard-name', item.name);
+      var name = createElement('h3', 'pcard-name', item.name);
       var price = createElement('p', 'pcard-desc', item.priceText);
-      var tag = createElement('span', 'pcard-tag', item.tag);
+      var tag = createElement('span', 'pcard-tag', 'View ' + item.color + ' set');
 
       card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
       card.setAttribute('aria-label', 'View ' + item.name + ' details');
       img.src = item.image;
+      img.width = 700;
+      img.height = 700;
       img.alt = item.name;
       img.loading = 'lazy';
       img.decoding = 'async';
@@ -358,27 +360,21 @@
       var media = createElement('div', 'collection-card-media');
       var badge = createElement('span', 'collection-badge', inventoryBadgeText(item));
       var img = document.createElement('img');
-      var dots = createElement('span', 'collection-dots');
       var info = createElement('div', 'collection-card-info');
-      var title = createElement('span', '', item.name);
+      var title = createElement('h2', 'collection-card-title', item.name);
       var meta = createElement('div', 'collection-card-meta', item.meta);
-      var dotCount = Math.min(Math.max(item.images.length, 1), 3);
-      var dotIndex;
 
       card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
       card.dataset.animate = '';
       img.src = item.image;
+      img.width = 700;
+      img.height = 700;
       img.alt = item.name;
       img.decoding = 'async';
       if (index) img.loading = 'lazy';
 
-      for (dotIndex = 0; dotIndex < dotCount; dotIndex += 1) {
-        dots.appendChild(createElement('i', dotIndex === 0 ? 'is-active' : ''));
-      }
-
       media.appendChild(badge);
       media.appendChild(img);
-      media.appendChild(dots);
       info.appendChild(title);
       appendPrice(info, item);
       card.appendChild(media);
@@ -486,12 +482,68 @@
 
   function renderPage() {
     var listings = getListingsSync();
+    var collectionRoot = document.querySelector('[data-pf-catalog-grid="collection"]');
+    var collectionListings = getCollectionListings(listings);
     renderHomeCards(document.querySelector('[data-pf-catalog-grid="home"]'), listings);
-    renderCollectionCards(document.querySelector('[data-pf-catalog-grid="collection"]'), listings);
+    renderCollectionCards(collectionRoot, collectionListings);
     renderRecommendationCards(document.querySelector('[data-pf-catalog-grid="recommendations"]'), listings);
     renderShadeCards(document.querySelector('[data-pf-catalog-grid="shade"]'), listings);
     renderOfferCards(document.querySelector('[data-pf-catalog-grid="offers"]'), listings);
-    updateCount(listings);
+    updateCount(collectionRoot ? collectionListings : listings);
+    var emptyState = document.querySelector('[data-pf-catalog-empty]');
+    if (emptyState) emptyState.hidden = collectionListings.length > 0;
+    updateHomePrice(listings);
+  }
+
+  function getCollectionListings(listings) {
+    var activeColor = document.querySelector('[data-pf-color][aria-pressed="true"]');
+    var stockOnly = document.querySelector('[data-pf-in-stock]');
+    var sort = document.querySelector('[data-pf-sort]');
+    var color = activeColor ? activeColor.dataset.pfColor : '';
+    var filtered = listings.filter(function (item) {
+      return (!color || item.color === color) &&
+        (!stockOnly || !stockOnly.checked || (item.inventory_quantity > 0 && item.inventory_status !== 'out_of_stock'));
+    });
+    if (sort && sort.value !== 'featured') {
+      filtered.sort(function (a, b) {
+        return sort.value === 'price-desc' ? b.price - a.price : a.price - b.price;
+      });
+    }
+    return filtered;
+  }
+
+  function updateHomePrice(listings) {
+    var node = document.querySelector('[data-pf-home-price]');
+    if (!node) return;
+    var available = listings.filter(function (item) {
+      return item.inventory_quantity > 0 && item.inventory_status !== 'out_of_stock';
+    });
+    node.textContent = available.length
+      ? 'From ' + formatAED(Math.min.apply(null, available.map(function (item) { return item.price; })))
+      : 'Currently unavailable';
+  }
+
+  function setupCollectionControls() {
+    document.querySelectorAll('[data-pf-color]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        document.querySelectorAll('[data-pf-color]').forEach(function (item) {
+          item.setAttribute('aria-pressed', String(item === button));
+        });
+        renderPage();
+      });
+    });
+    document.querySelectorAll('[data-pf-in-stock], [data-pf-sort]').forEach(function (control) {
+      control.addEventListener('change', renderPage);
+    });
+    var reset = document.querySelector('[data-pf-reset]');
+    if (reset) reset.addEventListener('click', function () {
+      document.querySelectorAll('[data-pf-color]').forEach(function (item) {
+        item.setAttribute('aria-pressed', String(!item.dataset.pfColor));
+      });
+      var stockOnly = document.querySelector('[data-pf-in-stock]');
+      if (stockOnly) stockOnly.checked = false;
+      renderPage();
+    });
   }
 
   function announceReady() {
@@ -569,6 +621,8 @@
     resolveSlug: canonicalSlug,
     renderPage: renderPage
   };
+
+  setupCollectionControls();
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', renderPage);
