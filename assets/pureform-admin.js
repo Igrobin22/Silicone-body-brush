@@ -618,11 +618,12 @@
     }
 
     var totalListings = state.listings.length;
+    var customerOrders = state.orders.filter(function (order) { return order.source !== 'stripe_sandbox'; });
     var totalOrders = state.orders.length;
-    var newOrders = state.orders.filter(function (order) { return order.status === 'new'; }).length;
-    var openOrders = state.orders.filter(isOpenOrder).length;
-    var orderRevenue = state.orders.reduce(function (sum, order) {
-      return order.status === 'cancelled' ? sum : sum + Number(order.total || 0);
+    var newOrders = customerOrders.filter(function (order) { return order.status === 'new'; }).length;
+    var openOrders = customerOrders.filter(isOpenOrder).length;
+    var orderRevenue = customerOrders.reduce(function (sum, order) {
+      return order.payment_status === 'paid' ? sum + Number(order.total || 0) : sum;
     }, 0);
     var activeDiscounts = state.listings.filter(isDiscountActive).length;
     var inventoryUnits = state.listings.reduce(function (sum, item) {
@@ -809,7 +810,7 @@
       code.className = 'order-code';
       code.textContent = orderNumber(order);
       time.className = 'listing-meta';
-      time.textContent = formatDateTime(order.created_at);
+      time.textContent = (order.source === 'stripe_sandbox' ? 'Sandbox test / ' : '') + formatDateTime(order.created_at);
       orderCell.appendChild(code);
       orderCell.appendChild(time);
 
@@ -861,7 +862,12 @@
   function orderSelect(order, field, options, action) {
     var select = document.createElement('select');
     select.className = 'quick-select status-' + String(order[field] || '').replace(/_/g, '-');
-    select.dataset.action = action;
+    if (field === 'payment_status') {
+      select.disabled = true;
+      select.title = 'Payment status verified by Stripe';
+    } else {
+      select.dataset.action = action;
+    }
     select.setAttribute('aria-label', statusLabel(field) + ' for ' + orderNumber(order));
 
     options.forEach(function (value) {
@@ -917,10 +923,6 @@
     if (input.dataset.action === 'quick-order-status') {
       await updateOrder(order.id, { status: input.value }, 'Order status updated.');
     }
-
-    if (input.dataset.action === 'quick-payment-status') {
-      await updateOrder(order.id, { payment_status: input.value }, 'Payment status updated.');
-    }
   }
 
   async function onOrderSubmit(event) {
@@ -934,7 +936,6 @@
 
     await updateOrder(id, {
       status: document.getElementById('orderStatus').value,
-      payment_status: document.getElementById('orderPaymentStatus').value,
       fulfillment_status: document.getElementById('orderFulfillmentStatus').value,
       admin_notes: document.getElementById('orderAdminNotes').value.trim()
     }, 'Order saved.');
@@ -961,9 +962,9 @@
   }
 
   function fillOrderForm(order) {
+    document.getElementById('orderPaymentStatus').disabled = true;
     var controls = [
       document.getElementById('orderStatus'),
-      document.getElementById('orderPaymentStatus'),
       document.getElementById('orderFulfillmentStatus'),
       document.getElementById('orderAdminNotes')
     ];
@@ -1005,6 +1006,7 @@
       { label: 'Contact', value: customerContact(order) },
       { label: 'Delivery', value: orderAddress(order) },
       { label: 'Payment', value: order.payment_preference || statusLabel(order.payment_status) },
+      { label: 'Environment', value: order.source === 'stripe_sandbox' ? 'Stripe sandbox - do not fulfill' : 'Storefront' },
       { label: 'Gateway', value: paymentReference(order) },
       { label: 'Customer notes', value: order.customer_notes || 'None' },
       { label: 'Placed', value: formatDateTime(order.created_at) }
