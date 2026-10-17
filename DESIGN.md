@@ -120,7 +120,7 @@ Load the same Montserrat and Open Sans Google Fonts request on every storefront 
 
 ## Layout
 
-Lead with product imagery. The home page uses a full-width product photograph with unframed overlaid copy, a clear product name, a catalog-derived starting price, and a direct shopping action. Let the next section remain visible at the bottom of the first viewport. Keep the original neutral, mint and rose palette.
+Lead with product imagery. The home page restores the original "Soft touch. Deep clean. Every day." composition: a centered full-width product photograph, unframed copy on the left, and quiet set facts on the right. The desktop Start Order action and price follow the Grey listing's admin data; unavailable Grey sets link to the collection instead. Mobile keeps the original three-line headline and Explore Set action below the product scene, with set facts underneath. Tablet widths through 1000px use this compact composition, with the full desktop photograph contained above the text. Let the next section remain visible at the bottom of the first viewport. Keep the original neutral, mint and rose palette.
 
 Use one homepage collection, followed by the four included tools, customer notes, and practical delivery/payment/return questions. Avoid repeating the same three products or displaying unconfigured promotion codes. Section layouts are unframed, with restrained borders and shared horizontal gutters.
 

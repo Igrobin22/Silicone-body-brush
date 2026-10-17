@@ -515,6 +515,18 @@
   function updateHomePrice(listings) {
     var node = document.querySelector('[data-pf-home-price]');
     if (!node) return;
+    var featuredId = node.getAttribute('data-pf-home-price');
+    if (featuredId) {
+      var featured = listings.find(function (item) { return item.id === featuredId; });
+      var inStock = featured && featured.inventory_quantity > 0 && featured.inventory_status !== 'out_of_stock';
+      node.textContent = inStock ? formatAED(featured.price) : 'Currently unavailable';
+      var orderLink = document.querySelector('[data-pf-home-order]');
+      if (orderLink) {
+        orderLink.href = inStock ? 'pureform-product-detail.html?product=' + encodeURIComponent(featured.id) : 'products.html';
+        orderLink.textContent = inStock ? 'Start Order' : 'Choose a Set';
+      }
+      return;
+    }
     var available = listings.filter(function (item) {
       return item.inventory_quantity > 0 && item.inventory_status !== 'out_of_stock';
     });
