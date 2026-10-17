@@ -181,8 +181,8 @@
 
     if (existing) {
       nextQuantity = clampQuantityForProduct(product, existing.quantity + clampQuantity(quantity));
-      if (nextQuantity <= 0) {
-        return getCart();
+      if (nextQuantity <= existing.quantity) {
+        return cart;
       }
       existing.quantity = nextQuantity;
     } else {
@@ -201,19 +201,27 @@
     var product = productId ? catalog[productId] : null;
     var nextQuantity;
     var cart;
+    var existing;
 
     if (!productId) {
       return getCart();
     }
 
-    nextQuantity = clampQuantityForProduct(product, numericQuantity);
-
     if (!numericQuantity || numericQuantity < 1) {
       return removeItem(productId);
     }
-    if (nextQuantity <= 0) return getCart();
 
-    cart = getCart().map(function (item) {
+    cart = getCart();
+    existing = cart.find(function (item) { return item.id === productId; });
+    if (!existing || numericQuantity === existing.quantity) return cart;
+
+    // Reductions change cart intent, even when a payment currently holds the stock.
+    nextQuantity = numericQuantity < existing.quantity
+      ? clampQuantity(numericQuantity)
+      : clampQuantityForProduct(product, numericQuantity);
+    if (numericQuantity > existing.quantity && nextQuantity <= existing.quantity) return cart;
+
+    cart = cart.map(function (item) {
       return item.id === productId ? { id: productId, quantity: nextQuantity } : item;
     });
 

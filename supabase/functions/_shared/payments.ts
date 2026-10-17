@@ -52,6 +52,13 @@ export function database() {
   });
 }
 
+export class StripeRequestError extends Error {
+  constructor(readonly definitivelyRejected = false) {
+    super('Payment gateway request failed.');
+    this.name = 'StripeRequestError';
+  }
+}
+
 export async function stripeRequest(path: string, options: {
   method?: string;
   params?: URLSearchParams;
@@ -63,15 +70,34 @@ export async function stripeRequest(path: string, options: {
   if (options.idempotencyKey) headers['Idempotency-Key'] = options.idempotencyKey;
   if (method === 'GET') url.search = options.params?.toString() || '';
   else headers['Content-Type'] = 'application/x-www-form-urlencoded';
-  const response = await fetch(url, {
-    method,
-    headers,
-    body: method === 'GET' ? undefined : options.params,
-    signal: AbortSignal.timeout(15000),
-  });
-  const payload = await response.json();
-  if (!response.ok) throw new Error('Payment gateway request failed.');
-  return payload;
+  const body = method === 'GET' ? undefined : options.params?.toString();
+  let uncertainAttempt = false;
+
+  for (let attempt = 0; ; attempt++) {
+    let response: Response;
+    let payload;
+    try {
+      response = await fetch(url, { method, headers, body, signal: AbortSignal.timeout(15000) });
+      payload = await response.json();
+    } catch {
+      // A lost response can hide a successful write. Replay only the exact keyed request.
+      uncertainAttempt = true;
+      if (options.idempotencyKey && attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        continue;
+      }
+      throw new StripeRequestError();
+    }
+
+    if (!response.ok) {
+      const definitivelyRejected = !uncertainAttempt &&
+        [400, 401, 403, 404, 429].includes(response.status) &&
+        ['invalid_request_error', 'authentication_error', 'permission_error', 'rate_limit_error'].includes(payload?.error?.type) &&
+        payload?.error?.code !== 'idempotency_key_in_use';
+      throw new StripeRequestError(definitivelyRejected);
+    }
+    return payload;
+  }
 }
 
 export type CheckoutSession = {

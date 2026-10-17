@@ -212,6 +212,8 @@
       var paymentReturnPending = new URLSearchParams(window.location.search).get('payment') === 'success';
       var checkoutBusy = false;
       var verificationBusy = false;
+      var stockWarning = 'Some quantities are no longer available. Update your cart before checkout.';
+      var pendingCheckoutKey = 'pureform.checkout.v1';
 
       if (!cart || !form || !summaryList) {
         return;
@@ -245,6 +247,15 @@
         status.classList.toggle('is-success', type === 'success');
       }
 
+      function isItemUnavailable(item) {
+        return item.inventoryStatus === 'out_of_stock' ||
+          (item.inventoryQuantity !== null && item.quantity > item.inventoryQuantity);
+      }
+
+      function hasUnavailableItems() {
+        return cart.getLineItems().some(isItemUnavailable);
+      }
+
       function renderSummary() {
         var items = cart.getLineItems();
         var subtotal = cart.getSubtotal();
@@ -263,6 +274,7 @@
           subtotalNode.textContent = cart.formatAED(0);
           totalNode.textContent = cart.formatAED(0);
           mobileTotalNode.textContent = cart.formatAED(0);
+          if (status.textContent === stockWarning) setStatus('');
           return;
         }
 
@@ -290,7 +302,7 @@
           name.className = 'checkout-summary-name';
           name.textContent = item.name;
           meta.className = 'checkout-summary-meta';
-          meta.textContent = item.meta;
+          meta.textContent = item.meta + (isItemUnavailable(item) ? ' / quantity unavailable' : '');
           copy.appendChild(name);
           copy.appendChild(meta);
 
@@ -303,8 +315,13 @@
           summaryList.appendChild(row);
         });
 
-        submitButton.disabled = paymentReturnPending || checkoutBusy;
+        var unavailable = hasUnavailableItems();
+        submitButton.disabled = paymentReturnPending || checkoutBusy || unavailable;
         submitButton.setAttribute('aria-disabled', String(submitButton.disabled));
+        if (!paymentReturnPending && !checkoutBusy) {
+          if (unavailable && (!status.textContent || status.textContent === stockWarning)) setStatus(stockWarning, 'error');
+          else if (status.textContent === stockWarning) setStatus('');
+        }
         subtotalNode.textContent = cart.formatAED(subtotal);
         totalNode.textContent = cart.formatAED(total);
         mobileTotalNode.textContent = cart.formatAED(total);
@@ -328,6 +345,40 @@
             quantity: Number(item.quantity) || 1
           };
         });
+      }
+
+      function cartSignature(items) {
+        if (!Array.isArray(items) || !items.length || items.some(function (item) {
+          return !item || typeof item.id !== 'string' || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 20;
+        })) return null;
+        return JSON.stringify(items.map(function (item) {
+          return { id: item.id, quantity: item.quantity };
+        }).sort(function (a, b) { return a.id.localeCompare(b.id); }));
+      }
+
+      function rememberCheckout(orderNumber, items) {
+        try {
+          sessionStorage.removeItem(pendingCheckoutKey);
+          if (typeof orderNumber === 'string' && orderNumber && cartSignature(items)) {
+            sessionStorage.setItem(pendingCheckoutKey, JSON.stringify({ order_number: orderNumber, items: items }));
+          }
+        } catch (_error) { /* Without tab storage, confirmation keeps the cart instead of guessing. */ }
+      }
+
+      function clearConfirmedCart(orderNumber) {
+        var cleared = false;
+        try {
+          var pending = JSON.parse(sessionStorage.getItem(pendingCheckoutKey) || 'null');
+          if (!pending || pending.order_number !== orderNumber) return false;
+          var original = cartSignature(pending.items);
+          var matches = original && original === cartSignature(cart.getCart());
+          sessionStorage.removeItem(pendingCheckoutKey);
+          if (matches) {
+            cart.clearCart();
+            cleared = true;
+          }
+        } catch (_error) { /* A damaged checkout snapshot must not invalidate a verified payment. */ }
+        return cleared;
       }
 
       function buildOrderPayload(data) {
@@ -439,6 +490,13 @@
           return;
         }
 
+        if (hasUnavailableItems()) {
+          event.preventDefault();
+          setStatus(stockWarning, 'error');
+          renderSummary();
+          return;
+        }
+
         if (!form.checkValidity()) {
           return;
         }
@@ -457,11 +515,11 @@
 
         try {
           var session = await createCheckoutSession(payload);
+          rememberCheckout(session.order_number, payload.line_items);
           window.location.assign(session.checkout_url);
         } catch (error) {
           checkoutBusy = false;
-          submitButton.disabled = false;
-          submitButton.removeAttribute('aria-disabled');
+          renderSummary();
           setStatus((error && error.message ? error.message : 'Secure card checkout could not be started.') + ' No card details were collected.', 'error');
         }
       });
@@ -492,11 +550,11 @@
             if (!response.ok || result.paid !== true || result.order_number !== orderNumber) {
               throw new Error('The payment has not been confirmed yet.');
             }
-            cart.clearCart();
-            form.reset();
+            var cartCleared = clearConfirmedCart(result.order_number);
+            if (cartCleared) form.reset();
             updateShippingCopy();
             paymentReturnPending = false;
-            setStatus('Payment confirmed for ' + result.order_number + '. PureForm will prepare your UAE delivery next.', 'success');
+            setStatus('Payment confirmed for ' + result.order_number + '. Keep this order number for delivery updates.' + (!cartCleared && cart.getCount() ? ' Your current cart was kept.' : ''), 'success');
             window.history.replaceState({}, document.title, window.location.pathname);
           } catch (_error) {
             verifyButton.hidden = !(params.get('session_id') && orderNumber && config.url && config.anonKey);

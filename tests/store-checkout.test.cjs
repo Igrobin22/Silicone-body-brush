@@ -34,7 +34,9 @@ function element() {
 }
 
 function fixture({ search = '', fetch = async () => ({ ok: true, json: async () => ({}) }), config = true,
-  setup = { configured: true, shipping_total: 10, currency: 'AED' } } = {}) {
+  setup = { configured: true, shipping_total: 10, currency: 'AED' },
+  pendingCheckout = search === successQuery ? { order_number: order, items: [{ id: grey, quantity: 2 }] } : null,
+  unavailableSessionStorage = false } = {}) {
   const ids = {};
   const events = {};
   const calls = [];
@@ -42,6 +44,7 @@ function fixture({ search = '', fetch = async () => ({ ok: true, json: async () 
   const redirects = [];
   const history = [];
   const storage = new Map([['pureform.cart.v1', JSON.stringify([{ id: grey, quantity: 2 }])]]);
+  const checkoutStorage = new Map(pendingCheckout ? [['pureform.checkout.v1', JSON.stringify(pendingCheckout)]] : []);
   const catalog = {
     [grey]: { id: grey, name: 'Grey set', price: 43.89, image: 'grey.png', meta: '4 tools', inventory_quantity: 24, inventory_status: 'in_stock' }
   };
@@ -61,6 +64,11 @@ function fixture({ search = '', fetch = async () => ({ ok: true, json: async () 
   const context = vm.createContext({
     window, document, URL, URLSearchParams, AbortSignal,
     localStorage: { getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value) },
+    sessionStorage: {
+      getItem(key) { if (unavailableSessionStorage) throw Error('Storage unavailable'); return checkoutStorage.get(key); },
+      setItem(key, value) { if (unavailableSessionStorage) throw Error('Storage unavailable'); checkoutStorage.set(key, value); },
+      removeItem(key) { if (unavailableSessionStorage) throw Error('Storage unavailable'); checkoutStorage.delete(key); }
+    },
     CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } },
     FormData: class { get(name) { return name === 'country' ? 'United Arab Emirates' : name === 'emirate' ? 'Dubai' : 'Fixture'; } },
     fetch: async (...args) => {
@@ -77,7 +85,7 @@ function fixture({ search = '', fetch = async () => ({ ok: true, json: async () 
   document.getElementById('checkoutVerifyPayment').hidden = true;
   new vm.Script(cartSource).runInContext(context);
   new vm.Script(checkoutSource).runInContext(context);
-  return { ids, calls, setupCalls, redirects, history, window, cart: window.PureFormCart,
+  return { ids, calls, setupCalls, redirects, history, window, checkoutStorage, cart: window.PureFormCart,
     submit: () => ids.checkoutForm.listeners.submit({ preventDefault() {} }),
     retry: () => ids.checkoutVerifyPayment.listeners.click(),
     runCart: () => new vm.Script(cartPageSource).runInContext(context) };
@@ -132,6 +140,66 @@ test('a verified retry clears the cart once and removes callback parameters', as
   assert.equal(page.ids.checkoutForm.resets, 1);
 });
 
+test('an old paid return without a matching checkout cannot clear a newer cart', async () => {
+  for (const pendingCheckout of [null, { order_number: 'PF-NEW-ORDER', items: [{ id: grey, quantity: 2 }] }]) {
+    const page = fixture({ search: successQuery, pendingCheckout, fetch: async () => ({ ok: true, json: async () => ({ paid: true, order_number: order }) }) });
+    await settle();
+    assert.equal(page.cart.getCount(), 2);
+    assert.match(page.ids.checkoutStatus.textContent, /Payment confirmed/);
+    assert.match(page.ids.checkoutStatus.textContent, /current cart was kept/);
+    if (pendingCheckout) assert.equal(JSON.parse(page.checkoutStorage.get('pureform.checkout.v1')).order_number, 'PF-NEW-ORDER');
+  }
+});
+
+test('cart changes made during payment verification are preserved', async () => {
+  let resolve;
+  const page = fixture({ search: successQuery, fetch: () => new Promise(done => { resolve = done; }) });
+  page.cart.setQuantity(grey, 3);
+  resolve({ ok: true, json: async () => ({ paid: true, order_number: order }) });
+  await settle();
+  assert.equal(page.cart.getCount(), 3);
+  assert.equal(page.checkoutStorage.has('pureform.checkout.v1'), false);
+});
+
+test('paid callback replay after cart clearing cannot erase a later cart', async () => {
+  const page = fixture({ search: successQuery, fetch: async () => ({ ok: true, json: async () => ({ paid: true, order_number: order }) }) });
+  await settle();
+  assert.equal(page.cart.getCount(), 0);
+  assert.equal(page.checkoutStorage.has('pureform.checkout.v1'), false);
+  page.cart.addItem(grey, 2);
+  const replay = fixture({ search: successQuery, pendingCheckout: null, fetch: async () => ({ ok: true, json: async () => ({ paid: true, order_number: order }) }) });
+  await settle();
+  assert.equal(replay.cart.getCount(), 2);
+});
+
+test('unavailable browser storage does not prevent payment confirmation or erase the cart', async () => {
+  const page = fixture({ search: successQuery, unavailableSessionStorage: true, fetch: async () => ({ ok: true, json: async () => ({ paid: true, order_number: order }) }) });
+  await settle();
+  assert.equal(page.cart.getCount(), 2);
+  assert.match(page.ids.checkoutStatus.textContent, /Payment confirmed/);
+});
+
+test('a damaged checkout snapshot keeps the cart without hiding verified payment', async () => {
+  for (const items of [null, [], [{ id: grey, quantity: '2' }], [null]]) {
+    const page = fixture({ search: successQuery, pendingCheckout: { order_number: order, items }, fetch: async () => ({ ok: true, json: async () => ({ paid: true, order_number: order }) }) });
+    await settle();
+    assert.equal(page.cart.getCount(), 2);
+    assert.match(page.ids.checkoutStatus.textContent, /Payment confirmed/);
+  }
+});
+
+test('payment confirmation remains visible when the changed cart is unavailable', async () => {
+  let resolve;
+  const page = fixture({ search: successQuery, fetch: () => new Promise(done => { resolve = done; }) });
+  page.cart.setCatalog({ [grey]: { ...page.cart.catalog[grey], inventory_quantity: 0, inventory_status: 'out_of_stock' } });
+  page.cart.setQuantity(grey, 1);
+  resolve({ ok: true, json: async () => ({ paid: true, order_number: order }) });
+  await settle();
+  assert.equal(page.cart.getCount(), 1);
+  assert.match(page.ids.checkoutStatus.textContent, /Payment confirmed/);
+  assert.equal(page.ids.checkoutSubmit.disabled, true);
+});
+
 test('verification stays single-flight while cart or catalog events fire', async () => {
   let resolve;
   const response = new Promise(done => { resolve = done; });
@@ -168,8 +236,16 @@ test('checkout sends only canonical quantities and blocks duplicate submissions'
   assert.deepEqual(payload.line_items, [{ id: grey, quantity: 2 }]);
   assert.equal(payload.country, 'United Arab Emirates');
   assert.ok(!('total' in payload) && !('card_number' in payload));
-  resolve({ ok: true, json: async () => ({ checkout_url: 'https://checkout.stripe.com/c/pay/fixture' }) });
+  resolve({ ok: true, json: async () => ({ checkout_url: 'https://checkout.stripe.com/c/pay/fixture', order_number: order }) });
   await pending;
+  assert.deepEqual(page.redirects, ['https://checkout.stripe.com/c/pay/fixture']);
+  assert.equal(page.cart.getCount(), 2);
+  assert.deepEqual(JSON.parse(page.checkoutStorage.get('pureform.checkout.v1')), { order_number: order, items: [{ id: grey, quantity: 2 }] });
+});
+
+test('blocked tab storage does not prevent redirect to a valid checkout', async () => {
+  const page = fixture({ unavailableSessionStorage: true, fetch: async () => ({ ok: true, json: async () => ({ checkout_url: 'https://checkout.stripe.com/c/pay/fixture', order_number: order }) }) });
+  await page.submit();
   assert.deepEqual(page.redirects, ['https://checkout.stripe.com/c/pay/fixture']);
   assert.equal(page.cart.getCount(), 2);
 });
@@ -196,6 +272,72 @@ test('stock reservations do not erase the cart; new additions obey current stock
   assert.equal(page.cart.getCount(), 2);
   page.cart.setQuantity(grey, 0);
   assert.equal(page.cart.getCount(), 0);
+});
+
+test('adding a set never reduces an existing cart when availability falls', () => {
+  const page = fixture();
+  const product = { ...page.cart.catalog[grey], inventory_quantity: 1, inventory_status: 'low_stock' };
+  page.cart.setCatalog({ [grey]: product });
+  page.cart.addItem(grey, 1);
+  assert.equal(page.cart.getCount(), 2);
+  page.cart.setQuantity(grey, 3);
+  assert.equal(page.cart.getCount(), 2);
+  page.cart.setQuantity(grey, 2);
+  assert.equal(page.cart.getCount(), 2);
+});
+
+test('shoppers can reduce or remove saved quantities while all stock is reserved', () => {
+  const page = fixture();
+  page.cart.setQuantity(grey, 5);
+  page.cart.setCatalog({ [grey]: { ...page.cart.catalog[grey], inventory_quantity: 0, inventory_status: 'out_of_stock' } });
+  page.cart.setQuantity(grey, 4);
+  assert.equal(page.cart.getCount(), 4);
+  page.cart.setQuantity(grey, 6);
+  assert.equal(page.cart.getCount(), 4);
+  page.cart.setQuantity(grey, 1);
+  assert.equal(page.cart.getCount(), 1);
+  page.cart.setQuantity(grey, 0);
+  assert.equal(page.cart.getCount(), 0);
+});
+
+test('cart controls permit reductions but block increases when a stock hold exceeds availability', () => {
+  const page = fixture();
+  page.runCart();
+  for (const stock of [0, 1]) {
+    page.cart.setCatalog({ [grey]: { ...page.cart.catalog[grey], inventory_quantity: stock, inventory_status: stock ? 'low_stock' : 'out_of_stock' } });
+    const all = root => [root, ...root.children.flatMap(all)];
+    const controls = all(page.ids.cartItemsList);
+    const input = controls.find(el => el.dataset.cartQuantity === grey);
+    assert.equal(input.max, '2');
+    assert.equal(input.min, '1');
+    assert.equal(controls.find(el => el.dataset.cartAction === 'increase').disabled, true);
+    assert.equal(page.ids.checkoutSubmit.disabled, true);
+  }
+});
+
+test('known stock shortages block forced checkout submissions and recover after a reduction', async () => {
+  const page = fixture();
+  page.cart.setCatalog({ [grey]: { ...page.cart.catalog[grey], inventory_quantity: 1, inventory_status: 'low_stock' } });
+  assert.match(page.ids.checkoutStatus.textContent, /no longer available/);
+  await page.submit();
+  assert.equal(page.calls.length, 0);
+  assert.equal(page.setupCalls.length, 0);
+  page.cart.setQuantity(grey, 1);
+  assert.equal(page.ids.checkoutSubmit.disabled, false);
+  assert.equal(page.ids.checkoutStatus.textContent, '');
+});
+
+test('a stock hold does not block verification of its existing paid session', async () => {
+  let paid = false;
+  const page = fixture({ search: successQuery, fetch: async () => ({ ok: true, json: async () => ({ paid, order_number: order }) }) });
+  page.cart.setCatalog({ [grey]: { ...page.cart.catalog[grey], inventory_quantity: 0, inventory_status: 'out_of_stock' } });
+  await settle();
+  assert.match(page.ids.checkoutStatus.textContent, /contact support before paying again/);
+  assert.equal(page.ids.checkoutVerifyPayment.hidden, false);
+  paid = true;
+  await page.retry();
+  assert.equal(page.cart.getCount(), 0);
+  assert.ok(page.calls.every(([url]) => url.endsWith('/checkout-status')));
 });
 
 test('cart quantities are capped at the server limit while admin prices drive totals', () => {

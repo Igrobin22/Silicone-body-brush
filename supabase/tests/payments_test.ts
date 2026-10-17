@@ -37,26 +37,57 @@ Deno.test('secure checkout and signed payment handling', async (test) => {
   const previousEnv = Object.fromEntries(Object.keys(settings).map((name) => [name, Deno.env.get(name)]));
   for (const [name, value] of Object.entries(settings)) Deno.env.set(name, value);
   const realFetch = globalThis.fetch;
-  let gatewayFailure = false;
+  let gatewayStatus = 200;
+  let gatewayErrorType = 'invalid_request_error';
+  let transportFailures = 0;
+  let malformedGateway = false;
   let databaseFailure = false;
+  let attachmentFailure = false;
   let reservationFailure = false;
+  let releaseFailure = false;
   let nonCardMethod = false;
+  let expiryFailure = false;
+  let expiryWrongOrder = false;
+  let expiryMalformed = false;
   let session = { ...paidSession };
-  const calls: { path: string; body: string; headers: Headers }[] = [];
+  let discountMode = 'ongoing';
+  let discountStartsAt: string | null = null;
+  let discountEndsAt: string | null = null;
+  const realConsoleError = console.error;
+  const alerts: string[] = [];
+  console.error = (value: unknown) => { alerts.push(String(value)); };
+  const calls: { path: string; query: URLSearchParams; body: string; headers: Headers }[] = [];
   globalThis.fetch = (input, init) => {
     const url = new URL(String(input));
     const options = init as RequestInit | undefined;
-    calls.push({ path: url.pathname, body: String(options?.body || ''), headers: new Headers(options?.headers) });
+    calls.push({ path: url.pathname, query: url.searchParams, body: String(options?.body || ''), headers: new Headers(options?.headers) });
     const response = (value: unknown, code = 200) => Promise.resolve(new Response(JSON.stringify(value), { status: code, headers: { 'Content-Type': 'application/json' } }));
     if (url.pathname === '/rest/v1/site_listings') return response([{
-      slug: 'pureform-4pc-set-grey', name: 'Grey set', description: 'Public product description', inventory_note: 'INTERNAL INVENTORY NOTE', price: 100, discount: 25, discount_mode: 'ongoing', inventory_quantity: 2, inventory_status: 'in_stock', photo_urls: [],
+      slug: 'pureform-4pc-set-grey', name: 'Grey set', description: 'Public product description', inventory_note: 'INTERNAL INVENTORY NOTE', price: 100, discount: 25, discount_mode: discountMode, discount_starts_at: discountStartsAt, discount_ends_at: discountEndsAt, inventory_quantity: 2, inventory_status: 'in_stock', photo_urls: [],
     }]);
-    if (url.pathname === '/rest/v1/site_orders') return response({ id: orderId, order_number: orderNumber });
+    if (url.pathname === '/rest/v1/site_orders') {
+      if (options?.method === 'PATCH' && String(options.body).includes('payment_session_id') && attachmentFailure) return response({ message: 'Attachment failed' }, 500);
+      return response({ id: orderId, order_number: orderNumber });
+    }
     if (url.pathname.endsWith('/reserve_site_order') && reservationFailure) return response({ message: 'Not enough stock' }, 409);
+    if (url.pathname.endsWith('/release_site_order') && releaseFailure) return response({ message: 'Release failed' }, 500);
     if (url.pathname.endsWith('/apply_paid_site_order') && databaseFailure) return response({ message: 'Database write failed' }, 500);
     if (url.pathname.startsWith('/rest/v1/rpc/')) return response(null);
-    if (url.pathname === '/v1/checkout/sessions') return gatewayFailure ? response({ error: {} }, 503) : response({ id: sessionId, url: `https://checkout.stripe.com/c/pay/${sessionId}`, livemode: false, payment_method_types: nonCardMethod ? ['card', 'link'] : ['card'] });
-    if (url.pathname === `/v1/checkout/sessions/${sessionId}/expire`) return response({ id: sessionId, status: 'expired' });
+    if (url.pathname === '/v1/checkout/sessions') {
+      if (transportFailures > 0) {
+        transportFailures--;
+        return Promise.reject(new TypeError('Connection lost with private gateway information'));
+      }
+      if (malformedGateway) return Promise.resolve(new Response('Gateway response truncated', { status: 200 }));
+      return gatewayStatus !== 200
+        ? response({ error: { type: gatewayErrorType, message: 'Private gateway error' } }, gatewayStatus)
+        : response({ id: sessionId, url: `https://checkout.stripe.com/c/pay/${sessionId}`, livemode: false, payment_method_types: nonCardMethod ? ['card', 'link'] : ['card'] });
+    }
+    if (url.pathname === `/v1/checkout/sessions/${sessionId}/expire`) {
+      if (expiryFailure) return response({ error: { type: 'invalid_request_error' } }, 400);
+      if (expiryMalformed) return response({ id: sessionId });
+      return response({ ...paidSession, status: 'expired', payment_status: 'unpaid', client_reference_id: expiryWrongOrder ? 'another-order' : orderId });
+    }
     if (url.pathname === `/v1/checkout/sessions/${sessionId}`) return response(session);
     throw new Error('Unexpected mocked request: ' + url);
   };
@@ -107,6 +138,21 @@ Deno.test('secure checkout and signed payment handling', async (test) => {
       const response = await status(new Request(site + '/checkout', { headers: { Origin: site } }));
       assert.deepEqual(await response.json(), { configured: true, shipping_total: 10, currency: 'AED' });
     });
+    await test.step('future and expired catalog offers are not discounted at the gateway', async () => {
+      discountMode = 'fixed';
+      for (const future of [true, false]) {
+        calls.length = 0;
+        discountStartsAt = future ? new Date(Date.now() + 86400000).toISOString() : null;
+        discountEndsAt = future ? null : new Date(Date.now() - 86400000).toISOString();
+        assert.equal((await checkout(request(payload))).status, 200);
+        const stripe = calls.find(call => call.path === '/v1/checkout/sessions')!;
+        assert.equal(new URLSearchParams(stripe.body).get('line_items[0][price_data][unit_amount]'), '10000');
+        const saved = JSON.parse(calls.find(call => call.path === '/rest/v1/site_orders')!.body);
+        assert.equal(saved.line_items[0].discount, 0);
+        assert.equal(saved.total, 110);
+      }
+      discountMode = 'ongoing'; discountStartsAt = null; discountEndsAt = null;
+    });
     await test.step('stock conflicts do not create a payment session', async () => {
       calls.length = 0; reservationFailure = true;
       assert.equal((await checkout(request(payload))).status, 409);
@@ -121,11 +167,124 @@ Deno.test('secure checkout and signed payment handling', async (test) => {
       assert(!calls.some((call) => call.path === '/rest/v1/site_orders' && call.body.includes('payment_session_id')));
       nonCardMethod = false;
     });
-    await test.step('gateway failures release stock and return JSON', async () => {
-      calls.length = 0; gatewayFailure = true;
+    await test.step('definite gateway rejections release stock without exposing gateway errors', async () => {
+      for (const code of [400, 401, 403, 404, 429]) {
+        calls.length = 0; gatewayStatus = code;
+        const result = await checkout(request(payload));
+        assert.equal(result.status, 502);
+        assert(calls.some((call) => call.path.endsWith('/release_site_order')));
+        assert(!JSON.stringify(await result.json()).includes('Private gateway error'));
+      }
+      gatewayStatus = 200;
+    });
+    await test.step('idempotency conflicts and unrecognized errors keep the original hold', async () => {
+      for (const [code, type] of [[409, 'invalid_request_error'], [400, 'idempotency_error'], [400, 'api_error']] as const) {
+        calls.length = 0; gatewayStatus = code; gatewayErrorType = type;
+        assert.equal((await checkout(request(payload))).status, 502);
+        assert(!calls.some((call) => call.path.endsWith('/release_site_order')));
+      }
+      gatewayStatus = 200; gatewayErrorType = 'invalid_request_error';
+    });
+    await test.step('server failures retain stock and flag the order for reconciliation', async () => {
+      calls.length = 0; alerts.length = 0; gatewayStatus = 503;
+      const result = await checkout(request(payload));
+      assert.equal(result.status, 502);
+      const body = await result.json();
+      assert(body.error.includes(orderNumber));
+      assert(!body.error.includes('No payment was taken'));
+      assert(!calls.some((call) => call.path.endsWith('/release_site_order')));
+      const note = calls.find((call) => call.path === '/rest/v1/site_orders' && call.body.includes('admin_notes'))!;
+      assert(note.body.includes('Stock is retained'));
+      assert.equal(note.query.get('admin_notes'), 'eq.');
+      assert.equal(note.query.get('payment_status'), 'eq.requires_payment');
+      assert.equal(JSON.parse(alerts[0]).reason, 'gateway_outcome_unknown');
+      assert(!alerts.join('').includes(payload.contact));
+      assert(!alerts.join('').includes('Private gateway error'));
+      gatewayStatus = 200;
+    });
+    await test.step('a lost create response replays exactly the same idempotent request', async () => {
+      calls.length = 0; transportFailures = 1;
+      assert.equal((await checkout(request(payload))).status, 200);
+      const creates = calls.filter((call) => call.path === '/v1/checkout/sessions');
+      assert.equal(creates.length, 2);
+      assert.equal(creates[0].body, creates[1].body);
+      assert.equal(creates[0].headers.get('Idempotency-Key'), creates[1].headers.get('Idempotency-Key'));
+      assert.equal(calls.filter((call) => call.path.endsWith('/reserve_site_order')).length, 1);
+      assert(!calls.some((call) => call.path.endsWith('/release_site_order')));
+    });
+    await test.step('exhausted transport retries never release a potentially payable session', async () => {
+      calls.length = 0; alerts.length = 0; transportFailures = 2;
       assert.equal((await checkout(request(payload))).status, 502);
+      assert.equal(calls.filter((call) => call.path === '/v1/checkout/sessions').length, 2);
+      assert(!calls.some((call) => call.path.endsWith('/release_site_order')));
+      assert.equal(JSON.parse(alerts[0]).reason, 'gateway_outcome_unknown');
+      assert(!alerts.join('').includes('private gateway information'));
+      transportFailures = 0;
+    });
+    await test.step('a rejection after an uncertain attempt does not prove the first request failed', async () => {
+      calls.length = 0; transportFailures = 1; gatewayStatus = 429;
+      assert.equal((await checkout(request(payload))).status, 502);
+      assert(!calls.some((call) => call.path.endsWith('/release_site_order')));
+      gatewayStatus = 200;
+    });
+    await test.step('truncated successful responses retain their reservations', async () => {
+      calls.length = 0; malformedGateway = true;
+      assert.equal((await checkout(request(payload))).status, 502);
+      assert(!calls.some((call) => call.path.endsWith('/release_site_order')));
+      malformedGateway = false;
+    });
+    await test.step('failed session attachment expires the matching session before releasing', async () => {
+      calls.length = 0; attachmentFailure = true;
+      assert.equal((await checkout(request(payload))).status, 502);
+      assert(calls.findIndex((call) => call.path.endsWith('/expire')) < calls.findIndex((call) => call.path.endsWith('/release_site_order')));
       assert(calls.some((call) => call.path.endsWith('/release_site_order')));
-      gatewayFailure = false;
+      attachmentFailure = false;
+    });
+    await test.step('a lost expiry response is checked before releasing stock', async () => {
+      calls.length = 0; attachmentFailure = true; expiryFailure = true;
+      session = { ...paidSession, status: 'expired', payment_status: 'unpaid' };
+      assert.equal((await checkout(request(payload))).status, 502);
+      assert(calls.some((call) => call.path === `/v1/checkout/sessions/${sessionId}`));
+      assert(calls.some((call) => call.path.endsWith('/release_site_order')));
+      attachmentFailure = false; expiryFailure = false; session = { ...paidSession };
+    });
+    await test.step('a payment racing expiry is recorded and never releases stock', async () => {
+      calls.length = 0; alerts.length = 0; attachmentFailure = true; expiryFailure = true;
+      const result = await checkout(request(payload));
+      assert.equal(result.status, 409);
+      assert((await result.json()).error.includes('Do not pay again'));
+      assert(calls.some((call) => call.path.endsWith('/apply_paid_site_order')));
+      assert(!calls.some((call) => call.path.endsWith('/release_site_order')));
+      assert.equal(alerts.length, 0);
+      attachmentFailure = false; expiryFailure = false;
+    });
+    await test.step('a failed paid-state write retains stock for the signed webhook retry', async () => {
+      calls.length = 0; attachmentFailure = true; expiryFailure = true; databaseFailure = true;
+      assert.equal((await checkout(request(payload))).status, 502);
+      assert(calls.some((call) => call.path.endsWith('/apply_paid_site_order')));
+      assert(!calls.some((call) => call.path.endsWith('/release_site_order')));
+      attachmentFailure = false; expiryFailure = false; databaseFailure = false;
+    });
+    await test.step('unconfirmed expiry, a different order or an open session retain stock', async () => {
+      for (const malformed of [false, true]) {
+        calls.length = 0; attachmentFailure = true; expiryWrongOrder = true; expiryMalformed = malformed;
+        session = { ...paidSession, status: 'open', payment_status: 'unpaid' };
+        assert.equal((await checkout(request(payload))).status, 502);
+        assert(!calls.some((call) => call.path.endsWith('/release_site_order')));
+      }
+      calls.length = 0;
+      session = { ...paidSession, client_reference_id: 'another-order' };
+      assert.equal((await checkout(request(payload))).status, 502);
+      assert(!calls.some((call) => call.path.endsWith('/apply_paid_site_order')));
+      assert(!calls.some((call) => call.path.endsWith('/release_site_order')));
+      attachmentFailure = false; expiryWrongOrder = false; expiryMalformed = false; session = { ...paidSession };
+    });
+    await test.step('stock release failures are flagged rather than silently discarded', async () => {
+      calls.length = 0; alerts.length = 0; gatewayStatus = 400; releaseFailure = true;
+      assert.equal((await checkout(request(payload))).status, 502);
+      assert.equal(JSON.parse(alerts[0]).reason, 'stock_release_failed');
+      assert(calls.some((call) => call.path === '/rest/v1/site_orders' && call.body.includes('stock release could not be confirmed')));
+      gatewayStatus = 200; releaseFailure = false;
     });
     await test.step('payment status verifies session and order before confirming', async () => {
       const response = await status(request({ session_id: sessionId, order_number: orderNumber }));
@@ -158,6 +317,7 @@ Deno.test('secure checkout and signed payment handling', async (test) => {
     });
   } finally {
     globalThis.fetch = realFetch;
+    console.error = realConsoleError;
     for (const [name, value] of Object.entries(previousEnv)) {
       if (value === undefined) Deno.env.delete(name); else Deno.env.set(name, value);
     }

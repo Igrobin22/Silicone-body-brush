@@ -1,4 +1,5 @@
-import { corsHeaders, database, env, json, originAllowed, paymentConfigurationReady, siteUrl as configuredSiteUrl, stripeRequest, uaeShippingTotal } from '../_shared/payments.ts';
+import { confirmPaidSession, corsHeaders, database, env, isSettledSession, json, originAllowed, paymentConfigurationReady, siteUrl as configuredSiteUrl, StripeRequestError, stripeRequest, uaeShippingTotal } from '../_shared/payments.ts';
+import type { CheckoutSession } from '../_shared/payments.ts';
 
 type CheckoutLine = {
   id?: string;
@@ -103,6 +104,52 @@ async function promotionCodeIdFor(code: string) {
 
   const result = await stripeRequest('/promotion_codes', { method: 'GET', params });
   return result?.data?.[0]?.id || '';
+}
+
+async function flagCheckoutReview(supabase: ReturnType<typeof database>, order: { id: string; order_number: string }, sessionId: string, releaseFailed = false) {
+  const reason = releaseFailed ? 'stock_release_failed' : 'gateway_outcome_unknown';
+  // Log identifiers only: never gateway payloads, checkout URLs or customer details.
+  console.error(JSON.stringify({ event: 'checkout_reconciliation_required', order_id: order.id, order_number: order.order_number, payment_session_id: sessionId, reason }));
+  try {
+    await supabase.from('site_orders').update({
+      admin_notes: releaseFailed
+        ? 'Checkout did not open, but its stock release could not be confirmed. Review Stripe and the stock hold before changing inventory. Do not fulfill.'
+        : 'Checkout outcome needs review. Stock is retained until Stripe confirms payment or expiry. Check Stripe using this order number; do not manually release stock or fulfill an unverified payment.',
+    }).eq('id', order.id).eq('payment_status', 'requires_payment').eq('admin_notes', '');
+  } catch {
+    // The structured function log remains available if the database is unreachable.
+  }
+}
+
+async function releaseFailedCheckout(supabase: ReturnType<typeof database>, order: { id: string; order_number: string }, sessionId = '') {
+  try {
+    const released = await supabase.rpc('release_site_order', { p_order_id: order.id, p_payment_status: 'failed' });
+    if (!released.error) return;
+  } catch { /* Keep the unresolved reservation visible for reconciliation. */ }
+  await flagCheckoutReview(supabase, order, sessionId, true);
+}
+
+function sessionMatchesOrder(session: CheckoutSession, order: { id: string; order_number: string }, sessionId: string) {
+  return session?.id === sessionId && session?.client_reference_id === order.id &&
+    session?.metadata?.order_id === order.id && session?.metadata?.order_number === order.order_number;
+}
+
+async function closeFailedSession(supabase: ReturnType<typeof database>, order: { id: string; order_number: string }, sessionId: string) {
+  try {
+    const expired = await stripeRequest(`/checkout/sessions/${encodeURIComponent(sessionId)}/expire`);
+    if (sessionMatchesOrder(expired, order, sessionId) && expired.status === 'expired' && expired.payment_status === 'unpaid') return 'expired';
+  } catch { /* Expiry can lose its response or race a completed payment. Retrieve its actual state. */ }
+
+  try {
+    const session = await stripeRequest(`/checkout/sessions/${encodeURIComponent(sessionId)}`, { method: 'GET' });
+    if (!sessionMatchesOrder(session, order, sessionId)) return 'unknown';
+    if (session.status === 'expired' && session.payment_status === 'unpaid') return 'expired';
+    if (isSettledSession(session)) {
+      await confirmPaidSession(supabase, session);
+      return 'paid';
+    }
+  } catch { /* A webhook can still settle or expire this reservation. Never assume an unknown session is unpaid. */ }
+  return 'unknown';
 }
 
 async function createCheckout(request: Request) {
@@ -319,15 +366,16 @@ async function createCheckout(request: Request) {
 
   const reservation = await supabase.rpc('reserve_site_order', { p_order_id: order.id });
   if (reservation.error) {
-    await supabase.rpc('release_site_order', { p_order_id: order.id, p_payment_status: 'failed' });
+    await releaseFailedCheckout(supabase, order);
     return errorResponse(request, 'Stock changed before payment. Please refresh your cart and try again.', 409);
   }
 
+  let sessionId = '';
   try {
     const session = await stripeRequest('/checkout/sessions', { params, idempotencyKey: order.id });
-    if (!session?.url || !session?.id) throw new Error('Missing payment session.');
+    if (/^cs_(test_|live_)?[A-Za-z0-9]+$/.test(session?.id)) sessionId = session.id;
+    if (!session?.url || !sessionId) throw new Error('Missing payment session.');
     if (!Array.isArray(session.payment_method_types) || session.payment_method_types.length !== 1 || session.payment_method_types[0] !== 'card') {
-      await stripeRequest(`/checkout/sessions/${encodeURIComponent(session.id)}/expire`);
       throw new Error('The gateway configuration must accept cards only.');
     }
     const saved = await supabase.from('site_orders').update({
@@ -336,7 +384,6 @@ async function createCheckout(request: Request) {
       source: session.livemode === false ? 'stripe_sandbox' : 'website',
     }).eq('id', order.id);
     if (saved.error) {
-      await stripeRequest(`/checkout/sessions/${encodeURIComponent(session.id)}/expire`);
       throw new Error('Could not attach payment session.');
     }
     return json(request, {
@@ -344,9 +391,20 @@ async function createCheckout(request: Request) {
       order_id: order.id,
       order_number: order.order_number,
     });
-  } catch {
-    await supabase.rpc('release_site_order', { p_order_id: order.id, p_payment_status: 'failed' });
-    return errorResponse(request, 'Secure card checkout could not be opened. No payment was taken. Please try again later.', 502);
+  } catch (error) {
+    const outcome = sessionId
+      ? await closeFailedSession(supabase, order, sessionId)
+      : error instanceof StripeRequestError && error.definitivelyRejected ? 'rejected' : 'unknown';
+    if (outcome === 'paid') {
+      return errorResponse(request, `Payment was confirmed for order ${order.order_number}. Do not pay again; contact PureForm support for your order details.`, 409);
+    }
+    if (outcome === 'expired' || outcome === 'rejected') {
+      await releaseFailedCheckout(supabase, order, sessionId);
+      return errorResponse(request, 'Secure card checkout could not be opened. Please try again later.', 502);
+    }
+
+    await flagCheckoutReview(supabase, order, sessionId);
+    return errorResponse(request, `Checkout could not be confirmed. Please contact PureForm support with order ${order.order_number} before trying another payment.`, 502);
   }
 }
 

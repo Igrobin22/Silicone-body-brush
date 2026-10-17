@@ -133,6 +133,19 @@
     return greyPhotos.slice();
   }
 
+  function storefrontPhotoUrl(value) {
+    try {
+      var url = new URL(value);
+      var rawUpload = /^(\/[^/]+\/image\/upload\/)(v\d+\/)/;
+      if (url.protocol !== 'https:' || url.hostname !== 'res.cloudinary.com' || url.username || url.password || url.port || url.search || url.hash || !rawUpload.test(url.pathname)) return value;
+      // Preserve admin originals and existing transformations; limit delivery without cropping.
+      url.pathname = url.pathname.replace(rawUpload, '$1f_auto,q_auto,c_limit,w_1400/$2');
+      return url.href;
+    } catch (_error) {
+      return value;
+    }
+  }
+
   function isDiscountActive(item) {
     var discount = toNumber(item && item.discount, 0);
     var now;
@@ -182,6 +195,7 @@
     if (!photos.length) {
       photos = fallbackPhotosForSlug(slug);
     }
+    photos = photos.map(storefrontPhotoUrl);
 
     return {
       id: slug,

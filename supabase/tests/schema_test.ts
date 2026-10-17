@@ -70,6 +70,21 @@ Deno.test('order schema, inventory transactions and access control', async (test
       assert.equal(await stock(), 0);
       await assert.rejects(pay(id, 'cs_test_wrong_session'), /does not match/);
     });
+    await test.step('lost session responses can settle or expire without releasing paid stock', async () => {
+      await db.query('update site_listings set inventory_quantity = 3, inventory_status = \'in_stock\' where slug = $1', [grey]);
+      const paid = await order([{ id: grey, quantity: 1 }]);
+      const expired = await order([{ id: grey, quantity: 1 }]);
+      await reserve(paid); await reserve(expired);
+      assert.equal(await stock(), 1);
+      const unattached = (await db.query<{ payment_session_id: string }>('select payment_session_id from site_orders where id = $1', [paid])).rows[0];
+      assert.equal(unattached.payment_session_id, '');
+      await pay(paid, 'cs_lost_response'); await pay(paid, 'cs_lost_response');
+      await release(paid);
+      assert.equal(await stock(), 1);
+      await release(expired); await release(expired);
+      assert.equal(await stock(), 2);
+      assert.equal((await db.query<{ payment_status: string }>('select payment_status from site_orders where id = $1', [paid])).rows[0].payment_status, 'paid');
+    });
     await test.step('paid totals include delivery, while promotions cannot remove the delivery fee', async () => {
       await db.query('update site_listings set inventory_quantity = 6, inventory_status = \'in_stock\' where slug = $1', [grey]);
       for (const amount of [110, 85, 10]) {

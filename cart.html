@@ -235,6 +235,7 @@
         var remove = document.createElement('button');
         var total = document.createElement('strong');
         var productUrl = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
+        var availableQuantity = item.inventoryStatus === 'out_of_stock' ? 0 : Math.min(20, item.inventoryQuantity === null ? 20 : item.inventoryQuantity);
 
         row.className = 'cart-item';
         row.dataset.cartId = item.id;
@@ -268,7 +269,7 @@
         input.type = 'number';
         input.inputMode = 'numeric';
         input.min = '1';
-        input.max = String(Math.min(20, item.inventoryQuantity === null ? 20 : item.inventoryQuantity));
+        input.max = String(Math.max(item.quantity, availableQuantity));
         input.step = '1';
         input.value = item.quantity;
         input.dataset.cartQuantity = item.id;
@@ -277,7 +278,7 @@
         increase.type = 'button';
         increase.textContent = '+';
         increase.dataset.cartAction = 'increase';
-        increase.disabled = item.quantity >= Math.min(20, item.inventoryQuantity === null ? 20 : item.inventoryQuantity);
+        increase.disabled = item.quantity >= availableQuantity;
         increase.setAttribute('aria-label', 'Increase quantity for ' + item.name);
 
         quantity.appendChild(decrease);
