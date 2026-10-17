@@ -7,6 +7,8 @@ const vm = require('node:vm');
 const html = readFileSync(path.join(__dirname, '../checkout.html'), 'utf8');
 const checkoutSource = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const cartSource = readFileSync(path.join(__dirname, '../assets/pureform-cart.js'), 'utf8');
+const cartPageSource = Array.from(readFileSync(path.join(__dirname, '../cart.html'), 'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g))
+  .map(match => match[1]).find(script => script.includes('var emptyState'));
 const grey = 'pureform-4pc-set-grey';
 const order = 'PF-261017-ABC123';
 const session = 'cs_test_12345678901234567890';
@@ -16,7 +18,7 @@ const settle = () => new Promise(resolve => setImmediate(resolve));
 
 function element() {
   return {
-    value: '', textContent: '', disabled: false, hidden: false, children: [], attributes: {}, listeners: {},
+    value: '', textContent: '', disabled: false, hidden: false, children: [], attributes: {}, listeners: {}, dataset: {},
     classList: { toggle() {} },
     addEventListener(name, callback) { this.listeners[name] = callback; },
     setAttribute(name, value) { this.attributes[name] = value; },
@@ -25,6 +27,7 @@ function element() {
     appendChild(child) { this.children.push(child); },
     replaceChildren() { this.children = []; },
     closest() { return this; },
+    querySelector() { return null; },
     checkValidity() { return true; },
     reset() { this.resets = (this.resets || 0) + 1; }
   };
@@ -43,7 +46,7 @@ function fixture({ search = '', fetch = async () => ({ ok: true, json: async () 
     [grey]: { id: grey, name: 'Grey set', price: 43.89, image: 'grey.png', meta: '4 tools', inventory_quantity: 24, inventory_status: 'in_stock' }
   };
   const document = {
-    readyState: 'complete', title: 'Checkout',
+    readyState: 'complete', title: 'Checkout', body: element(),
     getElementById(id) { return ids[id] || (ids[id] = element()); },
     querySelector() { return element(); }, querySelectorAll() { return []; }, createElement: element
   };
@@ -76,7 +79,8 @@ function fixture({ search = '', fetch = async () => ({ ok: true, json: async () 
   new vm.Script(checkoutSource).runInContext(context);
   return { ids, calls, setupCalls, redirects, history, window, cart: window.PureFormCart,
     submit: () => ids.checkoutForm.listeners.submit({ preventDefault() {} }),
-    retry: () => ids.checkoutVerifyPayment.listeners.click() };
+    retry: () => ids.checkoutVerifyPayment.listeners.click(),
+    runCart: () => new vm.Script(cartPageSource).runInContext(context) };
 }
 
 test('forged success links never clear the cart or start another payment', async () => {
@@ -224,4 +228,17 @@ test('checkout fails closed when deployed delivery configuration is missing or d
     assert.equal(page.cart.getCount(), 2);
     assert.match(page.ids.checkoutStatus.textContent, /Delivery settings are being updated/);
   }
+});
+
+test('cart controls honor the 20-set limit and its sticky total includes delivery', () => {
+  const page = fixture();
+  page.runCart();
+  page.cart.setQuantity(grey, 20);
+  const all = root => [root, ...root.children.flatMap(all)];
+  const controls = all(page.ids.cartItemsList);
+  assert.equal(controls.find(el => el.dataset.cartQuantity === grey).max, '20');
+  assert.equal(controls.find(el => el.dataset.cartAction === 'increase').disabled, true);
+  assert.equal(page.ids.cartShipping.textContent, 'AED 10.00');
+  assert.equal(page.ids.cartTotal.textContent, 'AED 887.80');
+  assert.equal(page.ids.cartStickyTotal.textContent, 'AED 887.80');
 });

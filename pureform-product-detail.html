@@ -1777,7 +1777,7 @@
       }
 
       function clampQuantity(value) {
-        return Math.max(1, parseInt(value, 10) || 1);
+        return Math.min(20, Math.max(1, parseInt(value, 10) || 1));
       }
 
       function getMaxQuantity(product) {
@@ -1787,7 +1787,7 @@
           return 0;
         }
 
-        return Number.isFinite(inventoryQuantity) ? Math.max(0, inventoryQuantity) : Infinity;
+        return Number.isFinite(inventoryQuantity) ? Math.min(20, Math.max(0, inventoryQuantity)) : 20;
       }
 
       function getProductImages(product) {
@@ -1930,6 +1930,7 @@
       function setQuantity(value) {
         var product = products[activeProductId] || products[fallbackId];
         var maxQuantity = getMaxQuantity(product);
+        var availableQuantity = parseInt(product && product.inventory_quantity, 10);
         selectedQuantity = maxQuantity > 0 ? Math.min(clampQuantity(value), maxQuantity) : 1;
 
         if (productQuantityInput) {
@@ -1942,9 +1943,9 @@
         }
 
         if (productQuantityNote) {
-          productQuantityNote.textContent = Number.isFinite(maxQuantity) && maxQuantity > 0
-            ? selectedQuantity + (selectedQuantity === 1 ? ' set' : ' sets') + ' / ' + maxQuantity + ' available'
-            : selectedQuantity + (selectedQuantity === 1 ? ' set' : ' sets');
+          productQuantityNote.textContent = selectedQuantity + (selectedQuantity === 1 ? ' set' : ' sets')
+            + (Number.isFinite(availableQuantity) && availableQuantity > 0 ? ' / ' + availableQuantity + ' available' : '')
+            + (maxQuantity === 20 ? ' / Max 20 per order' : '');
         }
 
         quantityButtons.forEach(function (button) {
