@@ -203,11 +203,10 @@
       inventory_quantity: inventoryQuantity,
       inventory_status: inventoryStatus,
       inventoryStatusText: inventoryQuantity <= 0 ? 'Out of stock' : sentenceCase(inventoryStatus),
-      inventory_note: String(item && item.inventory_note || '').trim(),
       visible: item ? item.visible !== false : true,
       images: photos,
       image: photos[0],
-      meta: String(item && item.inventory_note || '').trim() || color + ' set / 4 tools',
+      meta: color + ' set / 4 tools',
       tag: color + ' Set',
       color: color,
       swatch: swatchForColor(color),
@@ -215,7 +214,7 @@
       fit: [
         'Complete 4-piece set for face, scalp, body, and back care.',
         'Soft silicone bristles rinse clean after use.',
-        String(item && item.inventory_note || '').trim() || 'Stock and delivery are confirmed before checkout.'
+        'AED 10 delivery per order across the UAE.'
       ]
     };
   }
@@ -588,7 +587,7 @@
     });
     result = await client
       .from('site_listings')
-      .select('id,slug,name,description,price,discount,discount_mode,discount_starts_at,discount_ends_at,inventory_quantity,inventory_status,inventory_note,visible,photo_urls,sort_order,updated_at')
+      .select('id,slug,name,description,price,discount,discount_mode,discount_starts_at,discount_ends_at,inventory_quantity,inventory_status,visible,photo_urls,sort_order,updated_at')
       .in('slug', QUERY_SLUGS)
       .eq('visible', true)
       .order('sort_order', { ascending: true })
