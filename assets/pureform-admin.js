@@ -587,7 +587,7 @@
   async function loadOrders() {
     var result = await state.supabase
       .from('site_orders')
-      .select('id,order_number,status,payment_status,fulfillment_status,contact,phone,first_name,last_name,country,address,apartment,city,emirate,payment_preference,payment_provider,payment_session_id,payment_intent_id,payment_reference,paid_at,discount_code,customer_notes,admin_notes,line_items,subtotal,total,currency,source,created_at,updated_at')
+      .select('id,order_number,status,payment_status,fulfillment_status,contact,phone,first_name,last_name,country,address,apartment,city,emirate,payment_preference,payment_provider,payment_session_id,payment_intent_id,payment_reference,paid_at,discount_code,customer_notes,admin_notes,line_items,subtotal,shipping_total,total,currency,source,created_at,updated_at')
       .order('created_at', { ascending: false });
 
     if (result.error) {
@@ -1008,6 +1008,10 @@
       { label: 'Payment', value: order.payment_preference || statusLabel(order.payment_status) },
       { label: 'Environment', value: order.source === 'stripe_sandbox' ? 'Stripe sandbox - do not fulfill' : 'Storefront' },
       { label: 'Gateway', value: paymentReference(order) },
+      { label: 'Subtotal', value: formatCurrency(order.subtotal) },
+      { label: 'UAE delivery', value: formatCurrency(order.shipping_total) },
+      { label: 'Promotion discount', value: formatCurrency(Math.max(0, Number(order.subtotal || 0) + Number(order.shipping_total || 0) - Number(order.total || 0))) },
+      { label: 'Total', value: formatCurrency(order.total) },
       { label: 'Customer notes', value: order.customer_notes || 'None' },
       { label: 'Placed', value: formatDateTime(order.created_at) }
     ];

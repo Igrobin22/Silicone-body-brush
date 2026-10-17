@@ -7,6 +7,8 @@
 --    insert into public.admin_profiles (id, email, role)
 --    values ('AUTH_USER_UUID', 'owner@example.com', 'admin');
 
+begin;
+
 create extension if not exists pgcrypto;
 
 create table if not exists public.admin_profiles (
@@ -124,6 +126,7 @@ create table if not exists public.site_orders (
   admin_notes text not null default '',
   line_items jsonb not null default '[]'::jsonb,
   subtotal numeric(10, 2) not null default 0,
+  shipping_total numeric(10, 2) not null default 0,
   total numeric(10, 2) not null default 0,
   currency text not null default 'AED',
   source text not null default 'website',
@@ -141,6 +144,7 @@ create table if not exists public.site_orders (
   ),
   constraint site_orders_line_items_check check (jsonb_typeof(line_items) = 'array'),
   constraint site_orders_subtotal_check check (subtotal >= 0),
+  constraint site_orders_shipping_total_check check (shipping_total >= 0),
   constraint site_orders_total_check check (total >= 0)
 );
 
@@ -168,10 +172,14 @@ alter table public.site_orders
   add column if not exists admin_notes text not null default '',
   add column if not exists line_items jsonb not null default '[]'::jsonb,
   add column if not exists subtotal numeric(10, 2) not null default 0,
+  add column if not exists shipping_total numeric(10, 2) not null default 0 check (shipping_total >= 0),
   add column if not exists total numeric(10, 2) not null default 0,
   add column if not exists currency text not null default 'AED',
   add column if not exists source text not null default 'website',
   add column if not exists paid_at timestamptz;
+
+alter table public.site_orders
+  add column if not exists stock_deducted boolean not null default false;
 
 update public.site_orders
 set
@@ -179,11 +187,9 @@ set
     when payment_status in ('cod_pending', 'payment_link_sent') then 'pending'
     else payment_status
   end,
-  payment_provider = coalesce(nullif(payment_provider, ''), 'stripe'),
-  currency = 'AED'
+  payment_provider = coalesce(nullif(payment_provider, ''), 'stripe')
 where payment_status in ('cod_pending', 'payment_link_sent')
-  or coalesce(payment_provider, '') = ''
-  or currency <> 'AED';
+  or coalesce(payment_provider, '') = '';
 
 alter table public.site_orders
   drop constraint if exists site_orders_payment_status_check;
@@ -237,6 +243,86 @@ create trigger site_orders_set_updated_at
 before update on public.site_orders
 for each row execute function public.set_updated_at();
 
+create or replace function public.reserve_site_order(p_order_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  order_record public.site_orders%rowtype;
+  item jsonb;
+  item_quantity integer;
+begin
+  select * into order_record from public.site_orders where id = p_order_id for update;
+  if not found then raise exception 'Order not found'; end if;
+  if order_record.payment_status <> 'requires_payment' or order_record.currency <> 'AED' then
+    raise exception 'Order cannot reserve stock';
+  end if;
+  if order_record.stock_deducted then return; end if;
+  if jsonb_array_length(order_record.line_items) not between 1 and 3 then
+    raise exception 'Invalid order items';
+  end if;
+
+  -- Every stock operation locks products in the same order to avoid deadlocks.
+  for item in select value from jsonb_array_elements(order_record.line_items) order by value ->> 'id'
+  loop
+    item_quantity = (item ->> 'quantity')::integer;
+    if item_quantity is null or item_quantity not between 1 and 20 then raise exception 'Invalid quantity'; end if;
+    update public.site_listings
+    set inventory_quantity = inventory_quantity - item_quantity,
+        inventory_status = case
+          when inventory_quantity - item_quantity = 0 then 'out_of_stock'
+          when inventory_quantity - item_quantity <= 5 then 'low_stock'
+          else 'in_stock' end
+    where slug = item ->> 'id'
+      and slug in ('pureform-4pc-set-grey', 'pureform-4pc-set-black', 'pureform-4pc-set-pink')
+      and visible and inventory_status <> 'out_of_stock' and inventory_quantity >= item_quantity;
+    if not found then raise exception 'Not enough available stock'; end if;
+  end loop;
+
+  update public.site_orders set stock_deducted = true, fulfillment_status = 'reserved' where id = p_order_id;
+end;
+$$;
+
+create or replace function public.release_site_order(p_order_id uuid, p_payment_status text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  order_record public.site_orders%rowtype;
+  item jsonb;
+  item_quantity integer;
+begin
+  if p_payment_status is null or p_payment_status not in ('failed', 'cancelled') then raise exception 'Invalid release status'; end if;
+  select * into order_record from public.site_orders where id = p_order_id for update;
+  if not found then raise exception 'Order not found'; end if;
+  if order_record.paid_at is not null or order_record.payment_status in ('paid', 'refunded') then return; end if;
+
+  if order_record.stock_deducted then
+    for item in select value from jsonb_array_elements(order_record.line_items) order by value ->> 'id'
+    loop
+      item_quantity = (item ->> 'quantity')::integer;
+      update public.site_listings
+      set inventory_quantity = inventory_quantity + item_quantity,
+          inventory_status = case when inventory_quantity + item_quantity <= 5 then 'low_stock' else 'in_stock' end
+      where slug = item ->> 'id';
+    end loop;
+  end if;
+
+  update public.site_orders
+  set stock_deducted = false, status = 'cancelled', payment_status = p_payment_status, fulfillment_status = 'cancelled'
+  where id = p_order_id;
+end;
+$$;
+
+revoke all on function public.reserve_site_order(uuid) from public;
+revoke all on function public.release_site_order(uuid, text) from public;
+grant execute on function public.reserve_site_order(uuid) to service_role;
+grant execute on function public.release_site_order(uuid, text) to service_role;
+
 create or replace function public.apply_paid_site_order(
   p_order_id uuid,
   p_payment_session_id text,
@@ -251,9 +337,6 @@ set search_path = public
 as $$
 declare
   order_record public.site_orders%rowtype;
-  item jsonb;
-  item_slug text;
-  item_quantity integer;
 begin
   select *
   into order_record
@@ -264,6 +347,17 @@ begin
   if not found then
     raise exception 'site order % was not found', p_order_id;
   end if;
+  if coalesce(p_payment_session_id, '') = '' then raise exception 'Payment session is required'; end if;
+  if order_record.payment_session_id <> '' and order_record.payment_session_id <> p_payment_session_id then
+    raise exception 'Payment session does not match the order';
+  end if;
+  if order_record.currency <> 'AED' or p_paid_total is null or p_paid_total < order_record.shipping_total
+     or p_paid_total > order_record.subtotal + order_record.shipping_total then
+    raise exception 'Invalid payment total or currency';
+  end if;
+  -- A webhook retry must not deduct stock again or reverse a later refund.
+  if order_record.paid_at is not null or order_record.payment_status in ('paid', 'refunded') then return; end if;
+  if not order_record.stock_deducted then perform public.reserve_site_order(p_order_id); end if;
 
   update public.site_orders
   set
@@ -274,33 +368,10 @@ begin
     payment_session_id = coalesce(nullif(p_payment_session_id, ''), payment_session_id),
     payment_intent_id = coalesce(nullif(p_payment_intent_id, ''), payment_intent_id),
     payment_reference = coalesce(nullif(p_payment_reference, ''), payment_reference),
-    total = greatest(0, coalesce(p_paid_total, total)),
+    total = p_paid_total,
     paid_at = coalesce(paid_at, now())
   where id = p_order_id;
 
-  if order_record.payment_status = 'paid' then
-    return;
-  end if;
-
-  for item in
-    select value
-    from jsonb_array_elements(order_record.line_items)
-  loop
-    item_slug = item ->> 'id';
-    item_quantity = greatest(0, coalesce((item ->> 'quantity')::integer, 0));
-
-    if item_slug is not null and item_quantity > 0 then
-      update public.site_listings
-      set
-        inventory_quantity = greatest(0, inventory_quantity - item_quantity),
-        inventory_status = case
-          when greatest(0, inventory_quantity - item_quantity) = 0 then 'out_of_stock'
-          when greatest(0, inventory_quantity - item_quantity) <= 5 then 'low_stock'
-          else inventory_status
-        end
-      where slug = item_slug;
-    end if;
-  end loop;
 end;
 $$;
 
@@ -442,50 +513,10 @@ for delete
 to authenticated
 using (public.is_admin());
 
-with duplicate_listings as (
-  select
-    id,
-    row_number() over (
-      partition by lower(trim(name))
-      order by updated_at desc, sort_order asc, id
-    ) as duplicate_rank
-  from public.site_listings
-)
-delete from public.site_listings target
-using duplicate_listings ranked
-where target.id = ranked.id
-  and ranked.duplicate_rank > 1;
-
-with slug_map as (
-  select *
-  from (values
-    ('grey-4-piece-silicone-brush-set', 'pureform-4pc-set-grey'),
-    ('black-4-piece-silicone-brush-set', 'pureform-4pc-set-black'),
-    ('pink-4-piece-silicone-brush-set', 'pureform-4pc-set-pink')
-  ) as mapped(legacy_slug, canonical_slug)
-),
-canonical_duplicates as (
-  select
-    listing.id,
-    row_number() over (
-      partition by coalesce(slug_map.canonical_slug, listing.slug)
-      order by listing.updated_at desc, listing.sort_order asc, listing.id
-    ) as duplicate_rank
-  from public.site_listings listing
-  left join slug_map on listing.slug = slug_map.legacy_slug
-  where listing.slug in (
-    'grey-4-piece-silicone-brush-set',
-    'black-4-piece-silicone-brush-set',
-    'pink-4-piece-silicone-brush-set',
-    'pureform-4pc-set-grey',
-    'pureform-4pc-set-black',
-    'pureform-4pc-set-pink'
-  )
-)
-delete from public.site_listings target
-using canonical_duplicates ranked
-where target.id = ranked.id
-  and ranked.duplicate_rank > 1;
+-- Payment fields and stock reservations are written by verified server functions only.
+revoke all on public.site_orders from anon, authenticated;
+grant select on public.site_orders to authenticated;
+grant update (status, fulfillment_status, admin_notes) on public.site_orders to authenticated;
 
 with slug_map as (
   select *
@@ -504,16 +535,6 @@ where target.slug = slug_map.legacy_slug
     from public.site_listings existing
     where existing.slug = slug_map.canonical_slug
   );
-
-update public.site_listings
-set
-  price = 42,
-  discount = 10,
-  discount_mode = 'ongoing',
-  discount_starts_at = null,
-  discount_ends_at = null
-where slug = 'pureform-4pc-set-pink'
-  and price > 200;
 
 insert into public.site_listings (
   slug,
@@ -607,8 +628,6 @@ values
   ('site.announcement', 'Announcement bar', 'Free delivery checks and 15-day returns on PureForm orders', 'text'),
   ('sidebar.announcement', 'Sidebar announcement', 'Need help choosing a set? Support can confirm color, stock, UAE delivery, and secure card checkout.', 'text'),
   ('popup.message', 'Popup message', 'Add the exact popup copy here once the popup purpose is confirmed.', 'text')
-on conflict (key) do update
-set
-  label = excluded.label,
-  value = excluded.value,
-  block_type = excluded.block_type;
+on conflict (key) do nothing;
+
+commit;

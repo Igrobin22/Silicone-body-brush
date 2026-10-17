@@ -1465,6 +1465,14 @@ body.has-cart-sticky {
   gap: .8rem;
 }
 
+.checkout-actions [hidden] {
+  display: none;
+}
+
+.checkout-actions .btn-s {
+  min-height: 44px;
+}
+
 .checkout-actions .btn-p.buy-pay-button {
   width: 100%;
   min-height: 48px;

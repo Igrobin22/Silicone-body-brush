@@ -54,7 +54,7 @@
   }
 
   function clampQuantity(quantity) {
-    return Math.max(1, parseInt(quantity, 10) || 1);
+    return Math.min(20, Math.max(1, parseInt(quantity, 10) || 1));
   }
 
   function getMaxQuantity(product) {
@@ -117,8 +117,9 @@
   function sanitizeCart(items) {
     return items.reduce(function (cart, item) {
       var id = normalizeId(item && item.id);
-      var product = id ? catalog[id] : null;
-      var quantity = clampQuantityForProduct(product, item && item.quantity);
+      // Stock may be held by this customer's open payment session. Keep cart intent;
+      // adding/changing quantities and the server still check live availability.
+      var quantity = clampQuantity(item && item.quantity);
       var existing;
 
       if (!id || !quantity) {
@@ -130,7 +131,7 @@
       });
 
       if (existing) {
-        existing.quantity = clampQuantityForProduct(product, existing.quantity + quantity);
+        existing.quantity = clampQuantity(existing.quantity + quantity);
         return cart;
       }
 
@@ -181,7 +182,7 @@
     if (existing) {
       nextQuantity = clampQuantityForProduct(product, existing.quantity + clampQuantity(quantity));
       if (nextQuantity <= 0) {
-        return removeItem(productId);
+        return getCart();
       }
       existing.quantity = nextQuantity;
     } else {
@@ -207,9 +208,10 @@
 
     nextQuantity = clampQuantityForProduct(product, numericQuantity);
 
-    if (!numericQuantity || numericQuantity < 1 || nextQuantity <= 0) {
+    if (!numericQuantity || numericQuantity < 1) {
       return removeItem(productId);
     }
+    if (nextQuantity <= 0) return getCart();
 
     cart = getCart().map(function (item) {
       return item.id === productId ? { id: productId, quantity: nextQuantity } : item;
@@ -269,6 +271,15 @@
     }, 0);
   }
 
+  function getShippingTotal(items) {
+    var fee = Number((window.PUREFORM_SUPABASE_CONFIG || {}).shippingFeeAED);
+    return getCount(items) ? (Number.isFinite(fee) && fee >= 0 ? fee : 10) : 0;
+  }
+
+  function getTotal(items) {
+    return getSubtotal(items) + getShippingTotal(items);
+  }
+
   function getCheckoutUrl() {
     return 'checkout.html';
   }
@@ -307,7 +318,9 @@
     getCount: getCount,
     getLineItems: getLineItems,
     getSavings: getSavings,
+    getShippingTotal: getShippingTotal,
     getSubtotal: getSubtotal,
+    getTotal: getTotal,
     getSummaryText: getSummaryText,
     removeItem: removeItem,
     setCatalog: setCatalog,

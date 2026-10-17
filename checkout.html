@@ -126,7 +126,7 @@
             <div class="checkout-step-title">
               <h2 id="shippingTitle">Shipping method</h2>
             </div>
-            <div class="checkout-shipping-method" id="shippingMethod">Enter your delivery city to confirm timing and available delivery options.</div>
+            <div class="checkout-shipping-method" id="shippingMethod">AED 10 flat delivery across the UAE. Delivery timing is confirmed before dispatch.</div>
           </section>
 
           <section class="checkout-step" aria-labelledby="paymentTitle">
@@ -157,6 +157,7 @@
           <div class="checkout-actions">
             <button class="btn-p Btn buy-pay-button" type="submit" id="checkoutSubmit"><span>Continue to secure card payment</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
             <p class="checkout-status" id="checkoutStatus" aria-live="polite"></p>
+            <button class="btn-s" type="button" id="checkoutVerifyPayment" hidden>Check payment again</button>
           </div>
         </form>
       </section>
@@ -173,7 +174,7 @@
         <p class="checkout-discount-status" id="discountStatus" aria-live="polite"></p>
         <div class="checkout-totals">
           <div class="checkout-total-line"><span>Subtotal</span><strong id="checkoutSubtotal">AED 0.00</strong></div>
-          <div class="checkout-total-line"><span>Shipping</span><strong id="checkoutShipping">Enter delivery city</strong></div>
+          <div class="checkout-total-line"><span>UAE delivery</span><strong id="checkoutShipping">AED 0.00</strong></div>
           <div class="checkout-total-line"><span>Discount</span><strong id="checkoutDiscount">Catalog offers included</strong></div>
           <div class="checkout-total-line is-total"><span>Total</span><strong id="checkoutTotal">AED 0.00</strong></div>
         </div>
@@ -203,10 +204,14 @@
       var discountStatus = document.getElementById('discountStatus');
       var status = document.getElementById('checkoutStatus');
       var submitButton = document.getElementById('checkoutSubmit');
+      var verifyButton = document.getElementById('checkoutVerifyPayment');
       var cityInput = document.getElementById('checkout-city');
       var shippingMethod = document.getElementById('shippingMethod');
       var countryInput = document.getElementById('checkout-country');
       var emirateInput = document.getElementById('checkout-emirate');
+      var paymentReturnPending = new URLSearchParams(window.location.search).get('payment') === 'success';
+      var checkoutBusy = false;
+      var verificationBusy = false;
 
       if (!cart || !form || !summaryList) {
         return;
@@ -243,6 +248,8 @@
       function renderSummary() {
         var items = cart.getLineItems();
         var subtotal = cart.getSubtotal();
+        var total = cart.getTotal();
+        shippingNode.textContent = cart.formatAED(cart.getShippingTotal());
 
         summaryList.replaceChildren();
 
@@ -296,24 +303,22 @@
           summaryList.appendChild(row);
         });
 
-        submitButton.disabled = false;
-        submitButton.removeAttribute('aria-disabled');
+        submitButton.disabled = paymentReturnPending || checkoutBusy;
+        submitButton.setAttribute('aria-disabled', String(submitButton.disabled));
         subtotalNode.textContent = cart.formatAED(subtotal);
-        totalNode.textContent = cart.formatAED(subtotal);
-        mobileTotalNode.textContent = cart.formatAED(subtotal);
+        totalNode.textContent = cart.formatAED(total);
+        mobileTotalNode.textContent = cart.formatAED(total);
       }
 
       function updateShippingCopy() {
         var city = cityInput.value.trim();
 
         if (!city) {
-          shippingMethod.textContent = 'Enter your delivery city to confirm timing and available delivery options.';
-          shippingNode.textContent = 'Enter delivery city';
+          shippingMethod.textContent = 'AED 10 flat delivery across the UAE. Delivery timing is confirmed before dispatch.';
           return;
         }
 
-        shippingMethod.textContent = 'PureForm ships within the UAE only. Delivery timing for ' + city + ' is confirmed before dispatch.';
-        shippingNode.textContent = 'Calculated by city';
+        shippingMethod.textContent = 'AED 10 flat UAE delivery. Timing for ' + city + ' is confirmed before dispatch.';
       }
 
       function getOrderItems() {
@@ -368,6 +373,16 @@
           throw new Error('Secure card checkout is missing the Supabase function URL or anon key.');
         }
 
+        var setupResponse = await fetch(String(config.url).replace(/\/+$/, '') + '/functions/v1/checkout-status', {
+          method: 'GET',
+          headers: { 'Authorization': 'Bearer ' + config.anonKey, 'apikey': config.anonKey },
+          signal: AbortSignal.timeout(15000)
+        });
+        var setup = await setupResponse.json();
+        if (!setupResponse.ok || setup.configured !== true || setup.currency !== 'AED' || setup.shipping_total !== cart.getShippingTotal()) {
+          throw new Error('Delivery settings are being updated. Please contact support before paying.');
+        }
+
         response = await fetch(endpoint, {
           method: 'POST',
           headers: {
@@ -389,6 +404,11 @@
           throw new Error('Secure card checkout did not return a payment URL.');
         }
 
+        var paymentUrl = new URL(result.checkout_url);
+        if (paymentUrl.protocol !== 'https:' || paymentUrl.hostname !== 'checkout.stripe.com' || paymentUrl.username || paymentUrl.password || paymentUrl.port) {
+          throw new Error('Secure card checkout returned an untrusted payment URL.');
+        }
+
         return result;
       }
 
@@ -408,6 +428,10 @@
       form.addEventListener('submit', async function (event) {
         var data;
         var payload;
+        if (paymentReturnPending || checkoutBusy) {
+          event.preventDefault();
+          return;
+        }
 
         if (!cart.getCount()) {
           event.preventDefault();
@@ -426,6 +450,7 @@
 
         data = new FormData(form);
         payload = buildOrderPayload(data);
+        checkoutBusy = true;
         submitButton.disabled = true;
         submitButton.setAttribute('aria-disabled', 'true');
         setStatus('Opening secure card checkout...', 'neutral');
@@ -434,23 +459,53 @@
           var session = await createCheckoutSession(payload);
           window.location.assign(session.checkout_url);
         } catch (error) {
+          checkoutBusy = false;
           submitButton.disabled = false;
           submitButton.removeAttribute('aria-disabled');
           setStatus((error && error.message ? error.message : 'Secure card checkout could not be started.') + ' No card details were collected.', 'error');
         }
       });
 
-      function handlePaymentReturn() {
+      async function handlePaymentReturn() {
         var params = new URLSearchParams(window.location.search);
         var paymentState = params.get('payment');
         var orderNumber = params.get('order') || '';
 
         if (paymentState === 'success') {
-          cart.clearCart();
-          form.reset();
-          updateShippingCopy();
-          setStatus('Payment received for ' + (orderNumber || 'your order') + '. PureForm will prepare your UAE delivery next.', 'success');
-          window.history.replaceState({}, document.title, window.location.pathname);
+          if (verificationBusy || !paymentReturnPending) return;
+          verificationBusy = true;
+          verifyButton.hidden = true;
+          verifyButton.disabled = true;
+          setStatus('Verifying your card payment...', 'neutral');
+          try {
+            var sessionId = params.get('session_id');
+            if (!sessionId || !orderNumber || !config.url || !config.anonKey) {
+              throw new Error('The payment return is missing its verification details.');
+            }
+            var response = await fetch(String(config.url).replace(/\/+$/, '') + '/functions/v1/checkout-status', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + config.anonKey, 'apikey': config.anonKey },
+              body: JSON.stringify({ session_id: sessionId, order_number: orderNumber }),
+              signal: AbortSignal.timeout(20000)
+            });
+            var result = await response.json();
+            if (!response.ok || result.paid !== true || result.order_number !== orderNumber) {
+              throw new Error('The payment has not been confirmed yet.');
+            }
+            cart.clearCart();
+            form.reset();
+            updateShippingCopy();
+            paymentReturnPending = false;
+            setStatus('Payment confirmed for ' + result.order_number + '. PureForm will prepare your UAE delivery next.', 'success');
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } catch (_error) {
+            verifyButton.hidden = !(params.get('session_id') && orderNumber && config.url && config.anonKey);
+            setStatus('Payment could not be confirmed. Your cart was kept. Keep your order number' + (orderNumber ? ' (' + orderNumber + ')' : '') + ' and contact support before paying again.', 'error');
+          } finally {
+            verificationBusy = false;
+            verifyButton.disabled = false;
+          }
+          renderSummary();
         }
 
         if (paymentState === 'cancelled') {
@@ -461,6 +516,7 @@
 
       window.addEventListener('pureform:cart-change', renderSummary);
       window.addEventListener('pureform:catalog-ready', renderSummary);
+      verifyButton.addEventListener('click', handlePaymentReturn);
       handlePaymentReturn();
       updateShippingCopy();
       renderSummary();

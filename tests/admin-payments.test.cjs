@@ -110,3 +110,19 @@ test('both admin HTML routes start with payment fields disabled', () => {
     assert.match(select, /\bdisabled\b/);
   }
 });
+
+test('admin shows saved shipping and promotion totals without recalculating historical delivery fees', () => {
+  const page = fixture();
+  page.els.orderFormTitle = element();
+  page.els.orderDetailSummary = element();
+  page.els.orderItemsList = element();
+  page.fillOrderForm({ id: 'shipping-order', order_number: 'PF-SHIPPING', subtotal: 100, shipping_total: 10, total: 85, payment_status: 'paid' });
+  const summary = Object.fromEntries(page.els.orderDetailSummary.children.map(item => item.children.map(child => child.textContent)));
+  assert.equal(summary.Subtotal, 'AED 100.00');
+  assert.equal(summary['UAE delivery'], 'AED 10.00');
+  assert.equal(summary['Promotion discount'], 'AED 25.00');
+  assert.equal(summary.Total, 'AED 85.00');
+  page.fillOrderForm({ id: 'historical-order', order_number: 'PF-OLD', subtotal: 75, total: 75, payment_status: 'paid' });
+  const historical = Object.fromEntries(page.els.orderDetailSummary.children.map(item => item.children.map(child => child.textContent)));
+  assert.equal(historical['UAE delivery'], 'AED 0.00');
+});

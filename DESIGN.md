@@ -132,6 +132,8 @@ Product pages use a gallery beside the title, price, color-listing links, quanti
 
 On mobile checkout, show a compact expandable order summary with the current total above the contact and delivery fields. Keep the full summary visible beside the form on desktop.
 
+Show the AED 10 flat UAE delivery fee separately from product subtotal and include it in cart, sticky-cart and checkout totals. Shipping is charged once per order, never per set, and is zero for an empty cart. Stripe verifies payments before the return page clears a cart; verification failures retain the cart and offer a payment-status retry without creating another checkout.
+
 Reserve large display typography for the homepage hero. Information-page titles use 40px on desktop and 28px on mobile; section headings use 32px and 26px. Checkout headings remain at 24px to 26px. Supporting hero images are capped at 260px on desktop and 180px on mobile, and customer photos at 200px to 220px. Main product galleries and collection imagery remain large enough to inspect.
 
 Use section padding around 5rem on desktop and reduce gradually on mobile. Keep repeated product and review cards on predictable grids with stable dimensions so hover states do not shift the layout.

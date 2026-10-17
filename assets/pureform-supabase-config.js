@@ -4,5 +4,6 @@ window.PUREFORM_SUPABASE_CONFIG = {
   checkoutFunctionUrl: 'https://hibfipskhksboubibwbz.supabase.co/functions/v1/create-checkout-session',
   country: 'United Arab Emirates',
   currency: 'AED',
+  shippingFeeAED: 10,
   paymentProvider: 'stripe'
 };
