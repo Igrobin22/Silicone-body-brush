@@ -44,7 +44,7 @@
     if (!config.url || !config.anonKey) throw new Error('missing_config');
     var module = await import(SUPABASE_CDN);
     client = module.createClient(config.url, config.anonKey, {
-      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: true }
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: true, flowType: 'implicit' }
     });
     return client;
   }
@@ -61,13 +61,32 @@
       return;
     }
 
+    if (callbackError) {
+      var code = fragment.get('error_code') || query.get('error_code');
+      showRequest(code === 'otp_expired'
+        ? 'Supabase reports that this reset link is expired or no longer valid. Request a new link and open the newest message in the reset-email conversation.'
+        : 'Supabase rejected this recovery link. Request a new link below.', 'error');
+      window.history.replaceState(null, '', window.location.pathname);
+      return;
+    }
+    if (!isRecovery) {
+      showRequest('This link does not contain a supported password-recovery session. Request a new link from this page.', 'error');
+      window.history.replaceState(null, '', window.location.pathname);
+      return;
+    }
+    var stage = 'load';
+
     try {
-      if (callbackError || !isRecovery) throw new Error('invalid_link');
       var supabase = await getClient();
+      stage = 'verify';
+      var initialized = await supabase.auth.initialize();
+      if (initialized.error) throw initialized.error;
       var sessionResult = await supabase.auth.getSession();
-      if (sessionResult.error || !sessionResult.data.session) throw new Error('invalid_session');
+      if (sessionResult.error) throw sessionResult.error;
+      if (!sessionResult.data.session) throw new Error('invalid_session');
       var userResult = await supabase.auth.getUser();
-      if (userResult.error || !userResult.data.user) throw new Error('invalid_user');
+      if (userResult.error) throw userResult.error;
+      if (!userResult.data.user) throw new Error('invalid_user');
 
       recoveryVerified = true;
       requestForm.hidden = true;
@@ -77,11 +96,19 @@
       setStatus('Choose a new password for your PureForm admin account.');
       password.focus();
     } catch (error) {
-      showRequest('This reset link is invalid, expired, or already used. Request a new link below.', 'error');
+      if (stage === 'load' || isConnectionError(error)) {
+        showRequest('The secure sign-in service could not be reached. Check your connection, then request a new reset link.', 'error');
+      } else {
+        showRequest('Supabase could not verify this recovery session. Request a new reset link below.', 'error');
+      }
     } finally {
       // Keep recovery credentials out of copied URLs and subsequent navigation.
       window.history.replaceState(null, '', window.location.pathname);
     }
+  }
+
+  function isConnectionError(error) {
+    return error && (error.name === 'TypeError' || error.name === 'AuthRetryableFetchError' || error.status === 0 || error.status >= 500);
   }
 
   async function requestRecovery(event) {
@@ -95,7 +122,7 @@
       var supabase = await getClient();
       var result = await supabase.auth.resetPasswordForEmail(email.value.trim(), { redirectTo: RECOVERY_URL });
       if (result.error) throw result.error;
-      setStatus('If this email has an account, a new reset link will arrive shortly. Check your inbox and spam folder.', 'success');
+      setStatus('If this email has an account, a new reset link will arrive shortly. Open the newest message in the reset-email conversation; older links may no longer work.', 'success');
       window.setTimeout(function () { sendButton.disabled = false; }, 60000);
     } catch (error) {
       setStatus('The reset email could not be sent. Wait a minute and try again.', 'error');

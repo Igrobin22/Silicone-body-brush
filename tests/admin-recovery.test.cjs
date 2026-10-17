@@ -23,6 +23,10 @@ async function fixture(options = {}) {
   const user = { id: 'fake-owner-id', email: 'owner@example.test' };
   let userChecks = 0;
   const auth = {
+    async initialize() {
+      calls.push(['initialize']);
+      return { error: options.initializeError || null };
+    },
     async getSession() {
       calls.push(['session']);
       return { data: { session: options.noSession ? null : { user } }, error: options.sessionError || null };
@@ -80,7 +84,8 @@ test('plain visit offers recovery, never an unauthenticated password change', as
 
 test('expired callback gives safe retry and removes callback parameters', async () => {
   const page = await fixture({ hash: '#error=access_denied&error_code=otp_expired&error_description=%3Cscript%3E' });
-  assert.match(page.elements.recoveryStatus.textContent, /invalid, expired, or already used/);
+  assert.match(page.elements.recoveryStatus.textContent, /Supabase reports/);
+  assert.match(page.elements.recoveryStatus.textContent, /newest message/);
   assert.doesNotMatch(page.elements.recoveryStatus.textContent, /script/);
   assert.deepEqual(page.calls, [['history', '/admin/reset-password.html']]);
 });
@@ -89,7 +94,7 @@ test('non-recovery token fragments and unsupported codes are rejected and remove
   for (const options of [{ hash: '#type=signup&access_token=fake' }, { search: '?code=fake-code' }]) {
     const page = await fixture(options);
     assert.equal(page.elements.recoveryPasswordForm.hidden, true);
-    assert.match(page.elements.recoveryStatus.textContent, /invalid, expired, or already used/);
+    assert.match(page.elements.recoveryStatus.textContent, /supported password-recovery session/);
     assert.deepEqual(page.calls, [['history', '/admin/reset-password.html']]);
   }
 });
@@ -100,7 +105,24 @@ test('verified recovery enables password form without persisting its session', a
   assert.equal(page.elements.recoveryRequestForm.hidden, true);
   assert.equal(page.elements['new-password'].disabled, false);
   assert.equal(page.calls.find((call) => call[0] === 'client')[3].auth.persistSession, false);
-  assert.deepEqual(page.calls.map((call) => call[0]), ['client', 'session', 'user', 'history']);
+  assert.deepEqual(page.calls.map((call) => call[0]), ['client', 'initialize', 'session', 'user', 'history']);
+});
+
+test('connection and dependency failures are not mislabeled as expired links', async () => {
+  for (const options of [{ loadError: true }, { initializeError: { name: 'AuthRetryableFetchError', status: 0 } }, { sessionError: { status: 503 } }]) {
+    const page = await fixture({ hash: callback, ...options });
+    assert.match(page.elements.recoveryStatus.textContent, /could not be reached/);
+    assert.doesNotMatch(page.elements.recoveryStatus.textContent, /expired/);
+    assert.equal(page.elements.recoveryPasswordForm.hidden, true);
+    assert.equal(page.calls.at(-1)[0], 'history');
+  }
+});
+
+test('initialization errors are checked before trusting any cached session', async () => {
+  const page = await fixture({ hash: callback, initializeError: { name: 'AuthApiError', code: 'bad_jwt', status: 403 } });
+  assert.match(page.elements.recoveryStatus.textContent, /could not verify/);
+  assert.equal(page.calls.some((call) => call[0] === 'session'), false);
+  assert.equal(page.elements.recoveryPasswordForm.hidden, true);
 });
 
 test('missing or unverified sessions cannot enable password changes', async () => {
