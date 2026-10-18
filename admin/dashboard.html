@@ -90,8 +90,7 @@
         <section id="ordersPanel" class="view-panel" aria-labelledby="ordersHeading" hidden>
           <div class="section-head split">
             <div>
-              <p class="eyebrow">Orders</p>
-              <h2 id="ordersHeading">Order command center.</h2>
+              <h2 id="ordersHeading" tabindex="-1">Order history</h2>
             </div>
             <div class="order-filter-tabs" aria-label="Filter orders">
               <button type="button" class="order-filter-tab is-active" data-order-filter="all">All</button>
@@ -103,7 +102,7 @@
 
           <div class="manager-grid orders-manager-grid">
             <article class="admin-card table-card">
-              <div class="table-scroll">
+              <div class="table-scroll orders-table-scroll" role="region" aria-label="Customer orders" tabindex="0">
                 <table class="admin-table orders-table">
                   <caption>Customer orders</caption>
                   <thead>
@@ -127,15 +126,16 @@
                 <div class="form-head split">
                   <div>
                     <p class="eyebrow">Order Detail</p>
-                    <h3 id="orderFormTitle">Select an order</h3>
+                    <h3 id="orderFormTitle" tabindex="-1">Select an order</h3>
                   </div>
+                  <a class="text-button order-back-link" href="#ordersHeading">Back to orders</a>
                 </div>
                 <input id="orderId" name="id" type="hidden">
                 <div id="orderDetailSummary" class="order-detail-summary">
                   <p class="empty-state">Choose an order to view customer, delivery, and line item details.</p>
                 </div>
                 <div id="orderItemsList" class="order-items-list"></div>
-                <div class="form-grid two">
+                <div class="order-state-fields">
                   <label>
                     <span>Order status</span>
                     <select id="orderStatus" name="status">
@@ -158,18 +158,18 @@
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </label>
+                  <label>
+                    <span>Fulfillment</span>
+                    <select id="orderFulfillmentStatus" name="fulfillment_status">
+                      <option value="unfulfilled">Unfulfilled</option>
+                      <option value="reserved">Reserved</option>
+                      <option value="packed">Packed</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </label>
                 </div>
-                <label>
-                  <span>Fulfillment</span>
-                  <select id="orderFulfillmentStatus" name="fulfillment_status">
-                    <option value="unfulfilled">Unfulfilled</option>
-                    <option value="reserved">Reserved</option>
-                    <option value="packed">Packed</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </label>
                 <label>
                   <span>Admin notes</span>
                   <textarea id="orderAdminNotes" name="admin_notes" rows="4" placeholder="Internal delivery, payment, or customer follow-up notes"></textarea>

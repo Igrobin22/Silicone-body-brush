@@ -1,0 +1,60 @@
+# PureForm Telegram Setup
+
+Status: deployed and connected on 18 October 2026 to the dedicated [@Pureforbot](https://t.me/Pureforbot), with explicit owner approval. Secrets were saved privately in the existing PureForm Supabase project. Owner commands, confirmation/cancellation, scheduled delivery and actual sandbox payment/refund alerts passed. The bot used for another purpose is untouched. Customer support is implemented but its two-account delivery test remains pending: the owner has only one Telegram account. No public support link was added to the storefront.
+
+## Deployment Verification: 18 October 2026
+
+- Applied `migrations/20261018000200_telegram.sql` and deployed `telegram-bot` in `hibfipskhksboubibwbz`. Dashboard files are `index.ts` (the handler with relative shared imports and `Deno.serve(handler)`), unchanged `payments.ts`, and `telegram.ts`. All three editor documents were compared with their tested sources before deployment.
+- Saved the four `TELEGRAM_*` values from the owner-verified, access-restricted local setup file directly into Edge Function Secrets without printing them. Saved only the independent dispatcher secret into Vault as `pureform_telegram_dispatch_secret`. No Stripe credential was read or changed. No token belongs in this repository.
+- With the owner's explicit approval, disabled the legacy JWT check only for the new Telegram endpoint. Its webhook and dispatcher still require different dedicated secret headers. Checkout creation/status retain their JWT checks, and Stripe signature verification is unchanged.
+- Enabled `pg_cron` and `pg_net`, installed the named `pureform-telegram-delivery` job once per minute, and registered the dedicated bot webhook with its secret token. Existing bots/webhooks were not replaced. Scheduler runs succeeded and dispatcher responses were HTTP 200.
+- Eight deployed endpoint probes passed: GET 405, unsigned/forged webhook 401, swapped dispatcher secret 401, authenticated malformed JSON 400, an authenticated update without a message safely ignored with 200, unsigned dispatcher 401, and swapped webhook secret 401. These probes did not impersonate a Telegram user or modify inventory.
+- All four private tables have RLS enabled. Anonymous reads of each table and invocation of the management RPC returned HTTP 401. Local database coverage also checks ordinary authenticated access, replay protection, unauthorized owners and confirmation expiry/staleness.
+- The owner confirmed `/inventory` returned Grey 24, Black 18 and Pink 12. The audit recorded one cancelled stock request, a confirmed Grey test change to 23, and a cancelled Pink 10% discount request. At the owner's explicit request, Grey was restored to 24 using a guard against intervening edits. Pink's existing 10% offer was preserved; Grey/Black remain at 50%.
+- Actual hosted sandbox order `PF-261018-1D0EF4` (`03b63bc0-700b-407c-9c3f-4389359f8ce5`) paid AED 47.80: one Pink set at AED 37.80 plus AED 10 delivery. Stripe confirmed `livemode: false`, complete/paid and card-only. The normal return page confirmed the payment. The transactional paid alert was delivered once, with a provider message ID and no delivery error.
+- PaymentIntent `pi_3URvXyA8lq0LYwUg1srDZK80` was fully refunded in Stripe sandbox by `re_3URvXyA8lq0LYwUg1UVTjYUD` for AED 47.80. Signed refund synchronization marked the order refunded with zero pending, and the refund alert was delivered once. This used test funds only. A guarded, repeat-safe cleanup cancelled fulfillment and restored exactly one Pink unit without editing payment state. Final inventory is Grey 24, Black 18, Pink 12; the test order must not be fulfilled.
+- A clearly labeled connection-test notification and owner-command replies were also delivered. Confirmed outbox sends each had one attempt and a provider message ID; no pending/failed delivery was observed in this verification snapshot. This does not promise exactly-once delivery after an uncertain provider response.
+- Local checks passed: 62 Node tests, all four Deno entrypoints type-check, five Deno suites with 57 steps, and 70 preparation-script checks on each of Windows PowerShell 5.1 and PowerShell 7. The existing eight read-only checkout/backend checks still passed after Telegram deployment. Authenticated published admin displayed the new test order as cancelled/refunded, AED 47.80 refunded, zero pending, no refund review, and payment controls disabled.
+
+Before adding the public Telegram support link, verify a real customer-to-owner-to-customer reply from another Telegram account and agree support-data retention. Do not describe that two-account path as end-to-end tested. Live Stripe payments remain disabled.
+
+## Capabilities
+
+- Owner alerts for verified paid orders and refund changes; sandbox alerts are clearly labeled. Alerts contain an order number, amounts and a normal authenticated admin link, not customer contact/address or card fields.
+- Private customer support with `/support your question`. The owner receives a ticket and replies using `/reply TICKET_ID your message`. Replies can target only a saved ticket, never an arbitrary chat ID. Customers cannot read orders, stock-management data or discounts through owner commands.
+- Owner-only `/inventory`, `/discounts` and `/orders` (five recent order summaries).
+- `/stock grey 24` sets available-to-buy quantity, not physical stock including reservations. It also sets the matching in/out/low-stock status. Black and Pink use the same syntax.
+- `/discount pink 15` replaces the current offer with an ongoing 15% discount. `/discount pink off` sets zero discount. Scheduled dates are removed only after confirmation. The website and checkout read the same canonical listing records.
+- Stock and discount edits require a one-use confirmation button within five minutes. Changed product data invalidates the request. Successful edits record previous values and owner ID. No bot command changes payment status, card configuration, order totals or shipping.
+
+## Connect Privately
+
+1. Create a NEW dedicated bot in the verified [BotFather](https://t.me/BotFather) with `/newbot`. Do not replace a webhook on an existing automation bot. Keep its token out of chat, Git and browser URLs.
+2. Run `powershell.exe -NoProfile -File .\supabase\prepare-telegram.ps1` yourself in a private terminal from the project folder. The script supports Windows PowerShell 5.1 and PowerShell 7, so `pwsh -File .\supabase\prepare-telegram.ps1` also works when `pwsh` is on PATH. The token prompt is hidden; surrounding copied whitespace is removed. Failures show only fixed, safe diagnostics for invalid/rejected tokens, network resets/DNS/timeouts/TLS, conflicting bots and local file permissions. No provider error text or token-bearing URL is printed. The script checks the bot's existing webhook and verifies your owner ID through a fresh `/link` code sent to your own bot, never by trusting the first `/start` sender. It saves an owner-readable file under `%LOCALAPPDATA%\PureForm\Telegram\bot.env`, outside the website and Git repository. No webhook is activated by this step. Do not send that file or its contents in chat.
+3. Save its four values in the existing PureForm project's Edge Function Secrets. An already authenticated Supabase CLI can upload without printing them:
+
+```powershell
+npx.cmd --yes supabase secrets set --project-ref hibfipskhksboubibwbz --env-file "$env:LOCALAPPDATA\PureForm\Telegram\bot.env"
+```
+
+4. Save the SAME `TELEGRAM_DISPATCH_SECRET` in Supabase Vault with name `pureform_telegram_dispatch_secret`. This is a different secret from the webhook secret. Do not put either in a SQL snippet or command history. Do not copy the bot token to Vault or expose any secret in the frontend.
+5. Apply `migrations/20261018000200_telegram.sql` after the existing schema and refund migration. Deploy `telegram-bot`. It has JWT verification disabled only because Telegram cannot send a Supabase JWT; every webhook requires its own secret header. `/dispatch` requires the separate dispatch secret. Obtain explicit owner approval before enabling this new stock/discount management access.
+6. Enable `pg_cron` and `pg_net`, then run `telegram-cron.sql`. It schedules a named once-per-minute job and reads the dispatch secret from Vault without embedding its value. Verify scheduled delivery; webhook replies also attempt one queued message immediately.
+7. After reviewing and approving the connection, run `powershell.exe -NoProfile -File .\supabase\prepare-telegram.ps1 -ActivateWebhook`. It asks for `CONNECT`, refuses to overwrite a different webhook, keeps pending Telegram updates, and subscribes only to messages and confirmation callbacks. It uses the private setup file without printing secrets.
+8. Send `/inventory`, request and cancel one stock edit, then confirm a controlled sandbox edit and restore it. Test customer support from a different account. Verify payment/refund alerts with an actual signed sandbox event and confirm customers cannot use owner commands. Only then add the verified `https://t.me/USERNAME` support link to the store. Keep Gmail as a fallback.
+
+## Reliability And Privacy
+
+Local preparation regression checks (no real credentials or network requests): `powershell.exe -NoProfile -File .\supabase\tests\prepare_telegram_test.ps1`. Run the same file with PowerShell 7 when available to check both supported shells.
+
+Preparation and connection confirmation words accept either case and surrounding whitespace, but still require the exact word. A different answer prints a cancellation notice. Read-only Telegram API calls retry temporary network/server failures at most three times with a short backoff. Invalid tokens, TLS verification failures, rate limits and conflicts are not automatically retried. Webhook changes are never automatically retried.
+
+The outbox is transactional and has unique event/update keys, leased jobs, bounded retries and rate-limit backoff. Confirmed sends are not repeated. A timeout or process crash after Telegram accepted a message can still produce a duplicate on retry; this is at-least-once delivery, not an exactly-once promise. Use the order number to verify the single saved order before fulfillment. Telegram does not hold checkout open; no Telegram HTTP request runs inside Stripe payment processing.
+
+Only direct private messages are accepted. Groups, bot senders, forwarded commands, edited messages and stale owner mutation messages are ignored. The numeric owner ID is pinned in server secrets. The webhook secret is shared only with Telegram, and the dispatcher uses an independent secret. None of the new tables/functions is accessible to anonymous or ordinary authenticated database clients.
+
+Messages are plain text with link previews disabled. Customer support text is explicitly labeled untrusted in owner alerts. The bot warns users not to send cards/passwords; the checkout never collects or stores card fields. Support text and Telegram chat IDs are private operational data, so agree a retention policy before opening public support. This is a support relay, not an AI agent or an automatic refund/fulfillment system. Telegram's own account security and the owner's device remain part of the trust boundary; use Telegram two-step verification and protect the private setup file.
+
+Inspect failed/pending outbox jobs and scheduler health in Supabase. A permanently blocked bot/chat becomes failed; retryable network/rate-limit failures back off, up to 12 attempts. A stopped scheduler or revoked token is not automatically repaired. Rotate a compromised bot token using BotFather and replace the server secrets privately. To stop integration, disable the named cron job and remove this bot's webhook; do not change Stripe's webhook.
+
+References: [Telegram Bot API](https://core.telegram.org/bots/api), [BotFather and bot creation](https://core.telegram.org/bots/features#botfather), [Supabase scheduled functions and Vault](https://supabase.com/docs/guides/functions/schedule-functions).

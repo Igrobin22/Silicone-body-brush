@@ -754,6 +754,7 @@
   function syncOrderFilterTabs() {
     els.orderFilterTabs.forEach(function (button) {
       button.classList.toggle('is-active', button.dataset.orderFilter === state.orderFilter);
+      button.setAttribute('aria-pressed', String(button.dataset.orderFilter === state.orderFilter));
     });
   }
 
@@ -831,13 +832,18 @@
       itemsCell.textContent = itemSummary(order);
 
       var totalCell = document.createElement('td');
+      totalCell.className = 'order-total-cell';
       totalCell.textContent = formatCurrency(order.total);
 
       var statusCell = document.createElement('td');
       statusCell.appendChild(orderSelect(order, 'status', ORDER_STATUS_OPTIONS, 'quick-order-status'));
 
       var paymentCell = document.createElement('td');
-      paymentCell.appendChild(orderSelect(order, 'payment_status', PAYMENT_STATUS_OPTIONS, 'quick-payment-status'));
+      var paymentLabel = document.createElement('span');
+      paymentLabel.className = 'order-payment-label';
+      paymentLabel.textContent = statusLabel(order.payment_status);
+      paymentLabel.title = 'Payment status verified by Stripe';
+      paymentCell.appendChild(paymentLabel);
       if (Number(order.refunded_total) > 0 || Number(order.refund_pending_total) > 0 || order.refund_attention_required) {
         var refundNote = document.createElement('div');
         refundNote.textContent = order.refund_attention_required ? 'Refund needs attention' : Number(order.refund_pending_total) > 0
@@ -854,13 +860,11 @@
       }
       actionsCell.appendChild(actionRow);
 
-      row.appendChild(orderCell);
-      row.appendChild(customerCell);
-      row.appendChild(itemsCell);
-      row.appendChild(totalCell);
-      row.appendChild(statusCell);
-      row.appendChild(paymentCell);
-      row.appendChild(actionsCell);
+      var labels = ['Order', 'Customer', 'Items', 'Total', 'Status', 'Payment', 'Actions'];
+      [orderCell, customerCell, itemsCell, totalCell, statusCell, paymentCell, actionsCell].forEach(function (cell, index) {
+        cell.dataset.label = labels[index];
+        row.appendChild(cell);
+      });
       els.ordersTableBody.appendChild(row);
     });
   }
@@ -902,6 +906,8 @@
     if (button.dataset.action === 'view-order') {
       fillOrderForm(order);
       setView('orders', { push: true, order: order.id });
+      els.orderFormTitle.focus({ preventScroll: true });
+      els.orderFormTitle.scrollIntoView({ block: 'start' });
       return;
     }
 

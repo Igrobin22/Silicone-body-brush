@@ -388,8 +388,8 @@ a:focus-visible {
 
 .admin-topbar h1 {
   margin-top: 6px;
-  font-size: clamp(38px, 4vw, 54px);
-  line-height: .96;
+  font-size: 28px;
+  line-height: 1.2;
 }
 
 .section-head {
@@ -397,9 +397,8 @@ a:focus-visible {
 }
 
 .section-head h2 {
-  margin-top: 8px;
-  font-size: clamp(30px, 3.2vw, 42px);
-  line-height: 1;
+  font-size: 20px;
+  line-height: 1.3;
 }
 
 .dashboard-section-head {
@@ -569,11 +568,72 @@ a:focus-visible {
 }
 
 .orders-manager-grid {
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 390px);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+.orders-table-scroll {
+  container: orders / inline-size;
+}
+
+.orders-manager-grid .table-card {
+  border-radius: 8px;
+  box-shadow: none;
 }
 
 .orders-table {
-  min-width: 980px;
+  min-width: 900px;
+  table-layout: fixed;
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 12px;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+}
+
+.orders-table th:nth-child(1) { width: 15%; }
+.orders-table th:nth-child(2) { width: 22%; }
+.orders-table th:nth-child(3) { width: 18%; }
+.orders-table th:nth-child(4) { width: 10%; }
+.orders-table th:nth-child(5) { width: 13%; }
+.orders-table th:nth-child(6) { width: 12%; }
+.orders-table th:nth-child(7) { width: 10%; }
+
+.orders-table th {
+  color: var(--mid);
+}
+
+.orders-table .quick-select {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 20px 8px 8px;
+}
+
+.order-total-cell {
+  white-space: nowrap;
+}
+
+.order-payment-label {
+  display: block;
+  font-weight: 600;
+}
+
+.orders-table .listing-meta {
+  color: var(--mid);
+}
+
+#ordersHeading,
+#orderFormTitle {
+  scroll-margin-top: 24px;
+}
+
+.order-editor-card .order-back-link {
+  flex-shrink: 0;
+  text-transform: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .order-filter-tabs {
@@ -714,8 +774,40 @@ a:focus-visible {
 }
 
 .order-editor-card {
-  max-height: calc(100vh - 48px);
-  overflow: auto;
+  position: static;
+  max-height: none;
+  min-width: 0;
+  overflow: visible;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 24px 0;
+}
+
+.order-editor-card .form-head h3 {
+  font-size: 22px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.order-state-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.order-editor-card label,
+.order-state-fields > * {
+  min-width: 0;
+}
+
+.order-editor-card .btn[type="submit"] {
+  justify-self: end;
+  width: auto;
+  min-width: 140px;
 }
 
 .dense-form {
@@ -751,23 +843,21 @@ a:focus-visible {
 
 .order-detail-summary {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 24px;
 }
 
 .order-detail-summary > div {
   min-width: 0;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .62);
-  padding: 10px;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 0;
 }
 
 .order-detail-summary span,
 .order-items-list span {
   display: block;
-  color: var(--light);
-  font-size: 10px;
+  color: var(--mid);
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -777,9 +867,9 @@ a:focus-visible {
   display: block;
   margin-top: 4px;
   color: var(--dark);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.6;
   overflow-wrap: anywhere;
 }
 
@@ -793,10 +883,8 @@ a:focus-visible {
   grid-template-columns: 48px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .62);
-  padding: 9px;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 0;
 }
 
 .order-item img {
@@ -976,7 +1064,7 @@ a:focus-visible {
   }
 
   .admin-sidebar {
-    position: sticky;
+    position: static;
     z-index: 20;
     top: 0;
     height: auto;
@@ -1031,6 +1119,12 @@ a:focus-visible {
   .form-grid.two {
     grid-template-columns: 1fr;
   }
+
+  .admin-main input,
+  .admin-main select,
+  .admin-main textarea {
+    font-size: 16px;
+  }
 }
 
 @media (max-width: 560px) {
@@ -1054,9 +1148,32 @@ a:focus-visible {
     font-size: 46px;
   }
 
-  .admin-topbar h1,
-  .section-head h2 {
-    font-size: 34px;
+  .admin-topbar h1 {
+    font-size: 24px;
+  }
+
+  .order-editor-card {
+    padding: 24px 0;
+    border-radius: 0;
+  }
+
+  .order-detail-summary,
+  .order-state-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .order-editor-card .form-head.split {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .order-filter-tabs {
+    justify-content: flex-start;
+  }
+
+  .order-filter-tab {
+    min-height: 44px;
   }
 
   .stats-grid {
@@ -1091,6 +1208,100 @@ a:focus-visible {
 
   .btn {
     width: 100%;
+  }
+
+  .admin-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 12px;
+    overflow: visible;
+  }
+
+  .admin-nav .nav-tab {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-topbar,
+  .admin-topbar .topbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .admin-topbar .btn {
+    width: auto;
+    padding-inline: 12px;
+    font-size: 13px;
+  }
+}
+
+@container orders (max-width: 899px) {
+  .orders-table,
+  .orders-table tbody {
+    display: block;
+    min-width: 0;
+  }
+
+  .orders-table thead {
+    display: none;
+  }
+
+  .orders-table tr[data-id] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    padding: 16px;
+  }
+
+  .orders-table tr[data-id]:last-child {
+    border-bottom: 0;
+  }
+
+  .orders-table tr.is-selected {
+    background: rgba(220, 238, 231, .32);
+  }
+
+  .orders-table tr[data-id] td {
+    display: block;
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    background: none;
+  }
+
+  .orders-table td[data-label]::before {
+    content: attr(data-label);
+    content: attr(data-label) / attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    color: var(--mid);
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+
+  .orders-table td:nth-child(-n+3) {
+    grid-column: 1 / -1;
+  }
+
+  .orders-table .order-code {
+    font-size: 14px;
+  }
+
+  .orders-table .quick-select {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .orders-table .text-button {
+    min-height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--white);
+    padding-inline: 14px;
+    text-transform: none;
   }
 }
 

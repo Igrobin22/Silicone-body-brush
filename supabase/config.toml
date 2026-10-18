@@ -6,3 +6,7 @@ verify_jwt = true
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+# Telegram requests use a dedicated mandatory secret header, not a Supabase JWT.
+[functions.telegram-bot]
+verify_jwt = false

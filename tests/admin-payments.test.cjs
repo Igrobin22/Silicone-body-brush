@@ -12,6 +12,8 @@ function element(tag = 'div') {
     classList: { toggle() {} },
     appendChild(child) { this.children.push(child); return child; },
     setAttribute(name, value) { this.attributes[name] = value; },
+    focus(options) { this.focusOptions = options; },
+    scrollIntoView(options) { this.scrollOptions = options; },
     querySelector() { return null; }
   };
 }
@@ -26,7 +28,7 @@ function fixture() {
   // Expose private functions only inside the isolated test copy, never in the shipped script.
   assert.match(source, /\}\)\(\);\s*$/);
   const instrumented = source.replace(/\}\)\(\);\s*$/, `
-    globalThis.adminTest = { state, els, orderSelect, onOrdersTableChange, onOrderSubmit, renderStats, fillOrderForm,
+    globalThis.adminTest = { state, els, orderSelect, onOrdersTableChange, onOrdersTableClick, onOrderSubmit, renderStats, renderOrdersTable, fillOrderForm, syncOrderFilterTabs,
       captureUpdates(fn) { updateOrder = fn; setView = function () {}; } };
   })();`);
   const context = vm.createContext({ document, window: {}, Intl, URL, URLSearchParams });
@@ -109,6 +111,57 @@ test('both admin HTML routes start with payment fields disabled', () => {
     const select = html.match(/<select\b[^>]*id="orderPaymentStatus"[^>]*>/)[0];
     assert.match(select, /\bdisabled\b/);
   }
+});
+
+test('order rows expose every mobile label and show gateway payment as read-only text', () => {
+  const page = fixture();
+  page.els.ordersTableBody = element();
+  page.els.orderFilterTabs = [];
+  page.state.orders = [{ id: 'test-order', order_number: 'PF-TEST', payment_status: 'paid', status: 'confirmed', total: 47.8 }];
+  page.renderOrdersTable();
+  const cells = page.els.ordersTableBody.children[0].children;
+  assert.deepEqual(cells.map(cell => cell.dataset.label), ['Order', 'Customer', 'Items', 'Total', 'Status', 'Payment', 'Actions']);
+  assert.equal(cells[5].children[0].tag, 'span');
+  assert.equal(cells[5].children[0].textContent, 'Paid');
+  assert.equal(cells[5].children[0].dataset.action, undefined);
+});
+
+test('viewing an order moves keyboard focus to the full-width detail without saving anything', async () => {
+  const page = fixture();
+  page.els.orderFormTitle = element();
+  page.els.orderDetailSummary = element();
+  page.els.orderItemsList = element();
+  page.state.orders = [{ id: 'test-order', order_number: 'PF-TEST', payment_status: 'refunded', status: 'cancelled' }];
+  let writes = 0;
+  page.captureUpdates(() => { writes++; });
+  const button = { dataset: { action: 'view-order' }, closest: () => ({ dataset: { id: 'test-order' } }) };
+  await page.onOrdersTableClick({ target: { closest: () => button } });
+  assert.equal(page.els.orderFormTitle.textContent, 'PF-TEST');
+  assert.equal(page.els.orderFormTitle.focusOptions.preventScroll, true);
+  assert.equal(page.els.orderFormTitle.scrollOptions.block, 'start');
+  assert.equal(page.ids.orderPaymentStatus.disabled, true);
+  assert.equal(writes, 0);
+});
+
+test('both admin routes provide keyboard-accessible order list and detail navigation', () => {
+  for (const file of ['index.html', 'dashboard.html']) {
+    const html = readFileSync(path.join(__dirname, '../admin/', file), 'utf8');
+    assert.match(html, /class="table-scroll orders-table-scroll" role="region" aria-label="Customer orders" tabindex="0"/);
+    assert.match(html, /id="orderFormTitle" tabindex="-1"/);
+    assert.match(html, /href="#ordersHeading">Back to orders<\/a>/);
+  }
+});
+
+test('order filters announce the selected state', () => {
+  const page = fixture();
+  page.els.orderFilterTabs = ['all', 'new', 'open', 'completed'].map(filter => {
+    const button = element('button');
+    button.dataset.orderFilter = filter;
+    return button;
+  });
+  page.state.orderFilter = 'new';
+  page.syncOrderFilterTabs();
+  assert.deepEqual(page.els.orderFilterTabs.map(button => button.attributes['aria-pressed']), ['false', 'true', 'false', 'false']);
 });
 
 test('refund totals reduce customer revenue and remain read-only in order details', () => {

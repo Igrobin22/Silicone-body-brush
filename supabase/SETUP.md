@@ -2,6 +2,8 @@
 
 Do not take live orders until a complete sandbox checkout has passed. The storefront alone is not proof that payments or order capture work.
 
+Telegram integration was deployed and connected to the dedicated `@Pureforbot` on 18 October 2026 with explicit owner approval. Owner inventory/discount confirmation controls, scheduled delivery, and actual sandbox paid-order/full-refund alerts passed. See [TELEGRAM.md](TELEGRAM.md) for the deployment record and remaining customer-support two-account/retention checks. The existing bot used for another purpose is untouched; no public Telegram support link was added. Stripe remains in sandbox.
+
 ## Current connection
 
 - Both Cloudflare storefronts reference `hibfipskhksboubibwbz.supabase.co`.
@@ -167,7 +169,7 @@ Deploy the storefront changes through the existing Git/Cloudflare workflow. The 
 Local checks:
 
 ```powershell
-deno check supabase/functions/create-checkout-session/index.ts supabase/functions/checkout-status/index.ts supabase/functions/stripe-webhook/index.ts
+deno check supabase/functions/create-checkout-session/index.ts supabase/functions/checkout-status/index.ts supabase/functions/stripe-webhook/index.ts supabase/functions/telegram-bot/index.ts
 deno test --allow-env --allow-read --allow-sys supabase/tests/
 node supabase/check-backend.mjs
 ```

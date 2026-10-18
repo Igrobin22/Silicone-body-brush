@@ -154,6 +154,10 @@ Avoid mixing sharp boxes with highly rounded controls in the same cluster. Keep 
 
 ## Components
 
+### Admin Orders
+
+Keep the orders workspace compact and work-focused: 28px page headings, 20px section headings, and readable 13px to 14px table text. The order table uses the full content width; selected order details follow below it in normal page flow, without a fixed-height nested scroller. View moves focus to the selected order, and Back to orders returns to the list. On narrow screens, show each order as a labeled block with visible status, payment and actions. Mobile admin navigation wraps into two rows so every section stays visible. Use flat, divided detail fields instead of nested cards; long emails, addresses and gateway IDs wrap. Mobile form controls use 16px text. Preserve the existing fonts, neutral/mint/rose colors, authentication and read-only gateway payment state.
+
 Primary buttons are dark, pill-shaped, compact, and high contrast. Secondary buttons are light or translucent, with a subtle border and the same pill geometry.
 
 Navigation is fixed, white or glass-white, and restrained. The PureForm wordmark uses Montserrat; links use Open Sans and stay small, uppercase-feeling, and quiet until hover or active state.
