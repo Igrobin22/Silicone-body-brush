@@ -15,6 +15,9 @@
   <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
   <link rel="stylesheet" href="assets/pureform-store-flow.css">
   <link rel="stylesheet" href="assets/pureform-page-transitions.css">
+  <link rel="expect" href="#main-content" blocking="render">
+  <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
+  <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
   <link rel="stylesheet" href="assets/pureform-home.css">
 </head>
 <body class="home-page">
@@ -28,7 +31,7 @@
       <ul class="nav-links">
         <li><a href="products.html">Shop</a></li>
         <li><a href="#included">The set</a></li>
-        <li><a href="reviews.html">Reviews</a></li>
+        <li><a href="#reviews">Reviews</a></li>
         <li><a href="faq.html">FAQ</a></li>
       </ul>
       <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
@@ -62,6 +65,7 @@
             <a class="btn-p" data-pf-home-order href="pureform-product-detail.html?product=pureform-4pc-set-grey">Start Order</a>
             <a class="btn-s" href="#products">Explore Set</a>
           </div>
+          <a class="home-hero-reviews home-text-link" href="#reviews">Customer reviews</a>
         </div>
         <dl class="home-hero-specs" aria-label="Set details">
           <div><dt>Material</dt><dd>Silicone</dd></div>
@@ -115,8 +119,8 @@
         <div><strong>Made for daily routines</strong><p>Separate tools for back, body, scalp and face care.</p></div>
       </div>
     </section>
-    <section class="home-section" id="reviews" aria-labelledby="reviewsTitle">
-      <div class="home-section-head"><div><p class="eyebrow">Customer notes</p><h2 id="reviewsTitle">Small changes to the everyday shower.</h2></div><a class="home-text-link" href="reviews.html">Read customer reviews</a></div>
+    <section class="home-section home-reviews" id="reviews" aria-labelledby="reviewsTitle" tabindex="-1">
+      <div class="home-section-head"><div><p class="eyebrow">Customer notes</p><h2 id="reviewsTitle">Customer reviews</h2></div><a class="home-text-link" href="reviews.html">Read all reviews</a></div>
       <div class="home-review-grid">
         <figure class="home-review"><blockquote>The long handle makes the back brush useful every day. It rinses quickly and feels cleaner than my old sponge.</blockquote><figcaption><cite>Mariam A. &middot; Dubai</cite></figcaption></figure>
         <figure class="home-review"><blockquote>The silicone bristles are gentle but still effective. The face brush and body brush are the pieces I use most.</blockquote><figcaption><cite>Sara J. &middot; February 2026</cite></figcaption></figure>
@@ -142,8 +146,6 @@
   <script src="assets/pureform-supabase-config.js"></script>
   <script src="assets/pureform-public-catalog.js"></script>
   <script src="assets/pureform-cart.js"></script>
-  <script src="assets/pureform-page-transitions.js" defer></script>
-  <script src="assets/pureform-mobile-menu.js" defer></script>
   <script src="assets/pureform-store-flow.js" defer></script>
 </body>
 </html>

@@ -154,6 +154,10 @@ Avoid mixing sharp boxes with highly rounded controls in the same cluster. Keep 
 
 ## Components
 
+### Page Transitions
+
+Use native same-origin cross-document view transitions for storefront navigation: a quiet 220ms content cross-fade with the shared header and mobile menu toggle kept visually stationary. Do not delay clicks, replace native links/history with a client router, blur the page, or animate the entire body. Wait for the main content markup before capturing the destination and exclude closing mobile drawers from outgoing snapshots. Reveal content already inside the incoming viewport before capture so it does not run a second entrance animation; keep normal scroll reveals below the fold. Unsupported browsers and file previews use a short main-content entrance fade with normal navigation. Reduced-motion users get instant transitions. Keep admin/authentication pages and external card checkout outside this storefront enhancement.
+
 ### Admin Orders
 
 Keep the orders workspace compact and work-focused: 28px page headings, 20px section headings, and readable 13px to 14px table text. The order table uses the full content width; selected order details follow below it in normal page flow, without a fixed-height nested scroller. View moves focus to the selected order, and Back to orders returns to the list. On narrow screens, show each order as a labeled block with visible status, payment and actions. Mobile admin navigation wraps into two rows so every section stays visible. Use flat, divided detail fields instead of nested cards; long emails, addresses and gateway IDs wrap. Mobile form controls use 16px text. Preserve the existing fonts, neutral/mint/rose colors, authentication and read-only gateway payment state.
@@ -165,6 +169,8 @@ Navigation is fixed, white or glass-white, and restrained. The PureForm wordmark
 Product cards should emphasize image, product name, shade/material details, and a clear CTA. Keep them more editorial than marketplace-like: fewer badges, cleaner spacing, and no loud sale treatments.
 
 Review cards should be text-forward with small metadata, subtle dividers, and steady grid behavior. They should support trust without overwhelming the product story.
+
+Keep the homepage Customer reviews section visible at all sizes, using one readable column on mobile and three columns on desktop. On the mobile hero, include a quiet Customer reviews text link with a 44px touch target. The homepage Reviews navigation link scrolls to that section; Read all reviews opens the full reviews page. Reuse existing review copy without adding unverified ratings or purchase badges.
 
 ## Do's and Don'ts
 

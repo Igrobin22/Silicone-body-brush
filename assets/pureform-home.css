@@ -186,6 +186,10 @@ body.home-page {
   text-underline-offset: 5px;
 }
 
+.home-hero-reviews {
+  display: none;
+}
+
 .home-hero-note {
   margin-top: 18px;
 }
@@ -632,6 +636,21 @@ body.home-page {
 
   .home-text-link {
     font-size: 13px;
+  }
+
+  .home-hero-reviews {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-top: 4px;
+  }
+
+  .home-reviews .home-section-head .home-text-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 8px;
   }
 
   .home-hero-note {
