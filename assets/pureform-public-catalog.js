@@ -105,14 +105,6 @@
     return 'pureform-4pc-set-grey';
   }
 
-  function sentenceCase(value) {
-    return String(value || '')
-      .replace(/_/g, ' ')
-      .replace(/\w\S*/g, function (word) {
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-      });
-  }
-
   function colorFromSlug(slug, name) {
     var source = String(slug || name || '').toLowerCase();
     if (source.indexOf('pink') !== -1) return 'Pink';
@@ -216,7 +208,9 @@
       discount_ends_at: item && item.discount_ends_at || null,
       inventory_quantity: inventoryQuantity,
       inventory_status: inventoryStatus,
-      inventoryStatusText: inventoryQuantity <= 0 ? 'Out of stock' : sentenceCase(inventoryStatus),
+      inventoryStatusText: inventoryQuantity <= 0 || inventoryStatus === 'out_of_stock'
+        ? 'Out of stock'
+        : inventoryQuantity <= 5 ? 'Only ' + inventoryQuantity + ' left' : 'In stock',
       visible: item ? item.visible !== false : true,
       images: photos,
       image: photos[0],

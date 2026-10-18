@@ -49,6 +49,17 @@ test('catalog follows admin discount dates and stock, keeping only the three can
   assert.equal(listings[0].id, 'pureform-4pc-set-grey');
 });
 
+test('scarcity copy follows actual available quantity, not a stale low-stock flag', async () => {
+  const catalog = await fixture();
+  const listing = { slug: 'pureform-4pc-set-pink', price: 42, inventory_status: 'low_stock' };
+  assert.equal(catalog.normalizeListing({ ...listing, inventory_quantity: 12 }).inventoryStatusText, 'In stock');
+  assert.equal(catalog.normalizeListing({ ...listing, inventory_quantity: 6 }).inventoryStatusText, 'In stock');
+  assert.equal(catalog.normalizeListing({ ...listing, inventory_quantity: 5, inventory_status: 'in_stock' }).inventoryStatusText, 'Only 5 left');
+  assert.equal(catalog.normalizeListing({ ...listing, inventory_quantity: 1 }).inventoryStatusText, 'Only 1 left');
+  assert.equal(catalog.normalizeListing({ ...listing, inventory_quantity: 0 }).inventoryStatusText, 'Out of stock');
+  assert.equal(catalog.normalizeListing({ ...listing, inventory_quantity: 12, inventory_status: 'out_of_stock' }).inventoryStatusText, 'Out of stock');
+});
+
 test('raw versioned Cloudinary photos use bounded delivery without modifying admin originals', async () => {
   const catalog = await fixture();
   const original = 'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553535/grey_Head_h1duwj.png';
