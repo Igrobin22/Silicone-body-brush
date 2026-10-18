@@ -82,6 +82,25 @@ export async function handler(request: Request) {
   catch { return json(request, { error: 'Invalid webhook JSON.' }, 400); }
   if (!event || typeof event.type !== 'string') return json(request, { error: 'Invalid webhook event.' }, 400);
 
+  if (['refund.created', 'refund.updated', 'refund.failed'].includes(event.type)) {
+    const refund = event.data?.object;
+    const intent = typeof refund?.payment_intent === 'string' ? refund.payment_intent : refund?.payment_intent?.id;
+    if (!refund || !/^re_[A-Za-z0-9_]+$/.test(refund.id || '') || !/^pi_[A-Za-z0-9_]+$/.test(intent || '') ||
+      !Number.isSafeInteger(refund.amount) || refund.amount <= 0 || refund.currency !== 'aed' ||
+      !['pending', 'requires_action', 'succeeded', 'failed', 'canceled'].includes(refund.status) ||
+      typeof event.livemode !== 'boolean' || !Number.isSafeInteger(event.created) || event.created <= 0) {
+      return json(request, { error: 'Invalid refund event.' }, 400);
+    }
+    try {
+      const { error } = await database().rpc('record_site_refund', {
+        p_refund_id: refund.id, p_payment_intent_id: intent, p_amount_minor: refund.amount,
+        p_currency: refund.currency, p_status: refund.status, p_livemode: event.livemode, p_event_created: event.created,
+      });
+      if (error) throw error;
+      return json(request, { received: true });
+    } catch { return json(request, { error: 'Refund update could not be saved. Please retry this webhook.' }, 500); }
+  }
+
   const session = event.data?.object;
   const orderId = session?.metadata?.order_id;
   // Other Stripe products can use this account without creating PureForm orders.

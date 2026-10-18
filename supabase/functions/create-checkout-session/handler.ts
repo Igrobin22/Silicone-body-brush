@@ -172,7 +172,24 @@ async function createCheckout(request: Request) {
 
   let body: Record<string, unknown>;
   try {
-    body = await request.json();
+    const reader = request.body?.getReader();
+    if (!reader) return errorResponse(request, 'Checkout payload must be valid JSON.');
+    const decoder = new TextDecoder();
+    let text = '';
+    let bytes = 0;
+    try {
+      while (true) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        bytes += chunk.value.byteLength;
+        if (bytes > 16384) {
+          await reader.cancel();
+          return errorResponse(request, 'Checkout details are too large.', 413);
+        }
+        text += decoder.decode(chunk.value, { stream: true });
+      }
+      body = JSON.parse(text + decoder.decode());
+    } finally { reader.releaseLock(); }
   } catch (_error) {
     return errorResponse(request, 'Checkout payload must be valid JSON.');
   }
@@ -221,6 +238,23 @@ async function createCheckout(request: Request) {
   }
 
   const supabase = database();
+
+  // HMAC fingerprints limit repeated attempts without storing extra contact data.
+  const fingerprintKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(env('SUPABASE_SERVICE_ROLE_KEY')),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const fingerprint = async (value: string) => Array.from(new Uint8Array(await crypto.subtle.sign(
+    'HMAC', fingerprintKey, new TextEncoder().encode(value))), (n) => n.toString(16).padStart(2, '0')).join('');
+  const normalizedPhone = phone.replace(/\D/g, '').replace(/^00/, '').replace(/^0(?=\d{8,9}$)/, '971');
+  const { data: retryAfter, error: limitError } = await supabase.rpc('check_site_checkout_limit', {
+    p_phone_hash: await fingerprint(normalizedPhone),
+    p_contact_hash: await fingerprint(contact.toLowerCase()),
+  });
+  if (limitError || !Number.isSafeInteger(retryAfter) || retryAfter < 0) return errorResponse(request, 'Checkout is temporarily unavailable. Please try again later.', 503);
+  if (Number(retryAfter) > 0) {
+    const response = errorResponse(request, 'Too many checkout attempts. Please wait before trying again.', 429);
+    response.headers.set('Retry-After', String(Math.min(600, Math.max(1, Number(retryAfter)))));
+    return response;
+  }
 
   const slugs = Array.from(requestedItems.keys());
   const { data: listings, error: listingsError } = await supabase

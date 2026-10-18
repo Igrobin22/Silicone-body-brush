@@ -2990,3 +2990,17 @@ body > nav.site-header + main {
     font-size: 24px;
   }
 }
+
+@media (max-width: 760px) {
+  .checkout-field input,
+  .checkout-field select,
+  .checkout-field textarea,
+  .checkout-discount input,
+  .form-grid input,
+  .form-grid select,
+  .form-grid textarea,
+  .cart-quantity-control input,
+  .collection-page .collection-sort select {
+    font-size: 16px;
+  }
+}

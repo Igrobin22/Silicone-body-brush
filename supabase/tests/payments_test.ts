@@ -49,6 +49,9 @@ Deno.test('secure checkout and signed payment handling', async (test) => {
   let expiryFailure = false;
   let expiryWrongOrder = false;
   let expiryMalformed = false;
+  let rateWait = 0;
+  let limitFailure = false;
+  let refundFailure = false;
   let session = { ...paidSession };
   let discountMode = 'ongoing';
   let discountStartsAt: string | null = null;
@@ -72,6 +75,8 @@ Deno.test('secure checkout and signed payment handling', async (test) => {
     if (url.pathname.endsWith('/reserve_site_order') && reservationFailure) return response({ message: 'Not enough stock' }, 409);
     if (url.pathname.endsWith('/release_site_order') && releaseFailure) return response({ message: 'Release failed' }, 500);
     if (url.pathname.endsWith('/apply_paid_site_order') && databaseFailure) return response({ message: 'Database write failed' }, 500);
+    if (url.pathname.endsWith('/check_site_checkout_limit')) return limitFailure ? response({message:'Unavailable'},503) : response(rateWait);
+    if (url.pathname.endsWith('/record_site_refund') && refundFailure) return response({message:'Unavailable'},500);
     if (url.pathname.startsWith('/rest/v1/rpc/')) return response(null);
     if (url.pathname === '/v1/checkout/sessions') {
       if (transportFailures > 0) {
@@ -137,6 +142,23 @@ Deno.test('secure checkout and signed payment handling', async (test) => {
     await test.step('public setup reports AED 10 shipping without exposing credentials', async () => {
       const response = await status(new Request(site + '/checkout', { headers: { Origin: site } }));
       assert.deepEqual(await response.json(), { configured: true, shipping_total: 10, currency: 'AED' });
+    });
+    await test.step('oversized bodies and durable rate limits fail before stock or gateway requests', async () => {
+      calls.length = 0;
+      assert.equal((await checkout(request({...payload, customer_notes:'x'.repeat(17000)}))).status,413);
+      assert.equal(calls.length,0);
+      rateWait = 123;
+      const blocked = await checkout(request(payload));
+      assert.equal(blocked.status,429);
+      assert.equal(blocked.headers.get('Retry-After'),'123');
+      assert(!calls.some(call=>call.path === '/rest/v1/site_orders' || call.path.startsWith('/v1/')));
+      const fingerprint = JSON.parse(calls[0].body);
+      assert.match(fingerprint.p_phone_hash,/^[a-f0-9]{64}$/);
+      assert(!calls[0].body.includes(payload.phone));
+      assert(!calls[0].body.includes(payload.contact));
+      rateWait = 0; limitFailure = true;
+      assert.equal((await checkout(request(payload))).status,503);
+      limitFailure = false;
     });
     await test.step('future and expired catalog offers are not discounted at the gateway', async () => {
       discountMode = 'fixed';
@@ -314,6 +336,21 @@ Deno.test('secure checkout and signed payment handling', async (test) => {
       databaseFailure = false;
       assert.equal((await deliver('checkout.session.expired', { ...paidSession, status: 'expired', payment_status: 'unpaid' })).status, 200);
       assert(calls.some((call) => call.path.endsWith('/release_site_order')));
+    });
+    await test.step('signed refund events persist only the refund fields and request retries on database failures', async () => {
+      const refund = {id:'re_fixture',payment_intent:'pi_test_fixture',amount:2500,currency:'aed',status:'succeeded',card_number:'never-store'};
+      async function deliver(object: unknown) {
+        const body=JSON.stringify({type:'refund.updated',livemode:false,created:100,data:{object}});
+        return webhook(new Request(site+'/webhook',{method:'POST',headers:{'stripe-signature':await signature(body)},body}));
+      }
+      calls.length=0;
+      assert.equal((await deliver(refund)).status,200);
+      const saved=JSON.parse(calls.find(call=>call.path.endsWith('/record_site_refund'))!.body);
+      assert.deepEqual(saved,{p_refund_id:'re_fixture',p_payment_intent_id:'pi_test_fixture',p_amount_minor:2500,p_currency:'aed',p_status:'succeeded',p_livemode:false,p_event_created:100});
+      assert.equal((await deliver({...refund,amount:1.5})).status,400);
+      refundFailure=true;
+      assert.equal((await deliver(refund)).status,500);
+      refundFailure=false;
     });
   } finally {
     globalThis.fetch = realFetch;

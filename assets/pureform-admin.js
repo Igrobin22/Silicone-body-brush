@@ -587,7 +587,7 @@
   async function loadOrders() {
     var result = await state.supabase
       .from('site_orders')
-      .select('id,order_number,status,payment_status,fulfillment_status,contact,phone,first_name,last_name,country,address,apartment,city,emirate,payment_preference,payment_provider,payment_session_id,payment_intent_id,payment_reference,paid_at,discount_code,customer_notes,admin_notes,line_items,subtotal,shipping_total,total,currency,source,created_at,updated_at')
+      .select('id,order_number,status,payment_status,fulfillment_status,contact,phone,first_name,last_name,country,address,apartment,city,emirate,payment_preference,payment_provider,payment_session_id,payment_intent_id,payment_reference,paid_at,discount_code,customer_notes,admin_notes,line_items,subtotal,shipping_total,total,refunded_total,refund_pending_total,refund_attention_required,currency,source,created_at,updated_at')
       .order('created_at', { ascending: false });
 
     if (result.error) {
@@ -623,7 +623,7 @@
     var newOrders = customerOrders.filter(function (order) { return order.status === 'new'; }).length;
     var openOrders = customerOrders.filter(isOpenOrder).length;
     var orderRevenue = customerOrders.reduce(function (sum, order) {
-      return order.payment_status === 'paid' ? sum + Number(order.total || 0) : sum;
+      return order.payment_status === 'paid' ? sum + Math.max(0, Number(order.total || 0) - Number(order.refunded_total || 0)) : sum;
     }, 0);
     var activeDiscounts = state.listings.filter(isDiscountActive).length;
     var inventoryUnits = state.listings.reduce(function (sum, item) {
@@ -838,6 +838,12 @@
 
       var paymentCell = document.createElement('td');
       paymentCell.appendChild(orderSelect(order, 'payment_status', PAYMENT_STATUS_OPTIONS, 'quick-payment-status'));
+      if (Number(order.refunded_total) > 0 || Number(order.refund_pending_total) > 0 || order.refund_attention_required) {
+        var refundNote = document.createElement('div');
+        refundNote.textContent = order.refund_attention_required ? 'Refund needs attention' : Number(order.refund_pending_total) > 0
+          ? formatCurrency(order.refund_pending_total) + ' refund pending' : formatCurrency(order.refunded_total) + ' refunded';
+        paymentCell.appendChild(refundNote);
+      }
 
       var actionsCell = document.createElement('td');
       var actionRow = document.createElement('div');
@@ -1012,6 +1018,9 @@
       { label: 'UAE delivery', value: formatCurrency(order.shipping_total) },
       { label: 'Promotion discount', value: formatCurrency(Math.max(0, Number(order.subtotal || 0) + Number(order.shipping_total || 0) - Number(order.total || 0))) },
       { label: 'Total', value: formatCurrency(order.total) },
+      { label: 'Refunded', value: formatCurrency(order.refunded_total) },
+      { label: 'Refund pending', value: formatCurrency(order.refund_pending_total) },
+      { label: 'Refund review', value: order.refund_attention_required ? 'Action required in Stripe' : 'None' },
       { label: 'Customer notes', value: order.customer_notes || 'None' },
       { label: 'Placed', value: formatDateTime(order.created_at) }
     ];

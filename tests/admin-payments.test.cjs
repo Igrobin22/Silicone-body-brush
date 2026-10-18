@@ -111,6 +111,25 @@ test('both admin HTML routes start with payment fields disabled', () => {
   }
 });
 
+test('refund totals reduce customer revenue and remain read-only in order details', () => {
+  const page = fixture();
+  page.els.statsGrid = element();
+  page.els.orderFormTitle = element();
+  page.els.orderDetailSummary = element();
+  page.els.orderItemsList = element();
+  const order = { id: 'refund-order', payment_status: 'paid', total: 100, refunded_total: 25, refund_pending_total: 10, refund_attention_required: true };
+  page.state.orders = [order];
+  page.renderStats();
+  const stats = Object.fromEntries(page.els.statsGrid.children.map(card => card.children.map(child => child.textContent)));
+  assert.equal(stats.Revenue, 'AED 75.00');
+  page.fillOrderForm(order);
+  const summary = Object.fromEntries(page.els.orderDetailSummary.children.map(item => item.children.map(child => child.textContent)));
+  assert.equal(summary.Refunded, 'AED 25.00');
+  assert.equal(summary['Refund pending'], 'AED 10.00');
+  assert.equal(summary['Refund review'], 'Action required in Stripe');
+  assert.equal(page.ids.orderPaymentStatus.disabled, true);
+});
+
 test('admin shows saved shipping and promotion totals without recalculating historical delivery fees', () => {
   const page = fixture();
   page.els.orderFormTitle = element();
