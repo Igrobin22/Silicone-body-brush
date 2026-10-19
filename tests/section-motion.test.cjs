@@ -125,3 +125,18 @@ test('six lightweight keyframes settle naturally and reduced motion removes them
   assert.match(css,/@media \(prefers-reduced-motion: reduce\)[\s\S]*?animation: none;/);
   assert.doesNotMatch(css,/will-change:|\bfilter:\s*blur|\binfinite\b/);
 });
+
+test('document reloads and history restore without a smooth scrolling sweep',()=>{
+  const pagesCss=readFileSync(path.join(__dirname,'../assets/pureform-pages.css'),'utf8');
+  assert.match(pagesCss,/html\s*\{\s*scroll-behavior: auto;/);
+  assert.doesNotMatch(pagesCss,/content-visibility: auto|contain-intrinsic-size: 720px/);
+  assert.match(css,/\.pf-flow-ready \[data-flow-reveal\],\s*\.pf-flow-ready \[data-pf-catalog-grid\]\s*\{\s*overflow-anchor: none;/);
+  assert.doesNotMatch(css,/(?:html|:root)\s*\{[^}]*overflow-anchor: none/);
+  assert.doesNotMatch(source,/scrollRestoration\s*=|scrollTo\(|scrollIntoView\(/);
+});
+
+test('fixed-height tool frames can shrink their images without overlapping captions',()=>{
+  const homeCss=readFileSync(path.join(__dirname,'../assets/pureform-home.css'),'utf8');
+  assert.match(homeCss,/\.home-tool-media\s*\{[^}]*grid-template: minmax\(0, 1fr\) \/ minmax\(0, 1fr\);/);
+  assert.match(homeCss,/\.home-tool-media img\s*\{[^}]*min-height: 0;[^}]*max-height: 100%;[^}]*object-fit: contain;/);
+});

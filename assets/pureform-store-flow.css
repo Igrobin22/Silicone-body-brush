@@ -1,3 +1,8 @@
+.pf-flow-ready [data-flow-reveal],
+.pf-flow-ready [data-pf-catalog-grid] {
+  overflow-anchor: none;
+}
+
 .pf-flow-ready [data-flow-reveal] {
   opacity: 0;
   translate: 0 0;

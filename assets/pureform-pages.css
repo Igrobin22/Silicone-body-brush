@@ -31,7 +31,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {
@@ -145,14 +145,6 @@ nav {
 
 main {
   padding-top: 72px;
-}
-
-@supports (content-visibility: auto) {
-  main > section:not(:first-child),
-  footer {
-    content-visibility: auto;
-    contain-intrinsic-size: 720px;
-  }
 }
 
 .page-hero {
