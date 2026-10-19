@@ -395,15 +395,47 @@ body.home-page {
   gap: 24px;
 }
 
+/* Keep landmark focus visible without framing the whole page section. */
+.home-reviews:focus {
+  outline: none;
+}
+
+.home-reviews:focus-visible #reviewsTitle {
+  outline: 2px solid var(--dark);
+  outline-offset: 6px;
+}
+
 .home-review {
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-rows: 200px auto 1fr auto;
+  gap: 16px;
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+}
+
+.home-review-photo {
+  display: block;
+  width: 100%;
+  height: 200px;
+  border-radius: 4px;
+  background: var(--off);
+  object-fit: contain;
+}
+
+.home-review-rating {
+  color: var(--dark);
+  font-size: 13px;
+  line-height: 1;
 }
 
 .home-review blockquote {
-  margin-bottom: 22px;
-  font-size: 15px;
-  line-height: 1.8;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
 }
 
 .home-review cite {
@@ -720,14 +752,24 @@ body.home-page {
   }
 
   .home-benefits,
-  .home-review-grid,
   .home-faq {
     grid-template-columns: 1fr;
     gap: 24px;
   }
 
-  .home-review blockquote {
-    margin-bottom: 12px;
+  .home-review-grid {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 2px 2px 12px;
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 2px;
+  }
+
+  .home-review {
+    flex: 0 0 min(320px, calc(100% - 28px));
+    scroll-snap-align: start;
   }
 
   .home-footer {

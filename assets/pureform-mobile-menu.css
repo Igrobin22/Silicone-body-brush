@@ -141,6 +141,7 @@ body > nav.site-header {
   letter-spacing: 0;
   text-transform: uppercase;
   text-decoration: none;
+  white-space: nowrap;
   transition: color var(--pf-motion-fast) ease, transform var(--pf-motion-fast) var(--pf-ease-out);
 }
 
@@ -273,8 +274,12 @@ body > nav.site-header + .hero,
 }
 
 @media (max-width: 1040px) {
+  .nav-main {
+    gap: 12px;
+  }
+
   .site-header .nav-links {
-    gap: .85rem;
+    gap: .625rem;
   }
 
   .site-header .nav-links a,

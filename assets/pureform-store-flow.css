@@ -1,24 +1,54 @@
 .pf-flow-ready [data-flow-reveal] {
   opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity .42s cubic-bezier(.23, 1, .32, 1),
-    transform .42s cubic-bezier(.23, 1, .32, 1);
-  transition-delay: var(--pf-flow-delay, 0ms);
+  translate: 0 0;
+  scale: 1;
+  --pf-enter-name: pf-flow-rise;
 }
 
 .pf-flow-ready [data-flow-reveal].is-visible {
   opacity: 1;
-  transform: translateY(0);
+  animation: var(--pf-enter-name) 520ms cubic-bezier(.22, 1, .36, 1) var(--pf-flow-delay, 0ms) backwards;
 }
 
-.product-card,
-.pcard,
-.shade-card,
-.review-card,
-.policy-card,
-.card {
-  will-change: transform;
+.pf-flow-ready [data-flow-reveal="fade"] { --pf-enter-name: pf-flow-fade; }
+.pf-flow-ready [data-flow-reveal="drop"] { --pf-enter-name: pf-flow-drop; }
+.pf-flow-ready [data-flow-reveal="left"] { --pf-enter-name: pf-flow-left; }
+.pf-flow-ready [data-flow-reveal="right"] { --pf-enter-name: pf-flow-right; }
+.pf-flow-ready [data-flow-reveal="zoom"] { --pf-enter-name: pf-flow-zoom; }
+
+.pf-flow-ready [data-flow-reveal].pf-motion-instant {
+  opacity: 1;
+  animation: none;
+}
+
+@keyframes pf-flow-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pf-flow-rise {
+  from { opacity: 0; translate: 0 20px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes pf-flow-drop {
+  from { opacity: 0; translate: 0 -14px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes pf-flow-left {
+  from { opacity: 0; translate: -18px 0; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes pf-flow-right {
+  from { opacity: 0; translate: 18px 0; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes pf-flow-zoom {
+  from { opacity: 0; scale: .96; }
+  to { opacity: 1; scale: 1; }
 }
 
 .pcard {
@@ -132,6 +162,7 @@
     opacity: 1;
     transform: none;
     transition: none;
+    animation: none;
   }
 
   .pf-sticky-order {

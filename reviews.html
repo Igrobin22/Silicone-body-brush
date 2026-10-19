@@ -21,9 +21,10 @@
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
+  <link rel="stylesheet" href="assets/pureform-retail.css">
 </head>
 
-<body>
+<body class="retail-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
   <nav class="site-header" aria-label="Primary navigation">
     <div class="promo-bar">
@@ -35,10 +36,11 @@
     </div>
     <div class="nav-main">
       <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
         <li><a href="products.html">Shop</a></li>
-        <li><a href="index.html#included">The set</a></li>
-        <li><a class="is-active" href="reviews.html">Reviews</a></li>
-        <li><a href="faq.html">FAQ</a></li>
+        <li><a class="is-active" aria-current="page" href="reviews.html">Reviews</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="policy.html">Policies &amp; FAQ</a></li>
       </ul>
       <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
       <div class="nav-actions" aria-label="Shop utilities">
@@ -53,21 +55,13 @@
   </nav>
 
   <main id="main-content">
-    <section class="page-hero compact">
-      <div>
-        <p class="eyebrow">Customer Reviews</p>
-        <h1>Daily care, cleaner feedback.</h1>
-        <p class="lead">Read what customers notice most after adding the PureForm set to their daily shower routine.</p>
-      </div>
-      <div class="hero-media">
-        <img src="assets/pureform-face-brush.png" alt="PureForm face brush">
-      </div>
-    </section>
+    <nav class="retail-breadcrumb" aria-label="Breadcrumb"><ol><li><a href="index.html">Home</a></li><li aria-current="page">Customer reviews</li></ol></nav>
+    <header class="retail-heading retail-wrap"><h1>Customer reviews</h1><p>Photos and daily-use feedback on the PureForm shower set.</p></header>
 
     <section class="sec">
       <p class="eyebrow">What Customers Notice</p>
       <h2 class="section-title">Comfort, reach, and easy cleaning.</h2>
-      <div class="grid-3">
+      <div class="grid-3 reviews-grid">
         <div class="review-card">
           <figure class="review-card-photo">
             <img src="https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780243836/b49922d6-d5cd-4254-b166-be53bd47132e_675x1200_tspgdx.avif" alt="Customer photo for the PureForm back brush review" loading="lazy" decoding="async">
@@ -171,19 +165,15 @@
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-logo">PureForm</div>
-        <p class="card-text">Soft silicone. Daily clean. Better reach.</p>
+  <footer class="retail-footer">
+    <div class="retail-wrap">
+      <div class="retail-footer-grid">
+        <div><a class="retail-footer-brand" href="index.html">PureForm</a><p>Soft silicone. Daily clean. Better reach.</p><p>United Arab Emirates &middot; AED<br>Card payments only</p></div>
+        <div><h2>Shop &amp; discover</h2><ul><li><a href="products.html">All shower sets</a></li><li><a href="index.html#included">What's included</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="about.html">About PureForm</a></li></ul></div>
+        <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#returns">Returns &amp; refunds</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
+        <div><h2>Get in touch</h2><ul><li><a href="mailto:buyx.dxb@gmail.com">buyx.dxb@gmail.com</a></li><li><a href="https://t.me/Pureforbot">Telegram support</a></li><li><a href="policy.html#privacy">Privacy</a></li><li><a href="policy.html#terms">Store terms</a></li></ul></div>
       </div>
-      <ul class="footer-links">
-        <li><a href="products.html">Products</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="policy.html">Policy</a></li>
-        <li><a href="faq.html">FAQ</a></li>
-        <li><a href="contact.html">Contact</a></li>
-      </ul>
+      <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>AED 10 UAE delivery &middot; 15-day returns on unused items</span></div>
     </div>
   </footer>
   <script src="assets/pureform-cart.js"></script>

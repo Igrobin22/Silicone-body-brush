@@ -372,7 +372,6 @@
       var meta = createElement('div', 'collection-card-meta', item.meta);
 
       card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
-      card.dataset.animate = '';
       img.src = item.image;
       img.width = 700;
       img.height = 700;
@@ -407,7 +406,6 @@
       var price = createElement('p', 'card-text pf-catalog-card-price', item.priceText);
 
       card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
-      card.dataset.animate = '';
       img.src = item.image;
       img.alt = item.name;
       img.loading = 'lazy';

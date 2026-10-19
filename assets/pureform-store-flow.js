@@ -1,20 +1,8 @@
 (function () {
   'use strict';
 
-  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var revealSelector = [
-    'main .page-hero',
-    'main .card',
-    'main .product-card',
-    'main .review-card',
-    'main .policy-card',
-    'main .detail-list li',
-    'main .form-grid',
-    'main .buyer-confidence-item',
-    'main .shopping-note-card',
-    'main .pdp-proof-item',
-    'main .pdp-accordion details'
-  ].join(',');
+  var motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var refreshReveal = function () {};
 
   document.documentElement.classList.add('pf-flow-ready');
 
@@ -155,43 +143,123 @@
             });
           });
         });
+        refreshReveal();
       }).observe(document.documentElement, { childList: true, subtree: true });
     }
   }
 
   function setupReveal() {
-    var targets = Array.prototype.slice.call(document.querySelectorAll(revealSelector)).filter(function (item) {
-      return !item.classList.contains('reveal') && !item.hasAttribute('data-animate');
-    });
+    var groups = [
+      ['#heroTitle', 'fade'],
+      ['.home-hero-copy', 'fade'],
+      ['.retail-heading, .collection-heading', 'drop'],
+      ['.home-promises > a, .pdp-benefits > a', 'fade'],
+      ['#products .home-section-head, .cart-recommendations > .section-title', 'left'],
+      ['.pgrid > .pcard, .collection-grid > .collection-card', 'rise'],
+      ['.home-included .home-section-head', 'right'],
+      ['.home-tools > div, .pdp-tool-grid > figure', 'zoom'],
+      ['.home-benefits > div', 'rise'],
+      ['.home-reviews .home-section-head, .pdp-section-head', 'drop'],
+      ['.home-review, .review-card, .pdp-review-card', 'left'],
+      ['.home-faq > div:first-child', 'zoom'],
+      ['.home-faq summary, .retail-question > summary', 'right'],
+      ['.collection-essentials > div', 'left'],
+      ['.about-intro > p', 'left'],
+      ['.about-intro > img, .pdp-gallery', 'zoom'],
+      ['.about-values > .section-title, main > .sec > .section-title', 'drop'],
+      ['.about-values .card, .cart-product-card', 'rise'],
+      ['.sec.alt .grid-2 > div, .pdp-highlights', 'right'],
+      ['.detail-list > li', 'left'],
+      ['.support-layout > div > .section-title, .combined-faq > h2', 'drop'],
+      ['.retail-side-nav, .combined-faq-links', 'fade'],
+      ['.combined-faq-group > h3', 'left'],
+      ['.policy-card', 'alternate'],
+      ['.pdp-copy', 'left'],
+      ['.pdp-information summary, .pdp-details-body > .pdp-lead', 'fade'],
+      ['.pdp-specs > div, .pdp-related-card', 'right'],
+      ['.cart-empty-state > div:first-child', 'fade'],
+      ['.cart-summary > h2, .checkout-summary > h2', 'right'],
+      ['.checkout-step-title', 'fade'],
+      ['.retail-footer-grid > div', 'rise']
+    ];
+    var targets = new Set();
+    var seenParents = new WeakSet();
+    var observer = null;
+    var refreshFrame = null;
 
-    if (!targets.length) {
-      return;
+    function reveal(item, instant) {
+      if (instant) item.classList.add('pf-motion-instant');
+      item.classList.add('is-visible');
+      if (item.parentElement) seenParents.add(item.parentElement);
+      if (observer) observer.unobserve(item);
     }
 
-    targets.forEach(function (item, index) {
-      item.setAttribute('data-flow-reveal', '');
-      item.style.setProperty('--pf-flow-delay', (index % 5) * 42 + 'ms');
-    });
+    if ('IntersectionObserver' in window) {
+      try {
+        observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) reveal(entry.target, motionPreference.matches);
+          });
+        }, { threshold: 0.05, rootMargin: '0px 0px -16px 0px' });
+      } catch (error) {
+        observer = null;
+      }
+    }
 
-    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+    function registerTargets() {
       targets.forEach(function (item) {
-        item.classList.add('is-visible');
-      });
-      return;
-    }
-
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
+        if (!item.isConnected) {
+          if (observer) observer.unobserve(item);
+          targets.delete(item);
         }
       });
-    }, { threshold: 0.16, rootMargin: '0px 0px -48px 0px' });
+      groups.forEach(function (group) {
+        document.querySelectorAll(group[0]).forEach(function (item, index) {
+          if (targets.has(item)) return;
+          targets.add(item);
+          var variant = group[1] === 'alternate' ? (index % 2 ? 'right' : 'left') : group[1];
+          item.setAttribute('data-flow-reveal', variant);
+          item.style.setProperty('--pf-flow-delay', Math.min(index % 4, 3) * 55 + 'ms');
+          // Catalog refreshes must not replay an already-seen product row.
+          if (motionPreference.matches || !observer || seenParents.has(item.parentElement)) {
+            reveal(item, true);
+          } else {
+            item.classList.remove('is-visible');
+            observer.observe(item);
+          }
+        });
+      });
+    }
 
-    targets.forEach(function (item) {
-      observer.observe(item);
+    refreshReveal = function () {
+      if (refreshFrame !== null) return;
+      refreshFrame = window.requestAnimationFrame(function () {
+        refreshFrame = null;
+        registerTargets();
+      });
+    };
+
+    // Keyboard focus must never land on transparent or moving content.
+    document.addEventListener('focusin', function (event) {
+      var item = event.target;
+      while (item && item !== document.documentElement) {
+        if (targets.has(item)) reveal(item, true);
+        item = item.parentElement;
+      }
     });
+
+    function showAll() {
+      targets.forEach(function (item) { reveal(item, true); });
+    }
+    if (motionPreference.addEventListener) {
+      motionPreference.addEventListener('change', function () {
+        if (motionPreference.matches) showAll();
+      });
+    }
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted) showAll();
+    });
+    registerTargets();
   }
 
   function setupStickyOrder() {

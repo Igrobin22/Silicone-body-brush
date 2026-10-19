@@ -17,18 +17,26 @@
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
+  <link rel="stylesheet" href="assets/pureform-retail.css">
 </head>
-<body class="collection-page">
+<body class="collection-page retail-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
   <nav class="site-header" aria-label="Primary navigation">
     <div class="promo-bar"><div class="promo-message">UAE delivery &middot; 15-day returns</div><div class="promo-links"><a href="policy.html#delivery">UAE (AED) - EN</a><a href="contact.html">Support</a></div></div>
     <div class="nav-main">
-      <ul class="nav-links"><li><a class="is-active" href="products.html">Shop</a></li><li><a href="index.html#included">The set</a></li><li><a href="reviews.html">Reviews</a></li><li><a href="faq.html">FAQ</a></li></ul>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a class="is-active" aria-current="page" href="products.html">Shop</a></li>
+        <li><a href="reviews.html">Reviews</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="policy.html">Policies &amp; FAQ</a></li>
+      </ul>
       <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
       <div class="nav-actions" aria-label="Shop utilities"><a class="nav-action-link" href="contact.html">Support</a><a class="nav-icon nav-cart" href="cart.html" aria-label="Open cart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 8.5h11l-.8 11h-9.4l-.8-11Z"></path><path d="M9 8.5V6.8a3 3 0 0 1 6 0v1.7"></path></svg><span class="nav-cart-count" aria-label="0 items in cart">0</span></a></div>
     </div>
   </nav>
   <main id="main-content">
+    <nav class="retail-breadcrumb" aria-label="Breadcrumb"><ol><li><a href="index.html">Home</a></li><li aria-current="page">Shower sets</li></ol></nav>
     <section class="collection-listing" id="set-colors" aria-labelledby="collectionTitle">
       <span id="offers"></span>
       <div class="collection-heading"><p class="eyebrow">The collection</p><h1 id="collectionTitle">PureForm Shower Sets</h1><p>Four silicone essentials for face, scalp, body and back. Choose the color that fits your daily ritual.</p></div>
@@ -58,7 +66,17 @@
       <div><h2>15-day returns</h2><p>Return unused sets in their original condition and packaging.</p><a href="policy.html#returns">Return policy</a></div>
     </section>
   </main>
-  <footer class="site-footer"><div class="footer-grid"><div><div class="footer-logo">PureForm</div><p class="card-text">Soft silicone. Daily clean. Better reach.</p></div><ul class="footer-links"><li><a href="products.html">Shop</a></li><li><a href="about.html">About</a></li><li><a href="reviews.html">Reviews</a></li><li><a href="policy.html">Delivery &amp; returns</a></li><li><a href="faq.html">FAQ</a></li><li><a href="contact.html">Contact</a></li></ul></div></footer>
+  <footer class="retail-footer">
+    <div class="retail-wrap">
+      <div class="retail-footer-grid">
+        <div><a class="retail-footer-brand" href="index.html">PureForm</a><p>Soft silicone. Daily clean. Better reach.</p><p>United Arab Emirates &middot; AED<br>Card payments only</p></div>
+        <div><h2>Shop &amp; discover</h2><ul><li><a href="products.html">All shower sets</a></li><li><a href="index.html#included">What's included</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="about.html">About PureForm</a></li></ul></div>
+        <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#returns">Returns &amp; refunds</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
+        <div><h2>Get in touch</h2><ul><li><a href="mailto:buyx.dxb@gmail.com">buyx.dxb@gmail.com</a></li><li><a href="https://t.me/Pureforbot">Telegram support</a></li><li><a href="policy.html#privacy">Privacy</a></li><li><a href="policy.html#terms">Store terms</a></li></ul></div>
+      </div>
+      <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>AED 10 UAE delivery &middot; 15-day returns on unused items</span></div>
+    </div>
+  </footer>
   <script src="assets/pureform-supabase-config.js"></script>
   <script src="assets/pureform-public-catalog.js"></script>
   <script src="assets/pureform-cart.js"></script>

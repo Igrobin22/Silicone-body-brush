@@ -58,6 +58,7 @@
     item.className = 'pf-mobile-sidebar-link' + (link.classList.contains('is-active') ? ' is-active' : '');
     item.href = link.getAttribute('href') || '#';
     item.textContent = link.textContent.trim();
+    if (link.hasAttribute('aria-current')) item.setAttribute('aria-current', link.getAttribute('aria-current'));
     item.dataset.label = item.textContent.toLowerCase();
     list.appendChild(item);
   });

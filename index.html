@@ -19,6 +19,7 @@
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
   <link rel="stylesheet" href="assets/pureform-home.css">
+  <link rel="stylesheet" href="assets/pureform-retail.css">
 </head>
 <body class="home-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -29,10 +30,11 @@
     </div>
     <div class="nav-main">
       <ul class="nav-links">
+        <li><a class="is-active" aria-current="page" href="index.html">Home</a></li>
         <li><a href="products.html">Shop</a></li>
-        <li><a href="#included">The set</a></li>
-        <li><a href="#reviews">Reviews</a></li>
-        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="reviews.html">Reviews</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="policy.html">Policies &amp; FAQ</a></li>
       </ul>
       <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
       <div class="nav-actions" aria-label="Shop utilities">
@@ -121,14 +123,29 @@
     </section>
     <section class="home-section home-reviews" id="reviews" aria-labelledby="reviewsTitle" tabindex="-1">
       <div class="home-section-head"><div><p class="eyebrow">Customer notes</p><h2 id="reviewsTitle">Customer reviews</h2></div><a class="home-text-link" href="reviews.html">Read all reviews</a></div>
-      <div class="home-review-grid">
-        <figure class="home-review"><blockquote>The long handle makes the back brush useful every day. It rinses quickly and feels cleaner than my old sponge.</blockquote><figcaption><cite>Mariam A. &middot; Dubai</cite></figcaption></figure>
-        <figure class="home-review"><blockquote>The silicone bristles are gentle but still effective. The face brush and body brush are the pieces I use most.</blockquote><figcaption><cite>Sara J. &middot; February 2026</cite></figcaption></figure>
-        <figure class="home-review"><blockquote>I like that each brush has a clear job. The scalp massager is relaxing and the set dries fast after use.</blockquote><figcaption><cite>Priya S. &middot; January 2026</cite></figcaption></figure>
+      <div class="home-review-grid" role="group" aria-label="Customer photo reviews" tabindex="0">
+        <figure class="home-review">
+          <img class="home-review-photo" src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_480/v1780243836/b49922d6-d5cd-4254-b166-be53bd47132e_675x1200_tspgdx.avif" data-pf-fallback="assets/reviews/mariam.jpg" alt="Customer photo for Mariam A. PureForm review" width="675" height="1200" loading="lazy" decoding="async">
+          <div class="home-review-rating" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+          <blockquote>The long handle makes the back brush useful every day. It rinses quickly and feels cleaner than my old sponge.</blockquote>
+          <figcaption><cite>Mariam A. &middot; Dubai</cite></figcaption>
+        </figure>
+        <figure class="home-review">
+          <img class="home-review-photo" src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_480/v1780243837/8bee4d53-eb50-45e4-902f-f91f232f7588_svrxkv.avif" data-pf-fallback="assets/reviews/sara.jpg" alt="Customer photo for Sara J. PureForm review" width="675" height="1200" loading="lazy" decoding="async">
+          <div class="home-review-rating" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+          <blockquote>The silicone bristles are gentle but still effective. The face brush and body brush are the pieces I use most.</blockquote>
+          <figcaption><cite>Sara J. &middot; February 2026</cite></figcaption>
+        </figure>
+        <figure class="home-review">
+          <img class="home-review-photo" src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_480/v1780243837/4925d2f8-b8b1-43c6-9189-79b093734edc_675x1200_lltijt.avif" data-pf-fallback="assets/reviews/priya.jpg" alt="Customer photo for Priya S. PureForm review" width="675" height="1200" loading="lazy" decoding="async">
+          <div class="home-review-rating" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+          <blockquote>I like that each brush has a clear job. The scalp massager is relaxing and the set dries fast after use.</blockquote>
+          <figcaption><cite>Priya S. &middot; January 2026</cite></figcaption>
+        </figure>
       </div>
     </section>
     <section class="home-section home-faq" aria-labelledby="faqTitle">
-      <div><p class="eyebrow">Before you order</p><h2 id="faqTitle">The practical details.</h2><p class="home-section-copy">A little clarity before your new set arrives.</p><a class="home-text-link" href="faq.html">All questions &amp; answers</a></div>
+      <div><p class="eyebrow">Before you order</p><h2 id="faqTitle">The practical details.</h2><p class="home-section-copy">A little clarity before your new set arrives.</p><a class="home-text-link" href="policy.html#faq">All questions &amp; answers</a></div>
       <div>
         <details><summary>What's included in a set?</summary><p>One back scrubber, one body brush, one scalp massager and one face brush. Grey, Black and Pink sets contain the same four tools.</p></details>
         <details><summary>Where do you deliver?</summary><p>PureForm delivers within the United Arab Emirates. Enter your delivery address at checkout, or <a href="contact.html">contact support</a> to check timing for your city.</p></details>
@@ -137,11 +154,16 @@
       </div>
     </section>
   </main>
-  <footer class="home-footer">
-    <div><a class="home-footer-brand" href="index.html">PureForm</a><p>Soft silicone. Daily clean. Better reach.</p><p>United Arab Emirates &middot; AED</p></div>
-    <div><h2>Shop &amp; discover</h2><ul><li><a href="products.html">All shower sets</a></li><li><a href="#included">What's included</a></li><li><a href="about.html">About PureForm</a></li><li><a href="reviews.html">Customer reviews</a></li></ul></div>
-    <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery</a></li><li><a href="policy.html#returns">Returns</a></li><li><a href="faq.html">FAQ</a></li><li><a href="contact.html">Contact us</a></li><li><a href="policy.html">Store policies</a></li></ul></div>
-    <small class="home-copyright">&copy; 2026 PureForm. All rights reserved.</small>
+  <footer class="retail-footer">
+    <div class="retail-wrap">
+      <div class="retail-footer-grid">
+        <div><a class="retail-footer-brand" href="index.html">PureForm</a><p>Soft silicone. Daily clean. Better reach.</p><p>United Arab Emirates &middot; AED<br>Card payments only</p></div>
+        <div><h2>Shop &amp; discover</h2><ul><li><a href="products.html">All shower sets</a></li><li><a href="index.html#included">What's included</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="about.html">About PureForm</a></li></ul></div>
+        <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#returns">Returns &amp; refunds</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
+        <div><h2>Get in touch</h2><ul><li><a href="mailto:buyx.dxb@gmail.com">buyx.dxb@gmail.com</a></li><li><a href="https://t.me/Pureforbot">Telegram support</a></li><li><a href="policy.html#privacy">Privacy</a></li><li><a href="policy.html#terms">Store terms</a></li></ul></div>
+      </div>
+      <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>AED 10 UAE delivery &middot; 15-day returns on unused items</span></div>
+    </div>
   </footer>
   <script src="assets/pureform-supabase-config.js"></script>
   <script src="assets/pureform-public-catalog.js"></script>

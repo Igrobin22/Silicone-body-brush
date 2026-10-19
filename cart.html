@@ -20,9 +20,10 @@
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
+  <link rel="stylesheet" href="assets/pureform-retail.css">
 </head>
 
-<body>
+<body class="retail-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
   <nav class="site-header" aria-label="Primary navigation">
     <div class="promo-bar">
@@ -34,10 +35,11 @@
     </div>
     <div class="nav-main">
       <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
         <li><a href="products.html">Shop</a></li>
-        <li><a href="index.html#included">The set</a></li>
         <li><a href="reviews.html">Reviews</a></li>
-        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="policy.html">Policies &amp; FAQ</a></li>
       </ul>
       <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
       <div class="nav-actions" aria-label="Shop utilities">
@@ -52,15 +54,17 @@
   </nav>
 
   <main id="main-content">
+    <nav class="retail-breadcrumb" aria-label="Breadcrumb"><ol><li><a href="index.html">Home</a></li><li><a href="products.html">Shower sets</a></li><li aria-current="page">Cart</li></ol></nav>
+    <header class="retail-heading retail-wrap"><h1 id="cartTitle">Your cart</h1><p>Review your sets and quantities before continuing to checkout.</p></header>
+    <ol class="retail-steps retail-wrap" aria-label="Order progress"><li aria-current="step"><span class="retail-step-number" aria-hidden="true">1</span>Cart</li><li><span class="retail-step-number" aria-hidden="true">2</span>Delivery</li><li><span class="retail-step-number" aria-hidden="true">3</span>Card payment</li></ol>
     <section class="sec cart-section" aria-labelledby="cartTitle">
-      <h1 class="sr-only" id="cartTitle">PureForm cart</h1>
 
       <div class="cart-layout">
-        <article class="card cart-items-card" data-animate>
+        <article class="card cart-items-card">
           <div class="cart-empty-state" id="cartEmptyState">
             <div>
               <div class="card-kicker" id="cartItemKicker">0 items</div>
-              <h3 class="card-title">Your cart is empty.</h3>
+              <h2 class="card-title">Your cart is empty.</h2>
               <p class="card-text">Choose a Grey, Black, or Pink 4-piece set, then confirm your bundle and delivery details before checkout.</p>
             </div>
             <div class="button-row">
@@ -71,12 +75,12 @@
           <div class="cart-items-list" id="cartItemsList" aria-live="polite" hidden></div>
         </article>
 
-        <aside class="cart-summary" aria-label="Cart summary" data-animate>
-          <h3>Summary</h3>
+        <aside class="cart-summary" aria-label="Cart summary">
+          <h2>Order summary</h2>
           <div class="cart-summary-line"><span>Items</span><strong id="cartSummaryCount">0</strong></div>
           <div class="cart-summary-line"><span>Subtotal</span><strong id="cartSubtotal">AED 0.00</strong></div>
           <div class="cart-summary-line"><span>UAE delivery</span><strong id="cartShipping">AED 0.00</strong></div>
-          <div class="cart-summary-line"><span>Total</span><strong id="cartTotal">AED 0.00</strong></div>
+          <div class="cart-summary-line cart-summary-total"><span>Total</span><strong id="cartTotal">AED 0.00</strong></div>
           <div class="cart-summary-line"><span>Returns</span><strong>15 days</strong></div>
           <p class="cart-summary-note">AED 10 flat delivery across the UAE. Pay securely by card at checkout; delivery timing is confirmed before dispatch.</p>
           <div class="cart-summary-actions">
@@ -88,23 +92,23 @@
       </div>
     </section>
 
-    <section class="sec" aria-labelledby="cartRecommendedTitle">
+    <section class="sec cart-recommendations" aria-labelledby="cartRecommendedTitle">
       <p class="eyebrow">Recommended Sets</p>
-      <h2 class="section-title" id="cartRecommendedTitle">Choose your 4-piece color.</h2>
+      <h2 class="section-title" id="cartRecommendedTitle">Explore more sets</h2>
       <div class="grid-3" data-pf-catalog-grid="recommendations">
-        <a class="product-card cart-product-card product-card-grey" href="pureform-product-detail.html?product=pureform-4pc-set-grey" data-animate>
+        <a class="product-card cart-product-card product-card-grey" href="pureform-product-detail.html?product=pureform-4pc-set-grey">
           <img src="https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png" alt="Grey 4-piece silicone brush set" loading="lazy" decoding="async">
           <div class="color-row"><span class="color-dot color-dot-grey" aria-hidden="true"></span><span>Grey Set</span></div>
           <h3 class="card-title">Grey 4-Piece Silicone Brush Set</h3>
           <p class="card-text">A clean neutral finish for the complete PureForm shower routine.</p>
         </a>
-        <a class="product-card cart-product-card product-card-black" href="pureform-product-detail.html?product=pureform-4pc-set-black" data-animate>
+        <a class="product-card cart-product-card product-card-black" href="pureform-product-detail.html?product=pureform-4pc-set-black">
           <img src="assets/pureform-body-brush.png" alt="Black PureForm silicone body brush" loading="lazy" decoding="async">
           <div class="color-row"><span class="color-dot color-dot-black" aria-hidden="true"></span><span>Black Set</span></div>
           <h3 class="card-title">Black 4-Piece Silicone Brush Set</h3>
           <p class="card-text">The same four silicone tools in a clean Black finish.</p>
         </a>
-        <a class="product-card cart-product-card product-card-pink" href="pureform-product-detail.html?product=pureform-4pc-set-pink" data-animate>
+        <a class="product-card cart-product-card product-card-pink" href="pureform-product-detail.html?product=pureform-4pc-set-pink">
           <img src="assets/pureform-face-brush.png" alt="Pink PureForm silicone face brush" loading="lazy" decoding="async">
           <div class="color-row"><span class="color-dot color-dot-pink" aria-hidden="true"></span><span>Pink Set</span></div>
           <h3 class="card-title">Pink 4-Piece Silicone Brush Set</h3>
@@ -123,52 +127,21 @@
     <a class="cart-sticky-button" id="cartStickyCheckoutLink" href="checkout.html">Checkout</a>
   </aside>
 
-  <footer class="site-footer">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-logo">PureForm</div>
-        <p class="card-text">Soft silicone. Daily clean. Better reach.</p>
+  <footer class="retail-footer">
+    <div class="retail-wrap">
+      <div class="retail-footer-grid">
+        <div><a class="retail-footer-brand" href="index.html">PureForm</a><p>Soft silicone. Daily clean. Better reach.</p><p>United Arab Emirates &middot; AED<br>Card payments only</p></div>
+        <div><h2>Shop &amp; discover</h2><ul><li><a href="products.html">All shower sets</a></li><li><a href="index.html#included">What's included</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="about.html">About PureForm</a></li></ul></div>
+        <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#returns">Returns &amp; refunds</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
+        <div><h2>Get in touch</h2><ul><li><a href="mailto:buyx.dxb@gmail.com">buyx.dxb@gmail.com</a></li><li><a href="https://t.me/Pureforbot">Telegram support</a></li><li><a href="policy.html#privacy">Privacy</a></li><li><a href="policy.html#terms">Store terms</a></li></ul></div>
       </div>
-      <ul class="footer-links">
-        <li><a href="products.html">Products</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="reviews.html">Reviews</a></li>
-        <li><a href="policy.html">Policy</a></li>
-        <li><a href="faq.html">FAQ</a></li>
-        <li><a href="contact.html">Contact</a></li>
-      </ul>
+      <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>AED 10 UAE delivery &middot; 15-day returns on unused items</span></div>
     </div>
   </footer>
 
   <script src="assets/pureform-supabase-config.js"></script>
   <script src="assets/pureform-public-catalog.js"></script>
   <script src="assets/pureform-cart.js"></script>
-  <script>
-    (function () {
-      var animatedItems = document.querySelectorAll('[data-animate]');
-
-      if (!('IntersectionObserver' in window)) {
-        animatedItems.forEach(function (item) {
-          item.classList.add('is-visible');
-        });
-        return;
-      }
-
-      var observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.16, rootMargin: '0px 0px -48px 0px' });
-
-      animatedItems.forEach(function (item, index) {
-        item.style.setProperty('--stagger', (index % 4) * 80 + 'ms');
-        observer.observe(item);
-      });
-    })();
-  </script>
   <script>
     (function () {
       'use strict';

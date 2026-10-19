@@ -117,7 +117,7 @@ test('native CSS opts in, keeps header snapshots stationary and opts out for red
 });
 
 test('all participating storefront pages wait for their main markup without opting admin or recovery in', () => {
-  const files = ['index.html', 'products.html', 'pureform-product-detail.html', 'about.html', 'reviews.html', 'faq.html', 'policy.html', 'contact.html', 'cart.html', 'checkout.html'];
+  const files = ['index.html', 'products.html', 'pureform-product-detail.html', 'about.html', 'reviews.html', 'policy.html', 'contact.html', 'cart.html', 'checkout.html'];
   for (const file of files) {
     const html = readFileSync(path.join(root, file), 'utf8');
     const head = html.slice(0, html.indexOf('</head>'));
@@ -129,7 +129,7 @@ test('all participating storefront pages wait for their main markup without opti
     assert.equal((html.match(/src="assets\/pureform-page-transitions\.js"/g) || []).length, 1, file);
     assert.equal((html.match(/src="assets\/pureform-mobile-menu\.js"/g) || []).length, 1, file);
   }
-  for (const file of ['admin/index.html', 'admin/dashboard.html', 'admin/reset-password.html']) {
+  for (const file of ['admin/index.html', 'admin/dashboard.html', 'admin/reset-password.html', 'faq.html']) {
     assert.doesNotMatch(readFileSync(path.join(root, file), 'utf8'), /pureform-page-transitions/, file);
   }
 });

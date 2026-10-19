@@ -20,9 +20,10 @@
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
+  <link rel="stylesheet" href="assets/pureform-retail.css">
 </head>
 
-<body>
+<body class="retail-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
   <nav class="site-header" aria-label="Primary navigation">
     <div class="promo-bar">
@@ -34,10 +35,11 @@
     </div>
     <div class="nav-main">
       <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
         <li><a href="products.html">Shop</a></li>
-        <li><a href="index.html#included">The set</a></li>
         <li><a href="reviews.html">Reviews</a></li>
-        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="policy.html">Policies &amp; FAQ</a></li>
       </ul>
       <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
       <div class="nav-actions" aria-label="Shop utilities">
@@ -52,29 +54,20 @@
   </nav>
 
   <main id="main-content">
-    <section class="page-hero compact">
-      <div>
-        <p class="eyebrow">Contact</p>
-        <h1>Ask before you order.</h1>
-        <p class="lead">Use this page for order questions, delivery support, product help, or return requests.</p>
-      </div>
-      <div class="hero-media">
-        <img src="assets/pureform-back-scrubber.png" alt="PureForm back scrubber">
-      </div>
-    </section>
+    <nav class="retail-breadcrumb" aria-label="Breadcrumb"><ol><li><a href="index.html">Home</a></li><li aria-current="page">Customer support</li></ol></nav>
+    <header class="retail-heading retail-wrap"><h1>Customer support</h1><p>Help with your set, delivery, an existing order or a return.</p></header>
 
     <section class="sec">
-      <div class="grid-2">
+      <div class="support-layout">
         <div>
           <p class="eyebrow">Message PureForm</p>
-          <h2 class="section-title">We will help with the next step.</h2>
+          <h2 class="section-title">How can we help?</h2>
           <ul class="detail-list">
             <li><strong>Email</strong> Send order and support messages to <a href="mailto:buyx.dxb@gmail.com">buyx.dxb@gmail.com</a>.</li>
-            <li><strong>Start an order</strong> Choose a set color, bundle size, and delivery city so the first reply can be specific.</li>
-            <li><strong>Order support</strong> Include the order name, phone number, and delivery city.</li>
-            <li><strong>Product help</strong> Ask about which brush to use for body, scalp, face, or back care.</li>
-            <li><strong>Returns</strong> Send a clear photo if the product arrived damaged or incorrect.</li>
+            <li><strong>Telegram</strong> Message <a href="https://t.me/Pureforbot">@Pureforbot</a> and send /support followed by your question.</li>
+            <li><strong>Existing order?</strong> Include your order number, name and delivery city. For a damaged or incorrect item, include a clear photo.</li>
           </ul>
+          <div class="retail-support-links"><a href="policy.html#faq">Common questions</a><a href="policy.html#delivery">Delivery</a><a href="policy.html#returns">Returns</a></div>
         </div>
         <form class="form-grid" id="message" action="mailto:buyx.dxb@gmail.com" method="post" enctype="text/plain">
           <div class="form-row">
@@ -120,7 +113,7 @@
                 <option value="pureform-4pc-set-grey">Grey 4-Piece Silicone Brush Set</option>
                 <option value="pureform-4pc-set-black">Black 4-Piece Silicone Brush Set</option>
                 <option value="pureform-4pc-set-pink">Pink 4-Piece Silicone Brush Set</option>
-                <option value="mixed-colors">Mixed colors / Three Set Family Bundle</option>
+                <option value="mixed-colors">Mixed colors</option>
                 <option value="back-scrubber">Long Handle Back Scrubber</option>
                 <option value="body-brush">Silicone Body Brush</option>
                 <option value="scalp-massager">Silicone Scalp Massager</option>
@@ -131,11 +124,11 @@
 
           <div class="form-row">
             <div class="form-field">
-              <label for="order-bundle">Bundle</label>
+              <label for="order-bundle">Number of sets</label>
               <select id="order-bundle" name="bundle" autocomplete="off">
-                <option value="single">Single Set - AED 87.78</option>
-                <option value="two">Two Sets - AED 164.00</option>
-                <option value="three">Three Sets - AED 228.00</option>
+                <option value="single">1 set</option>
+                <option value="two">2 sets</option>
+                <option value="three">3 sets</option>
                 <option value="question">Not sure yet</option>
               </select>
             </div>
@@ -151,19 +144,15 @@
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-logo">PureForm</div>
-        <p class="card-text">Soft silicone. Daily clean. Better reach.</p>
+  <footer class="retail-footer">
+    <div class="retail-wrap">
+      <div class="retail-footer-grid">
+        <div><a class="retail-footer-brand" href="index.html">PureForm</a><p>Soft silicone. Daily clean. Better reach.</p><p>United Arab Emirates &middot; AED<br>Card payments only</p></div>
+        <div><h2>Shop &amp; discover</h2><ul><li><a href="products.html">All shower sets</a></li><li><a href="index.html#included">What's included</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="about.html">About PureForm</a></li></ul></div>
+        <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#returns">Returns &amp; refunds</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
+        <div><h2>Get in touch</h2><ul><li><a href="mailto:buyx.dxb@gmail.com">buyx.dxb@gmail.com</a></li><li><a href="https://t.me/Pureforbot">Telegram support</a></li><li><a href="policy.html#privacy">Privacy</a></li><li><a href="policy.html#terms">Store terms</a></li></ul></div>
       </div>
-      <ul class="footer-links">
-        <li><a href="products.html">Products</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="reviews.html">Reviews</a></li>
-        <li><a href="policy.html">Policy</a></li>
-        <li><a href="faq.html">FAQ</a></li>
-      </ul>
+      <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>AED 10 UAE delivery &middot; 15-day returns on unused items</span></div>
     </div>
   </footer>
   <script src="assets/pureform-cart.js"></script>

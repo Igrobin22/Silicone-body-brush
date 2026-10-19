@@ -21,7 +21,7 @@
 
   window.addEventListener('pagereveal', function (event) {
     if (!event.viewTransition || reduceMotion.matches) return;
-    // Prepare visible content before the incoming snapshot, without a second reveal.
+    // Prepare the incoming snapshot; section keyframes still run once per node.
     Array.prototype.forEach.call(document.querySelectorAll('[data-flow-reveal]'), function (item) {
       var bounds = item.getBoundingClientRect();
       if (bounds.bottom > 0 && bounds.top < window.innerHeight) {

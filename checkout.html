@@ -20,9 +20,10 @@
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
+  <link rel="stylesheet" href="assets/pureform-retail.css">
 </head>
 
-<body>
+<body class="retail-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
   <nav class="site-header" aria-label="Primary navigation">
     <div class="promo-bar">
@@ -34,10 +35,11 @@
     </div>
     <div class="nav-main">
       <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
         <li><a href="products.html">Shop</a></li>
-        <li><a href="index.html#included">The set</a></li>
         <li><a href="reviews.html">Reviews</a></li>
-        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="policy.html">Policies &amp; FAQ</a></li>
       </ul>
       <a class="nav-logo" href="index.html" aria-label="PureForm home">PureForm</a>
       <div class="nav-actions" aria-label="Shop utilities">
@@ -52,9 +54,11 @@
   </nav>
 
   <main id="main-content" class="checkout-page">
+    <nav class="retail-breadcrumb" aria-label="Breadcrumb"><ol><li><a href="index.html">Home</a></li><li><a href="cart.html">Cart</a></li><li aria-current="page">Checkout</li></ol></nav>
+    <header class="retail-heading retail-wrap"><h1 id="checkoutTitle">Checkout</h1><p>Enter your UAE delivery details. Card payment is completed securely with Stripe.</p></header>
+    <ol class="retail-steps retail-wrap" aria-label="Order progress"><li><a href="cart.html"><span class="retail-step-number" aria-hidden="true">1</span>Cart</a></li><li aria-current="step"><span class="retail-step-number" aria-hidden="true">2</span>Delivery</li><li><span class="retail-step-number" aria-hidden="true">3</span>Card payment</li></ol>
     <div class="checkout-shell">
       <section class="checkout-panel" aria-labelledby="checkoutTitle">
-        <h1 class="sr-only" id="checkoutTitle">Complete your PureForm order</h1>
 
         <form class="checkout-form" id="checkoutForm">
           <section class="checkout-step" aria-labelledby="contactTitle">
@@ -185,6 +189,17 @@
       </aside>
     </div>
   </main>
+  <footer class="retail-footer">
+    <div class="retail-wrap">
+      <div class="retail-footer-grid">
+        <div><a class="retail-footer-brand" href="index.html">PureForm</a><p>Soft silicone. Daily clean. Better reach.</p><p>United Arab Emirates &middot; AED<br>Card payments only</p></div>
+        <div><h2>Shop &amp; discover</h2><ul><li><a href="products.html">All shower sets</a></li><li><a href="index.html#included">What's included</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="about.html">About PureForm</a></li></ul></div>
+        <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#returns">Returns &amp; refunds</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
+        <div><h2>Get in touch</h2><ul><li><a href="mailto:buyx.dxb@gmail.com">buyx.dxb@gmail.com</a></li><li><a href="https://t.me/Pureforbot">Telegram support</a></li><li><a href="policy.html#privacy">Privacy</a></li><li><a href="policy.html#terms">Store terms</a></li></ul></div>
+      </div>
+      <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>AED 10 UAE delivery &middot; 15-day returns on unused items</span></div>
+    </div>
+  </footer>
 
   <script src="assets/pureform-supabase-config.js"></script>
   <script src="assets/pureform-public-catalog.js"></script>
