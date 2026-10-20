@@ -2,6 +2,11 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
 export const env = (name: string) => Deno.env.get(name)?.trim() || '';
 export const uaeShippingTotal = 10;
+export const freeShippingMinSets = 2;
+
+export function shippingForQuantity(quantity: number) {
+  return quantity > 0 && quantity < freeShippingMinSets ? uaeShippingTotal : 0;
+}
 
 export function siteUrl() {
   const value = env('SITE_URL').replace(/\/+$/, '');

@@ -281,7 +281,26 @@
 
   function getShippingTotal(items) {
     var fee = Number((window.PUREFORM_SUPABASE_CONFIG || {}).shippingFeeAED);
-    return getCount(items) ? (Number.isFinite(fee) && fee >= 0 ? fee : 10) : 0;
+    var count = getCount(items);
+    return count > 0 && count < 2 ? (Number.isFinite(fee) && fee >= 0 ? fee : 10) : 0;
+  }
+
+  function addItems(items) {
+    if (!Array.isArray(items) || !items.length) return false;
+    var next = getCart().map(function (item) { return { id: item.id, quantity: item.quantity }; });
+    for (var i = 0; i < items.length; i++) {
+      if (!items[i] || typeof items[i] !== 'object') return false;
+      var id = normalizeId(items[i].id);
+      var quantity = items[i].quantity;
+      if (!id || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) return false;
+      var existing = next.find(function (item) { return item.id === id; });
+      var desired = (existing ? existing.quantity : 0) + quantity;
+      if (desired > 20 || desired > getMaxQuantity(catalog[id])) return false;
+      if (existing) existing.quantity = desired;
+      else next.push({ id: id, quantity: quantity });
+    }
+    saveCart(next);
+    return true;
   }
 
   function getTotal(items) {
@@ -318,6 +337,7 @@
 
   window.PureFormCart = {
     addItem: addItem,
+    addItems: addItems,
     catalog: catalog,
     clearCart: clearCart,
     formatAED: formatAED,
@@ -352,5 +372,12 @@
   window.addEventListener('pureform:catalog-ready', function (event) {
     setCatalog(event.detail && event.detail.catalog);
     window.PureFormCart.catalog = catalog;
+  });
+  window.addEventListener('pureform:catalog-refresh', function (event) {
+    var next = event.detail && event.detail.catalog;
+    if (next && JSON.stringify(next) !== JSON.stringify(catalog)) {
+      setCatalog(next);
+      window.PureFormCart.catalog = catalog;
+    }
   });
 })();

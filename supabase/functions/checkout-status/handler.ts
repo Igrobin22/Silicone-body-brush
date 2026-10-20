@@ -1,11 +1,11 @@
-import { confirmPaidSession, database, json, originAllowed, corsHeaders, paymentConfigurationReady, stripeRequest, uaeShippingTotal } from '../_shared/payments.ts';
+import { confirmPaidSession, database, json, originAllowed, corsHeaders, paymentConfigurationReady, stripeRequest, uaeShippingTotal, freeShippingMinSets } from '../_shared/payments.ts';
 
 export async function handler(request: Request) {
   if (!originAllowed(request)) return json(request, { error: 'Storefront origin is not allowed.' }, 403);
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
   if (request.method === 'GET') {
     const configured = paymentConfigurationReady();
-    return json(request, { configured, shipping_total: uaeShippingTotal, currency: 'AED' }, configured ? 200 : 503);
+    return json(request, { configured, shipping_total: uaeShippingTotal, free_shipping_min_sets: freeShippingMinSets, currency: 'AED' }, configured ? 200 : 503);
   }
   if (request.method !== 'POST') return json(request, { error: 'Use POST to verify payment.' }, 405);
   if (!paymentConfigurationReady()) return json(request, { error: 'Secure card checkout is not configured yet.' }, 503);

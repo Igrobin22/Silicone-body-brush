@@ -1,4 +1,4 @@
-import { confirmPaidSession, corsHeaders, database, env, isSettledSession, json, originAllowed, paymentConfigurationReady, siteUrl as configuredSiteUrl, StripeRequestError, stripeRequest, uaeShippingTotal } from '../_shared/payments.ts';
+import { confirmPaidSession, corsHeaders, database, env, isSettledSession, json, originAllowed, paymentConfigurationReady, siteUrl as configuredSiteUrl, StripeRequestError, stripeRequest, shippingForQuantity } from '../_shared/payments.ts';
 import type { CheckoutSession } from '../_shared/payments.ts';
 
 type CheckoutLine = {
@@ -320,6 +320,7 @@ async function createCheckout(request: Request) {
     }
   }
 
+  const shippingTotal = shippingForQuantity(orderItems.reduce((sum, item) => sum + item.quantity, 0));
   const orderNumber = makeOrderNumber();
   const orderPayload = {
     order_number: orderNumber,
@@ -341,8 +342,8 @@ async function createCheckout(request: Request) {
     customer_notes: customerNotes,
     line_items: orderItems,
     subtotal,
-    shipping_total: uaeShippingTotal,
-    total: subtotal + uaeShippingTotal,
+    shipping_total: shippingTotal,
+    total: subtotal + shippingTotal,
     currency: 'AED',
     source: /^[sr]k_test_/.test(env('STRIPE_SECRET_KEY')) ? 'stripe_sandbox' : 'website',
   };
@@ -368,9 +369,9 @@ async function createCheckout(request: Request) {
   params.set('phone_number_collection[enabled]', 'true');
   params.set('shipping_address_collection[allowed_countries][0]', 'AE');
   params.set('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');
-  params.set('shipping_options[0][shipping_rate_data][fixed_amount][amount]', String(uaeShippingTotal * 100));
+  params.set('shipping_options[0][shipping_rate_data][fixed_amount][amount]', String(shippingTotal * 100));
   params.set('shipping_options[0][shipping_rate_data][fixed_amount][currency]', 'aed');
-  params.set('shipping_options[0][shipping_rate_data][display_name]', 'UAE delivery');
+  params.set('shipping_options[0][shipping_rate_data][display_name]', shippingTotal === 0 ? 'Free UAE delivery - 2+ sets' : 'UAE delivery');
   params.set('metadata[order_id]', order.id);
   params.set('metadata[order_number]', order.order_number);
   params.set('payment_intent_data[metadata][order_id]', order.id);

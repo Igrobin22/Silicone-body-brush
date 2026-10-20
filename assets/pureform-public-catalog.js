@@ -82,8 +82,11 @@
   var state = {
     listings: normalizeListings(fallbackListings),
     source: 'fallback',
-    ready: false
+    ready: false,
+    sales: null
   };
+  var refreshPromise = null;
+  var publicClient;
 
   function toNumber(value, fallback) {
     var numeric = Number(value);
@@ -222,7 +225,7 @@
       fit: [
         'Complete 4-piece set for face, scalp, body, and back care.',
         'Soft silicone bristles rinse clean after use.',
-        'AED 10 delivery per order across the UAE.'
+        'Free UAE delivery with 2+ sets. One set: AED 10 delivery.'
       ]
     };
   }
@@ -317,6 +320,34 @@
     return item.inventoryStatusText;
   }
 
+  function liveStatusText(item) {
+    if (state.source !== 'supabase') return '';
+    var stock = item.inventory_quantity > 0 && item.inventory_status !== 'out_of_stock'
+      ? item.inventory_quantity + ' available' : 'Out of stock';
+    var sales = state.sales && state.sales[item.id];
+    return stock + (sales ? ' / ' + sales.total_sold + ' sold / ' + sales.sold_this_week + ' this week' : '');
+  }
+
+  function appendLiveStatus(parent, item) {
+    var status = createElement('p', 'pf-live-product-status', liveStatusText(item));
+    status.setAttribute('data-pf-live-status', item.id);
+    status.hidden = !status.textContent;
+    parent.appendChild(status);
+  }
+
+  function updateLiveStatus() {
+    document.querySelectorAll('[data-pf-live-status]').forEach(function (node) {
+      var item = state.listings.find(function (listing) { return listing.id === node.getAttribute('data-pf-live-status'); });
+      node.textContent = item ? liveStatusText(item) : '';
+      node.hidden = !node.textContent;
+    });
+    document.querySelectorAll('[data-pf-product]').forEach(function (node) {
+      var item = state.listings.find(function (listing) { return listing.id === node.getAttribute('data-pf-product'); });
+      var badge = node.querySelector('.pcard-sale, .collection-badge');
+      if (item && badge) badge.textContent = inventoryBadgeText(item);
+    });
+  }
+
   function renderHomeCards(root, listings) {
     if (!root) return;
 
@@ -333,6 +364,7 @@
       var tag = createElement('span', 'pcard-tag', 'View ' + item.color + ' set');
 
       card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
+      card.setAttribute('data-pf-product', item.id);
       card.setAttribute('aria-label', 'View ' + item.name + ' details');
       img.src = item.image;
       img.width = 700;
@@ -353,6 +385,7 @@
       card.appendChild(name);
       card.appendChild(price);
       card.appendChild(tag);
+      appendLiveStatus(card, item);
       root.appendChild(card);
     });
   }
@@ -372,6 +405,7 @@
       var meta = createElement('div', 'collection-card-meta', item.meta);
 
       card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
+      card.setAttribute('data-pf-product', item.id);
       img.src = item.image;
       img.width = 700;
       img.height = 700;
@@ -386,6 +420,7 @@
       card.appendChild(media);
       card.appendChild(info);
       card.appendChild(meta);
+      appendLiveStatus(card, item);
       root.appendChild(card);
     });
   }
@@ -418,6 +453,7 @@
       card.appendChild(title);
       card.appendChild(copy);
       card.appendChild(price);
+      appendLiveStatus(card, item);
       root.appendChild(card);
     });
   }
@@ -583,14 +619,17 @@
       return state.listings;
     }
 
-    supabaseModule = await import(SUPABASE_CDN);
-    client = supabaseModule.createClient(config.url, config.anonKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false
-      }
-    });
+    if (!publicClient) {
+      supabaseModule = await import(SUPABASE_CDN);
+      publicClient = supabaseModule.createClient(config.url, config.anonKey, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false
+        }
+      });
+    }
+    client = publicClient;
     result = await client
       .from('site_listings')
       .select('id,slug,name,description,price,discount,discount_mode,discount_starts_at,discount_ends_at,inventory_quantity,inventory_status,visible,photo_urls,sort_order,updated_at')
@@ -603,14 +642,25 @@
       throw result.error;
     }
 
+    try {
+      var salesResult = await client.rpc('get_public_sales_totals');
+      state.sales = !salesResult.error && Array.isArray(salesResult.data) ? salesResult.data.reduce(function (totals, row) {
+        if (OFFICIAL_SLUGS.includes(row.slug) && Number.isSafeInteger(Number(row.total_sold)) && Number(row.total_sold) >= 0 &&
+            Number.isSafeInteger(Number(row.sold_this_week)) && Number(row.sold_this_week) >= 0 && Number(row.sold_this_week) <= Number(row.total_sold)) {
+          totals[row.slug] = { total_sold: Number(row.total_sold), sold_this_week: Number(row.sold_this_week) };
+        }
+        return totals;
+      }, Object.create(null)) : null;
+    } catch (_error) { state.sales = null; }
+
     listings = normalizeListings(result.data);
-    return listings.length ? listings : state.listings;
+    return listings;
   }
 
   var readyPromise = fetchListings()
     .then(function (listings) {
       state.listings = listings;
-      state.source = 'supabase';
+      state.source = config.url && config.anonKey ? 'supabase' : 'fallback';
     })
     .catch(function (error) {
       state.source = 'fallback';
@@ -636,10 +686,55 @@
     getProduct: getProduct,
     isDiscountActive: isDiscountActive,
     resolveSlug: canonicalSlug,
-    renderPage: renderPage
+    renderPage: renderPage,
+    refresh: refreshCatalog,
+    updateLiveStatus: updateLiveStatus,
+    isFresh: function () { return state.source === 'supabase'; }
   };
 
+  function refreshCatalog() {
+    if (!state.ready) return readyPromise.then(refreshCatalog);
+    if (refreshPromise) return refreshPromise;
+    if (!config.url || !config.anonKey || document.visibilityState === 'hidden') return Promise.resolve();
+    refreshPromise = fetchListings().then(function (listings) {
+      var before = JSON.stringify(state.listings.map(function (item) { return [item.id, item.name, item.price, item.regularPrice, item.discountLabel, item.images, item.description]; }));
+      var after = JSON.stringify(listings.map(function (item) { return [item.id, item.name, item.price, item.regularPrice, item.discountLabel, item.images, item.description]; }));
+      state.listings = listings;
+      state.source = 'supabase';
+      var collection = document.querySelector('[data-pf-catalog-grid="collection"]');
+      var stockFilter = document.querySelector('[data-pf-in-stock]');
+      var stockFilterChanged = collection && stockFilter && stockFilter.checked &&
+        Array.from(collection.querySelectorAll('[data-pf-product]')).map(function (node) { return node.getAttribute('data-pf-product'); }).join(',') !==
+        getCollectionListings(listings).map(function (item) { return item.id; }).join(',');
+      if (before !== after || stockFilterChanged) {
+        renderPage();
+        announceReady();
+      } else {
+        updateLiveStatus();
+        updateHomePrice(listings);
+        window.dispatchEvent(new CustomEvent('pureform:catalog-refresh', { detail: { catalog: getCatalogSync(), listings: getListingsSync() } }));
+      }
+    }).catch(function () {
+      state.source = 'fallback';
+      state.sales = null;
+      document.querySelectorAll('[data-pf-live-status]').forEach(function (node) { node.hidden = true; });
+      window.dispatchEvent(new CustomEvent('pureform:catalog-refresh', { detail: { catalog: getCatalogSync(), listings: getListingsSync() } }));
+    }).finally(function () { refreshPromise = null; });
+    return refreshPromise;
+  }
+
+  if (config.url && config.anonKey && window.setInterval) {
+    window.setInterval(refreshCatalog, 30000);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') refreshCatalog(); });
+    window.addEventListener('pageshow', function (event) { if (event.persisted) refreshCatalog(); });
+  }
+
   setupCollectionControls();
+
+  if (window.location && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname) &&
+      new URLSearchParams(window.location.search).get('demo') === 'activity') {
+    import('./pureform-activity-demo.js').catch(function () { /* Optional local preview only. */ });
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', renderPage);

@@ -33,9 +33,16 @@ const health = await check('Checkout configuration', base + '/functions/v1/check
 if (health) {
   const setup = await health.json();
   if (setup.configured !== true) { failures++; console.log('FAIL Checkout secrets or SITE_URL are incomplete'); }
-  const shippingReady = setup.currency === 'AED' && setup.shipping_total === config.shippingFeeAED;
+  const shippingReady = setup.currency === 'AED' && setup.shipping_total === config.shippingFeeAED && setup.free_shipping_min_sets === config.freeShippingMinSets;
   console.log(`${shippingReady ? 'PASS' : 'FAIL'} Server/storefront delivery agreement: ${shippingReady ? 'AED ' + setup.shipping_total : 'deploy the approved shipping configuration'}`);
   if (!shippingReady) failures++;
+}
+const sales = await check('Public aggregate sales totals', base + '/rest/v1/rpc/get_public_sales_totals', 200);
+if (sales) {
+  const rows = await sales.json();
+  if (!Array.isArray(rows) || rows.some(row => Object.keys(row).some(key => !['slug','total_sold','sold_this_week'].includes(key)))) {
+    failures++; console.log('FAIL Sales endpoint returned unexpected fields');
+  }
 }
 await check('Anonymous order access denied', base + '/rest/v1/site_orders?select=id&limit=0', [401, 403]);
 await check('Checkout creation requires Supabase JWT', base + '/functions/v1/create-checkout-session', 401, false);

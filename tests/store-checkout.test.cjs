@@ -34,7 +34,7 @@ function element() {
 }
 
 function fixture({ search = '', fetch = async () => ({ ok: true, json: async () => ({}) }), config = true,
-  setup = { configured: true, shipping_total: 10, currency: 'AED' },
+  setup = { configured: true, shipping_total: 10, free_shipping_min_sets: 2, currency: 'AED' },
   pendingCheckout = search === successQuery ? { order_number: order, items: [{ id: grey, quantity: 2 }] } : null,
   unavailableSessionStorage = false } = {}) {
   const ids = {};
@@ -348,13 +348,17 @@ test('cart quantities are capped at the server limit while admin prices drive to
   assert.equal(page.cart.formatAED(page.cart.getSubtotal()), 'AED 246.80');
 });
 
-test('delivery is AED 10 once per order, included in both checkout totals, and zero for an empty cart', () => {
+test('two or more sets waive AED 10 delivery in both checkout totals; one set still pays delivery', () => {
   const page = fixture();
-  assert.equal(page.cart.getShippingTotal(), 10);
-  assert.equal(page.cart.formatAED(page.cart.getTotal()), 'AED 97.78');
-  assert.equal(page.ids.checkoutShipping.textContent, 'AED 10.00');
-  assert.equal(page.ids.checkoutTotal.textContent, 'AED 97.78');
-  assert.equal(page.ids.checkoutMobileTotal.textContent, 'AED 97.78');
+  assert.equal(page.cart.getShippingTotal(), 0);
+  assert.equal(page.cart.formatAED(page.cart.getTotal()), 'AED 87.78');
+  assert.equal(page.ids.checkoutShipping.textContent, 'Free');
+  assert.equal(page.ids.checkoutTotal.textContent, 'AED 87.78');
+  assert.equal(page.ids.checkoutMobileTotal.textContent, 'AED 87.78');
+  page.cart.setQuantity(grey,1);
+  assert.equal(page.cart.getShippingTotal(),10);
+  assert.equal(page.ids.checkoutTotal.textContent,'AED 53.89');
+  assert.equal(page.ids.checkoutShipping.textContent,'AED 10.00');
   page.cart.clearCart();
   assert.equal(page.cart.getShippingTotal(), 0);
   assert.equal(page.cart.getTotal(), 0);
@@ -362,7 +366,7 @@ test('delivery is AED 10 once per order, included in both checkout totals, and z
 });
 
 test('checkout fails closed when deployed delivery configuration is missing or different', async () => {
-  for (const setup of [{ configured: true }, { configured: true, currency: 'AED', shipping_total: 0 }, { configured: false, currency: 'AED', shipping_total: 10 }]) {
+  for (const setup of [{ configured: true }, { configured:true,currency:'AED',shipping_total:10 }, { configured:true,currency:'AED',shipping_total:10,free_shipping_min_sets:3 }, { configured: true, currency: 'AED', shipping_total: 0 }, { configured: false, currency: 'AED', shipping_total: 10 }]) {
     const page = fixture({ setup });
     await page.submit();
     assert.equal(page.calls.length, 0);
@@ -372,7 +376,7 @@ test('checkout fails closed when deployed delivery configuration is missing or d
   }
 });
 
-test('cart controls honor the 20-set limit and its sticky total includes delivery', () => {
+test('cart controls honor the 20-set limit and sticky totals apply free combo delivery', () => {
   const page = fixture();
   page.runCart();
   page.cart.setQuantity(grey, 20);
@@ -380,7 +384,26 @@ test('cart controls honor the 20-set limit and its sticky total includes deliver
   const controls = all(page.ids.cartItemsList);
   assert.equal(controls.find(el => el.dataset.cartQuantity === grey).max, '20');
   assert.equal(controls.find(el => el.dataset.cartAction === 'increase').disabled, true);
-  assert.equal(page.ids.cartShipping.textContent, 'AED 10.00');
-  assert.equal(page.ids.cartTotal.textContent, 'AED 887.80');
-  assert.equal(page.ids.cartStickyTotal.textContent, 'AED 887.80');
+  assert.equal(page.ids.cartShipping.textContent, 'Free');
+  assert.equal(page.ids.cartTotal.textContent, 'AED 877.80');
+  assert.equal(page.ids.cartStickyTotal.textContent, 'AED 877.80');
+});
+
+test('combo additions are atomic and count matching or mixed colors toward free delivery',()=>{
+  const page=fixture();page.cart.clearCart();
+  const pink='pureform-4pc-set-pink';
+  assert.equal(page.cart.addItems([null]), false);
+  assert.equal(page.cart.getCount(), 0);
+  page.cart.setCatalog({[grey]:{...page.cart.catalog[grey],inventory_quantity:1},[pink]:{id:pink,name:'Pink',price:37.8,inventory_quantity:1}});
+  assert.equal(page.cart.addItems([{id:grey,quantity:1},{id:grey,quantity:1}]),false);
+  assert.equal(page.cart.getCount(),0);
+  assert.equal(page.cart.addItems([{id:grey,quantity:1},{id:pink,quantity:2}]),false);
+  assert.equal(page.cart.getCount(),0);
+  assert.equal(page.cart.addItems([{id:grey,quantity:1},{id:pink,quantity:1}]),true);
+  assert.equal(page.cart.getCount(),2);
+  assert.equal(page.cart.getShippingTotal(),0);
+  assert.equal(page.cart.addItems([{id:pink,quantity:1}]),false);
+  assert.equal(page.cart.getCount(),2);
+  page.cart.removeItem(pink);
+  assert.equal(page.cart.getShippingTotal(),10);
 });

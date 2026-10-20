@@ -10,7 +10,7 @@ const css = readFileSync(path.join(__dirname, '../assets/pureform-product.css'),
 function fixture() {
   const elements = new Map();
   function element(id) {
-    if (!elements.has(id)) elements.set(id, { textContent: '', hidden: false, classList: { toggle(name, value) { this[name] = value; } } });
+    if (!elements.has(id)) elements.set(id, { textContent: '', hidden: false, setAttribute(name,value) { this[name]=value; }, classList: { toggle(name, value) { this[name] = value; } } });
     return elements.get(id);
   }
   const product = {
@@ -19,6 +19,7 @@ function fixture() {
   };
   const context = vm.createContext({
     products: { pink: product }, fallbackId: 'pink', activeProductId: '', selectedQuantity: 2,
+    publicCatalog: { updateLiveStatus() {} },
     document: { getElementById: element, querySelector: element },
     productName: element('name'), productLead: element('lead'), productPrice: element('price'),
     productCompare: element('compare'), productSaving: element('saving'), productCare: element('care'),

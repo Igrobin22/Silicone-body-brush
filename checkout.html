@@ -133,7 +133,7 @@
             <div class="checkout-step-title">
               <h2 id="shippingTitle">Shipping method</h2>
             </div>
-            <div class="checkout-shipping-method" id="shippingMethod">AED 10 flat delivery across the UAE. Delivery timing is confirmed before dispatch.</div>
+            <div class="checkout-shipping-method" id="shippingMethod">Free UAE delivery with 2+ sets. One set: AED 10. Timing is confirmed before dispatch.</div>
           </section>
 
           <section class="checkout-step" aria-labelledby="paymentTitle">
@@ -197,7 +197,7 @@
         <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#returns">Returns &amp; refunds</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
         <div><h2>Get in touch</h2><ul><li><a href="mailto:buyx.dxb@gmail.com">buyx.dxb@gmail.com</a></li><li><a href="https://t.me/Pureforbot">Telegram support</a></li><li><a href="policy.html#privacy">Privacy</a></li><li><a href="policy.html#terms">Store terms</a></li></ul></div>
       </div>
-      <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>AED 10 UAE delivery &middot; 15-day returns on unused items</span></div>
+      <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>Free UAE delivery with 2+ sets &middot; 15-day returns on unused items</span></div>
     </div>
   </footer>
 
@@ -278,7 +278,8 @@
         var items = cart.getLineItems();
         var subtotal = cart.getSubtotal();
         var total = cart.getTotal();
-        shippingNode.textContent = cart.formatAED(cart.getShippingTotal());
+        shippingNode.textContent = cart.getCount() >= 2 ? 'Free' : cart.formatAED(cart.getShippingTotal());
+        updateShippingCopy();
 
         summaryList.replaceChildren();
 
@@ -348,12 +349,8 @@
       function updateShippingCopy() {
         var city = cityInput.value.trim();
 
-        if (!city) {
-          shippingMethod.textContent = 'AED 10 flat delivery across the UAE. Delivery timing is confirmed before dispatch.';
-          return;
-        }
-
-        shippingMethod.textContent = 'AED 10 flat UAE delivery. Timing for ' + city + ' is confirmed before dispatch.';
+        var rate = cart.getCount() >= 2 ? 'Free UAE delivery for 2+ sets. You save AED 10.' : 'AED 10 UAE delivery. Free when you buy 2 or more sets.';
+        shippingMethod.textContent = rate + (city ? ' Timing for ' + city + ' is confirmed before dispatch.' : ' Timing is confirmed before dispatch.');
       }
 
       function getOrderItems() {
@@ -448,7 +445,7 @@
           signal: AbortSignal.timeout(15000)
         });
         var setup = await setupResponse.json();
-        if (!setupResponse.ok || setup.configured !== true || setup.currency !== 'AED' || setup.shipping_total !== cart.getShippingTotal()) {
+        if (!setupResponse.ok || setup.configured !== true || setup.currency !== 'AED' || setup.shipping_total !== 10 || setup.free_shipping_min_sets !== 2) {
           throw new Error('Delivery settings are being updated. Please contact support before paying.');
         }
 

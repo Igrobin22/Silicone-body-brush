@@ -5,5 +5,6 @@ window.PUREFORM_SUPABASE_CONFIG = {
   country: 'United Arab Emirates',
   currency: 'AED',
   shippingFeeAED: 10,
+  freeShippingMinSets: 2,
   paymentProvider: 'stripe'
 };

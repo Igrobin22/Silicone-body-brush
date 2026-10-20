@@ -69,6 +69,7 @@
         <a class="pdp-brand" href="products.html">Shop PureForm</a>
         <h1 id="productName">Grey 4-Piece Silicone Brush Set</h1>
         <div class="pdp-item-meta"><span id="productItem">4-piece set &middot; Grey</span><a href="#productReviews">3 photo reviews</a><span class="pdp-status" role="status">In stock</span></div>
+        <p class="pf-live-product-status" id="productSalesStatus" hidden></p>
       </div>
       <div class="pdp-buy">
         <div class="pdp-pricing">
@@ -85,7 +86,7 @@
         </div>
         <div class="pdp-delivery">
           <h2>Delivery</h2>
-          <p><strong>AED 10 across the UAE</strong> &middot; Once per order</p>
+          <p><strong>Free with 2+ sets</strong> &middot; One set: AED 10 across the UAE</p>
           <p id="availabilityLine">In stock &middot; Delivery timing confirmed by city</p>
           <a href="policy.html#delivery">Delivery details</a>
         </div>
@@ -112,8 +113,9 @@
     </section>
 
     <div class="pdp-container">
+      <aside class="pf-combo-card" data-pf-combo aria-label="Two-set combo" hidden></aside>
       <div class="pdp-benefits" aria-label="PureForm order information">
-        <a href="policy.html#delivery"><strong>UAE delivery</strong><span>AED 10 per order</span></a>
+        <a href="policy.html#delivery"><strong>Free delivery with 2+ sets</strong><span>One set: AED 10</span></a>
         <a href="policy.html#returns"><strong>15-day returns</strong><span>Unused items, in original packaging</span></a>
         <a href="contact.html"><strong>Customer support</strong><span>Help with your set or order</span></a>
       </div>
@@ -149,7 +151,7 @@
         <details id="productDelivery">
           <summary><h2>Delivery &amp; returns</h2></summary>
           <div class="pdp-details-body pdp-care-copy">
-            <p><strong>UAE only.</strong> AED 10 delivery per order, regardless of the number of sets. Delivery timing is confirmed for your city.</p>
+            <p><strong>UAE only.</strong> Free delivery with any 2 or more sets; one set has an AED 10 delivery fee. Delivery timing is confirmed for your city.</p>
             <p><strong>15-day returns.</strong> Items must be unused and in their original packaging. <a href="policy.html#returns">Read the return policy</a>.</p>
             <p id="productPriceNote">Your price is shown in AED. Card details are handled by the hosted payment gateway.</p>
             <p>Need help? <a href="contact.html">Contact PureForm support</a>.</p>
@@ -226,13 +228,14 @@
         <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#returns">Returns &amp; refunds</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
         <div><h2>Get in touch</h2><ul><li><a href="mailto:buyx.dxb@gmail.com">buyx.dxb@gmail.com</a></li><li><a href="https://t.me/Pureforbot">Telegram support</a></li><li><a href="policy.html#privacy">Privacy</a></li><li><a href="policy.html#terms">Store terms</a></li></ul></div>
       </div>
-      <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>AED 10 UAE delivery &middot; 15-day returns on unused items</span></div>
+      <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>Free UAE delivery with 2+ sets &middot; 15-day returns on unused items</span></div>
     </div>
   </footer>
 
   <script src="assets/pureform-supabase-config.js"></script>
   <script src="assets/pureform-public-catalog.js"></script>
   <script src="assets/pureform-cart.js"></script>
+  <script src="assets/pureform-combo.js" defer></script>
   <script src="assets/pureform-store-flow.js"></script>
   <script>
     (function () {
@@ -573,6 +576,11 @@
           info.appendChild(title);
           info.appendChild(price);
           info.appendChild(meta);
+          var sales = document.createElement('p');
+          sales.className = 'pf-live-product-status';
+          sales.setAttribute('data-pf-live-status', product.id);
+          sales.hidden = true;
+          info.appendChild(sales);
           card.appendChild(media);
           card.appendChild(info);
           relatedProductsGrid.appendChild(card);
@@ -700,6 +708,7 @@
           priceNote += ' Discount applied from ' + product.regularPriceText + '.';
         }
         productName.textContent = product.name;
+        document.getElementById('productSalesStatus').setAttribute('data-pf-live-status', activeProductId);
         var status = document.querySelector('.pdp-status');
         status.textContent = isProductAvailable(product) ? 'In stock' : 'Out of stock';
         status.classList.toggle('is-unavailable', !isProductAvailable(product));
@@ -724,6 +733,7 @@
         setQuantity(selectedQuantity);
         updateStructuredData(activeProductId, product);
         document.title = product.name + ' | PureForm';
+        if (publicCatalog) publicCatalog.updateLiveStatus();
 
         if (pushState) {
           history.pushState({ product: activeProductId }, '', 'pureform-product-detail.html?product=' + encodeURIComponent(activeProductId));
@@ -761,6 +771,17 @@
 
       window.addEventListener('pureform:catalog-ready', function (event) {
         syncCatalog(event.detail && event.detail.catalog);
+      });
+      window.addEventListener('pureform:catalog-refresh', function (event) {
+        var next = event.detail && event.detail.catalog;
+        if (!next || !next[activeProductId]) return;
+        products = next;
+        availabilityLine.textContent = getAvailabilityText(products[activeProductId]);
+        var status = document.querySelector('.pdp-status');
+        status.textContent = isProductAvailable(products[activeProductId]) ? 'In stock' : 'Out of stock';
+        status.classList.toggle('is-unavailable', !isProductAvailable(products[activeProductId]));
+        setQuantity(selectedQuantity);
+        updateStructuredData(activeProductId, products[activeProductId]);
       });
 
       if (publicCatalog && publicCatalog.ready && typeof publicCatalog.ready.then === 'function') {

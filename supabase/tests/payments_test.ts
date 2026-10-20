@@ -65,9 +65,9 @@ Deno.test('secure checkout and signed payment handling', async (test) => {
     const options = init as RequestInit | undefined;
     calls.push({ path: url.pathname, query: url.searchParams, body: String(options?.body || ''), headers: new Headers(options?.headers) });
     const response = (value: unknown, code = 200) => Promise.resolve(new Response(JSON.stringify(value), { status: code, headers: { 'Content-Type': 'application/json' } }));
-    if (url.pathname === '/rest/v1/site_listings') return response([{
-      slug: 'pureform-4pc-set-grey', name: 'Grey set', description: 'Public product description', inventory_note: 'INTERNAL INVENTORY NOTE', price: 100, discount: 25, discount_mode: discountMode, discount_starts_at: discountStartsAt, discount_ends_at: discountEndsAt, inventory_quantity: 2, inventory_status: 'in_stock', photo_urls: [],
-    }]);
+    if (url.pathname === '/rest/v1/site_listings') return response(['grey','pink'].map(color=>({
+      slug: 'pureform-4pc-set-'+color, name: color+' set', description: 'Public product description', inventory_note: 'INTERNAL INVENTORY NOTE', price: 100, discount: 25, discount_mode: discountMode, discount_starts_at: discountStartsAt, discount_ends_at: discountEndsAt, inventory_quantity: 2, inventory_status: 'in_stock', photo_urls: [],
+    })));
     if (url.pathname === '/rest/v1/site_orders') {
       if (options?.method === 'PATCH' && String(options.body).includes('payment_session_id') && attachmentFailure) return response({ message: 'Attachment failed' }, 500);
       return response({ id: orderId, order_number: orderNumber });
@@ -139,9 +139,19 @@ Deno.test('secure checkout and signed payment handling', async (test) => {
       assert.equal(JSON.parse(attached.body).source, 'stripe_sandbox');
       assert(!('card_number' in saved));
     });
-    await test.step('public setup reports AED 10 shipping without exposing credentials', async () => {
+    await test.step('two validated sets waive delivery for matching, mixed or duplicate cart lines', async () => {
+      for (const line_items of [[{id:'grey',quantity:2}],[{id:'grey',quantity:1},{id:'pink',quantity:1}],[{id:'grey',quantity:1},{id:'grey',quantity:1}]]) {
+        calls.length=0;
+        assert.equal((await checkout(request({...payload,line_items,shipping_total:999,total:0.01}))).status,200);
+        const params=new URLSearchParams(calls.find(call=>call.path==='/v1/checkout/sessions')!.body);
+        const saved=JSON.parse(calls.find(call=>call.path==='/rest/v1/site_orders')!.body);
+        assert.equal(params.get('shipping_options[0][shipping_rate_data][fixed_amount][amount]'),'0');
+        assert.equal(saved.subtotal,150); assert.equal(saved.shipping_total,0); assert.equal(saved.total,150);
+      }
+    });
+    await test.step('public setup reports the full delivery policy without exposing credentials', async () => {
       const response = await status(new Request(site + '/checkout', { headers: { Origin: site } }));
-      assert.deepEqual(await response.json(), { configured: true, shipping_total: 10, currency: 'AED' });
+      assert.deepEqual(await response.json(), { configured: true, shipping_total: 10, free_shipping_min_sets: 2, currency: 'AED' });
     });
     await test.step('oversized bodies and durable rate limits fail before stock or gateway requests', async () => {
       calls.length = 0;
