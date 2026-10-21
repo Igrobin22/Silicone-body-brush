@@ -25,6 +25,23 @@ test('shared retail styles do not target or replace the homepage hero', () => {
   assert.match(read('index.html'), /<span>Soft touch\.<\/span><span><em>Deep clean\.<\/em><\/span><span>Every day\.<\/span>/);
 });
 
+test('all public pages and the announcement seed omit the removed fixed return-period promise', () => {
+  const removedClaim = /(?:15|fifteen)(?:[\s-]|&(?:nbsp|ndash|mdash);|[\u2010-\u2015])*days?\b/i;
+  for (const file of files.concat(['supabase/admin-schema.sql'])) {
+    assert.doesNotMatch(read(file), removedClaim, file);
+  }
+  for (const file of files) {
+    assert.match(read(file), /UAE delivery &middot; Card payments only/, file);
+  }
+  const policy = read('policy.html');
+  assert.match(policy, /id="returns"/);
+  assert.match(policy, /Return eligibility/);
+  assert.match(policy, /Contact support with your order number/);
+  assert.match(policy, /damaged or incorrect/);
+  assert.doesNotMatch(policy, /no returns|all sales are final/i);
+  assert.doesNotMatch(read('cart.html'), /<span>Returns<\/span>/);
+});
+
 test('secondary pages have breadcrumbs and exactly one visible main title', () => {
   for (const file of files.filter(file=>file!=='index.html')) {
     const html=read(file);

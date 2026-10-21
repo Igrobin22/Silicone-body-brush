@@ -625,7 +625,7 @@ insert into public.site_content_blocks (key, label, value, block_type)
 values
   ('home.hero.title', 'Home hero title', 'Soft touch. Deep clean. Every day.', 'text'),
   ('home.hero.body', 'Home hero body', 'A complete silicone brush set made for smoother cleansing, easier reach, and a fresher post-shower feel.', 'text'),
-  ('site.announcement', 'Announcement bar', 'Free delivery checks and 15-day returns on PureForm orders', 'text'),
+  ('site.announcement', 'Announcement bar', 'UAE delivery and secure card checkout on PureForm orders', 'text'),
   ('sidebar.announcement', 'Sidebar announcement', 'Need help choosing a set? Support can confirm color, stock, UAE delivery, and secure card checkout.', 'text'),
   ('popup.message', 'Popup message', 'Add the exact popup copy here once the popup purpose is confirmed.', 'text')
 on conflict (key) do nothing;
