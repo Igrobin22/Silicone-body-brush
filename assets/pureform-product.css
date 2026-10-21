@@ -205,3 +205,17 @@ body:has(.pdp-zoom-dialog[open]) { overflow: hidden; }
   html { scroll-behavior: auto; }
   .pdp-order-button { transition: none; }
 }
+.pdp-selection-summary { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 16px 0; font-size: 13px; }
+.pdp-selection-summary strong { font-size: 17px; font-weight: 600; white-space: nowrap; }
+.pdp-add-status { font-size: 13px; line-height: 1.7; }
+.pdp-add-status:empty { display: none; }
+.pdp-tools-note { margin-top: 20px; color: #666660; font-size: 13px; line-height: 1.8; }
+.pdp-routine-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin: 0; padding: 0; list-style: none; }
+.pdp-routine-steps li { display: flex; align-items: flex-start; gap: 14px; }
+.pdp-routine-steps li > span { font-family: 'Montserrat', Arial, sans-serif; font-size: 24px; line-height: 1.4; color: #547163; }
+.pdp-routine-steps h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; line-height: 1.5; }
+.pdp-routine-steps p { margin: 0; font-size: 14px; line-height: 1.8; }
+@media (max-width: 760px) {
+  .pdp-routine-steps { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .pdp-selection-summary strong { font-size: 16px; }
+}

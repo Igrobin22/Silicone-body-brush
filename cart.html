@@ -73,6 +73,17 @@
             </div>
           </div>
           <div class="cart-items-list" id="cartItemsList" aria-live="polite" hidden></div>
+          <section class="cart-delivery-offer" id="cartDeliveryOffer" aria-labelledby="cartDeliveryTitle" hidden>
+            <h2 id="cartDeliveryTitle" tabindex="-1">One more set. Free UAE delivery.</h2>
+            <p id="cartDeliveryMessage"></p>
+            <progress id="cartDeliveryProgress" max="2" value="1" aria-label="Sets toward free UAE delivery"></progress>
+            <div id="cartDeliveryChoices">
+              <fieldset class="cart-delivery-colors"><legend>Choose your second set</legend><div id="cartDeliveryOptions"></div></fieldset>
+              <p class="cart-delivery-preview" id="cartDeliveryPreview"></p>
+              <button class="btn-s" id="cartDeliveryAdd" type="button">Add a second set</button>
+            </div>
+            <p class="cart-delivery-status" id="cartDeliveryStatus" role="status"></p>
+          </section>
         </article>
 
         <aside class="cart-summary" aria-label="Cart summary">
@@ -195,21 +206,21 @@
         stickySaved.textContent = cart.formatAED(savingsValue) + ' saved';
       }
 
-      function renderItem(item) {
-        var row = document.createElement('article');
-        var media = document.createElement('a');
-        var image = document.createElement('img');
-        var body = document.createElement('div');
-        var name = document.createElement('a');
-        var meta = document.createElement('div');
-        var price = document.createElement('div');
-        var controls = document.createElement('div');
-        var quantity = document.createElement('div');
-        var decrease = document.createElement('button');
-        var input = document.createElement('input');
-        var increase = document.createElement('button');
-        var remove = document.createElement('button');
-        var total = document.createElement('strong');
+      function renderItem(item, existingRow) {
+        var row = existingRow || document.createElement('article');
+        var media = existingRow ? row.querySelector('.cart-item-media') : document.createElement('a');
+        var image = existingRow ? media.querySelector('img') : document.createElement('img');
+        var body = existingRow ? row.querySelector('.cart-item-body') : document.createElement('div');
+        var name = existingRow ? row.querySelector('.cart-item-name') : document.createElement('a');
+        var meta = existingRow ? row.querySelector('.cart-item-meta') : document.createElement('div');
+        var price = existingRow ? row.querySelector('.cart-item-price') : document.createElement('div');
+        var controls = existingRow ? row.querySelector('.cart-item-controls') : document.createElement('div');
+        var quantity = existingRow ? row.querySelector('.cart-quantity-control') : document.createElement('div');
+        var decrease = existingRow ? row.querySelector('[data-cart-action="decrease"]') : document.createElement('button');
+        var input = existingRow ? row.querySelector('input') : document.createElement('input');
+        var increase = existingRow ? row.querySelector('[data-cart-action="increase"]') : document.createElement('button');
+        var remove = existingRow ? row.querySelector('[data-cart-action="remove"]') : document.createElement('button');
+        var total = existingRow ? row.querySelector('.cart-item-total') : document.createElement('strong');
         var productUrl = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
         var availableQuantity = item.inventoryStatus === 'out_of_stock' ? 0 : Math.min(20, item.inventoryQuantity === null ? 20 : item.inventoryQuantity);
 
@@ -218,18 +229,18 @@
 
         media.className = 'cart-item-media';
         media.href = productUrl;
-        image.src = item.image;
+        if (image.getAttribute('src') !== item.image) image.src = item.image;
         image.alt = item.name;
         image.loading = 'lazy';
         image.decoding = 'async';
-        media.appendChild(image);
+        if (!existingRow) media.appendChild(image);
 
         body.className = 'cart-item-body';
         name.className = 'cart-item-name';
         name.href = productUrl;
         name.textContent = item.name;
         meta.className = 'cart-item-meta';
-        meta.textContent = item.meta + (item.inventoryQuantity !== null ? ' / ' + item.inventoryQuantity + ' available' : '');
+        meta.textContent = item.meta + (item.inventoryStatus === 'out_of_stock' ? ' / Currently unavailable' : (item.inventoryQuantity !== null ? ' / ' + item.inventoryQuantity + ' available' : ''));
         price.className = 'cart-item-price';
         price.textContent = cart.formatAED(item.price) + ' each';
 
@@ -247,7 +258,11 @@
         input.min = '1';
         input.max = String(Math.max(item.quantity, availableQuantity));
         input.step = '1';
-        input.value = item.quantity;
+        var editing = document.activeElement === input && input.value !== input.defaultValue;
+        if (!editing) {
+          input.value = item.quantity;
+          input.defaultValue = String(item.quantity);
+        }
         input.dataset.cartQuantity = item.id;
         input.setAttribute('aria-label', 'Quantity for ' + item.name);
 
@@ -257,9 +272,11 @@
         increase.disabled = item.quantity >= availableQuantity;
         increase.setAttribute('aria-label', 'Increase quantity for ' + item.name);
 
-        quantity.appendChild(decrease);
-        quantity.appendChild(input);
-        quantity.appendChild(increase);
+        if (!existingRow) {
+          quantity.appendChild(decrease);
+          quantity.appendChild(input);
+          quantity.appendChild(increase);
+        }
 
         remove.className = 'cart-item-remove';
         remove.type = 'button';
@@ -267,20 +284,23 @@
         remove.dataset.cartAction = 'remove';
         remove.setAttribute('aria-label', 'Remove ' + item.name + ' from cart');
 
-        controls.appendChild(quantity);
-        controls.appendChild(remove);
-
-        body.appendChild(name);
-        body.appendChild(meta);
-        body.appendChild(price);
-        body.appendChild(controls);
+        if (!existingRow) {
+          controls.appendChild(quantity);
+          controls.appendChild(remove);
+          body.appendChild(name);
+          body.appendChild(meta);
+          body.appendChild(price);
+          body.appendChild(controls);
+        }
 
         total.className = 'cart-item-total';
         total.textContent = cart.formatAED(item.lineTotal);
 
-        row.appendChild(media);
-        row.appendChild(body);
-        row.appendChild(total);
+        if (!existingRow) {
+          row.appendChild(media);
+          row.appendChild(body);
+          row.appendChild(total);
+        }
         return row;
       }
 
@@ -289,15 +309,24 @@
         var count = cart.getCount();
         var hasItems = lineItems.length > 0;
         var checkoutLabel = checkoutLink.querySelector('span');
+        var active = document.activeElement;
+        var removedFocus = false;
 
         if (emptyState) {
           emptyState.hidden = hasItems;
         }
 
         itemsList.hidden = !hasItems;
-        itemsList.replaceChildren();
+        Array.from(itemsList.children).forEach(function (row) {
+          if (!lineItems.some(function (item) { return item.id === row.dataset.cartId; })) {
+            if (active && row.contains(active)) removedFocus = true;
+            itemsList.removeChild(row);
+          }
+        });
         lineItems.forEach(function (item) {
-          itemsList.appendChild(renderItem(item));
+          var existing = Array.from(itemsList.children).find(function (row) { return row.dataset.cartId === item.id; });
+          if (existing) renderItem(item, existing);
+          else itemsList.appendChild(renderItem(item));
         });
 
         if (itemKicker) {
@@ -316,6 +345,10 @@
         }
         clearButton.disabled = !hasItems;
         updateStickyCheckout(hasItems);
+        if (removedFocus || (active && active.disabled)) {
+          var next = itemsList.querySelector('[data-cart-quantity]') || (emptyState && emptyState.querySelector('a'));
+          if (next) next.focus({ preventScroll: true });
+        }
       }
 
       itemsList.addEventListener('click', function (event) {
@@ -359,8 +392,14 @@
           return;
         }
 
-        cart.setQuantity(event.target.dataset.cartQuantity, event.target.value);
-        setStatus('Quantity updated.');
+        var id = event.target.dataset.cartQuantity;
+        cart.setQuantity(id, event.target.value);
+        var current = cart.getCart().find(function (item) { return item.id === id; });
+        if (current) {
+          event.target.value = current.quantity;
+          event.target.defaultValue = String(current.quantity);
+        }
+        setStatus(current ? 'Quantity updated.' : 'Item removed from cart.');
       });
 
       checkoutLink.addEventListener('click', function (event) {
@@ -379,6 +418,7 @@
       renderCart();
     })();
   </script>
+  <script src="assets/pureform-cart-delivery.js" defer></script>
   <script src="assets/pureform-store-flow.js" defer></script>
 </body>
 

@@ -16,8 +16,9 @@ const successQuery = `?payment=success&order=${order}&session_id=${session}`;
 const copy = value => JSON.parse(JSON.stringify(value));
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
-function element() {
+function element(tagName = 'div') {
   return {
+    tagName: tagName.toUpperCase(),
     value: '', textContent: '', disabled: false, hidden: false, children: [], attributes: {}, listeners: {}, dataset: {},
     classList: { toggle() {} },
     addEventListener(name, callback) { this.listeners[name] = callback; },
@@ -25,9 +26,19 @@ function element() {
     getAttribute(name) { return this.attributes[name]; },
     removeAttribute(name) { delete this.attributes[name]; },
     appendChild(child) { this.children.push(child); },
+    removeChild(child) { this.children.splice(this.children.indexOf(child), 1); },
     replaceChildren() { this.children = []; },
     closest() { return this; },
-    querySelector() { return null; },
+    querySelector(selector) {
+      const all = root => root.children.flatMap(child => [child, ...all(child)]);
+      return all(this).find(child => {
+        if (selector[0] === '.') return child.className === selector.slice(1);
+        const action = selector.match(/^\[data-cart-action="(.+)"\]$/);
+        if (action) return child.dataset.cartAction === action[1];
+        if (selector === '[data-cart-quantity]') return Boolean(child.dataset.cartQuantity);
+        return child.tagName === selector.toUpperCase();
+      }) || null;
+    },
     checkValidity() { return true; },
     reset() { this.resets = (this.resets || 0) + 1; }
   };
@@ -36,7 +47,7 @@ function element() {
 function fixture({ search = '', fetch = async () => ({ ok: true, json: async () => ({}) }), config = true,
   setup = { configured: true, shipping_total: 10, free_shipping_min_sets: 2, currency: 'AED' },
   pendingCheckout = search === successQuery ? { order_number: order, items: [{ id: grey, quantity: 2 }] } : null,
-  unavailableSessionStorage = false } = {}) {
+  unavailableSessionStorage = false, initialCatalog } = {}) {
   const ids = {};
   const events = {};
   const calls = [];
@@ -55,7 +66,7 @@ function fixture({ search = '', fetch = async () => ({ ok: true, json: async () 
   };
   const window = {
     PUREFORM_SUPABASE_CONFIG: config ? { url: 'https://backend.example.test', anonKey: 'public-fixture-key' } : {},
-    PureFormCatalog: { getCatalogSync: () => catalog },
+    PureFormCatalog: { getCatalogSync: () => initialCatalog || catalog },
     location: { search, pathname: '/checkout.html', assign(url) { redirects.push(url); } },
     history: { replaceState(...args) { history.push(args); window.location.search = ''; } },
     addEventListener(name, callback) { (events[name] ||= []).push(callback); },
@@ -85,7 +96,7 @@ function fixture({ search = '', fetch = async () => ({ ok: true, json: async () 
   document.getElementById('checkoutVerifyPayment').hidden = true;
   new vm.Script(cartSource).runInContext(context);
   new vm.Script(checkoutSource).runInContext(context);
-  return { ids, calls, setupCalls, redirects, history, window, checkoutStorage, cart: window.PureFormCart,
+  return { ids, calls, setupCalls, redirects, history, window, checkoutStorage, storage, cart: window.PureFormCart,
     submit: () => ids.checkoutForm.listeners.submit({ preventDefault() {} }),
     retry: () => ids.checkoutVerifyPayment.listeners.click(),
     runCart: () => new vm.Script(cartPageSource).runInContext(context) };
@@ -406,4 +417,123 @@ test('combo additions are atomic and count matching or mixed colors toward free 
   assert.equal(page.cart.getCount(),2);
   page.cart.removeItem(pink);
   assert.equal(page.cart.getShippingTotal(),10);
+});
+
+test('cart storage changes refresh checkout totals without writing back to storage', () => {
+  const page = fixture();
+  page.runCart();
+  page.storage.set('pureform.cart.v1', JSON.stringify([{ id: grey, quantity: 1 }]));
+  let writes = 0;
+  const set = page.storage.set.bind(page.storage);
+  page.storage.set = (...args) => { writes++; return set(...args); };
+  page.window.dispatchEvent({ type: 'storage', key: 'pureform.cart.v1' });
+  assert.equal(page.ids.checkoutTotal.textContent, 'AED 53.89');
+  assert.equal(page.ids.cartTotal.textContent, 'AED 53.89');
+  assert.equal(page.ids.checkoutShipping.textContent, 'AED 10.00');
+  assert.equal(page.ids.cartSummaryCount.textContent, '1 item');
+  assert.equal(writes, 0);
+});
+
+test('clearing storage in another tab empties both summaries and disables payment', () => {
+  const page = fixture();
+  page.runCart();
+  page.storage.clear();
+  page.window.dispatchEvent({ type: 'storage', key: null });
+  assert.equal(page.cart.getCount(), 0);
+  assert.equal(page.ids.checkoutTotal.textContent, 'AED 0.00');
+  assert.equal(page.ids.cartTotal.textContent, 'AED 0.00');
+  assert.equal(page.ids.checkoutSubmit.disabled, true);
+  assert.equal(page.ids.cartItemsList.children.length, 0);
+});
+
+test('unrelated storage events are ignored and a restored page refreshes its summary', () => {
+  const page = fixture();
+  page.storage.set('pureform.cart.v1', JSON.stringify([{ id: grey, quantity: 1 }]));
+  page.window.dispatchEvent({ type: 'storage', key: 'unrelated' });
+  page.window.dispatchEvent({ type: 'storage', key: 'pureform.cart.v1', storageArea: {} });
+  assert.equal(page.ids.checkoutTotal.textContent, 'AED 87.78');
+  page.window.dispatchEvent({ type: 'pageshow', persisted: true });
+  assert.equal(page.ids.checkoutTotal.textContent, 'AED 53.89');
+});
+
+test('an empty admin catalog keeps saved items but never restores purchasable fallback stock', async () => {
+  const page = fixture();
+  const product = { ...page.cart.catalog[grey] };
+  page.cart.setCatalog({});
+  assert.equal(page.cart.getCount(), 2);
+  assert.equal(page.cart.getLineItems()[0].inventoryStatus, 'out_of_stock');
+  assert.equal(page.cart.getLineItems()[0].inventoryQuantity, 0);
+  assert.equal(page.cart.catalog[grey].visible, false);
+  page.cart.addItem(grey, 1);
+  assert.equal(page.cart.getCount(), 2);
+  await page.submit();
+  assert.equal(page.calls.length, 0);
+  assert.equal(page.ids.checkoutSubmit.disabled, true);
+  page.cart.setCatalog({ [grey]: product });
+  assert.equal(page.cart.catalog[grey].inventory_quantity, 24);
+  assert.equal(page.ids.checkoutSubmit.disabled, false);
+});
+
+test('hidden saved colors stay reviewable and removable when other products remain available', () => {
+  const page = fixture();
+  const pink = 'pureform-4pc-set-pink';
+  const product = { ...page.cart.catalog[grey] };
+  page.cart.setCatalog({ [grey]: product, [pink]: { name: 'Pink admin title', price: 30, inventory_quantity: 12 } });
+  page.cart.addItem(pink, 1);
+  page.cart.setCatalog({ [grey]: product });
+  assert.equal(page.cart.getLineItems().length, 2);
+  assert.equal(page.cart.getLineItems()[1].name, 'Pink admin title');
+  assert.equal(page.cart.getLineItems()[1].inventoryStatus, 'out_of_stock');
+  assert.equal(page.ids.checkoutSubmit.disabled, true);
+  page.cart.removeItem(pink);
+  assert.equal(page.ids.checkoutSubmit.disabled, false);
+});
+
+test('initial empty catalogs and explicitly hidden listings fail closed', () => {
+  const page = fixture({ initialCatalog: {} });
+  assert.equal(page.cart.getCount(), 2);
+  assert.equal(page.ids.checkoutSubmit.disabled, true);
+  page.cart.setCatalog({ [grey]: { price: 12, inventory_quantity: 24, inventory_status: 'in_stock', visible: false } });
+  page.cart.addItem(grey, 1);
+  assert.equal(page.cart.getCount(), 2);
+  assert.equal(page.cart.getLineItems()[0].inventoryQuantity, 0);
+  assert.equal(page.ids.checkoutSubmit.disabled, true);
+});
+
+test('saved cart data cannot create inherited or unknown products', () => {
+  const page = fixture();
+  page.storage.set('pureform.cart.v1', JSON.stringify([
+    { id: 'constructor', quantity: 1 }, { id: '__proto__', quantity: 1 }, { id: 'toString', quantity: 1 },
+    { id: 'missing', quantity: 1 }, null, { id: grey, quantity: 1 }
+  ]));
+  assert.deepEqual(copy(page.cart.getCart()), [{ id: grey, quantity: 1 }]);
+  assert.equal(page.cart.getLineItems().length, 1);
+});
+
+test('quantity and catalog changes update existing cart controls instead of replacing them', () => {
+  const page = fixture();
+  page.runCart();
+  const row = page.ids.cartItemsList.children[0];
+  const input = row.querySelector('input');
+  page.cart.setQuantity(grey, 3);
+  assert.equal(page.ids.cartItemsList.children[0], row);
+  assert.equal(row.querySelector('input'), input);
+  assert.equal(input.value, 3);
+  page.cart.setCatalog({ [grey]: { ...page.cart.catalog[grey], price: 15 } });
+  assert.equal(page.ids.cartItemsList.children[0], row);
+  assert.equal(row.querySelector('input'), input);
+  assert.equal(row.querySelector('.cart-item-total').textContent, 'AED 45.00');
+});
+
+test('changes from another tab during payment verification preserve the newer cart', async () => {
+  let resolve;
+  const page = fixture({ search: successQuery, fetch: () => new Promise(done => { resolve = done; }) });
+  page.storage.set('pureform.cart.v1', JSON.stringify([{ id: grey, quantity: 1 }]));
+  page.window.dispatchEvent({ type: 'storage', key: 'pureform.cart.v1' });
+  assert.equal(page.ids.checkoutSubmit.disabled, true);
+  resolve({ ok: true, json: async () => ({ paid: true, order_number: order }) });
+  await settle();
+  assert.equal(page.cart.getCount(), 1);
+  assert.equal(page.ids.checkoutTotal.textContent, 'AED 53.89');
+  assert.match(page.ids.checkoutStatus.textContent, /current cart was kept/);
 });

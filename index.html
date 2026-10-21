@@ -18,6 +18,8 @@
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
+  <link rel="stylesheet" href="assets/pureform-intro.css">
+  <script src="assets/pureform-intro.js" defer></script>
   <link rel="stylesheet" href="assets/pureform-home.css">
   <link rel="stylesheet" href="assets/pureform-retail.css">
 </head>
@@ -48,10 +50,24 @@
   </nav>
   <main id="main-content">
     <section class="home-hero" id="hero" aria-labelledby="heroTitle">
-      <picture class="home-hero-media">
-        <source media="(max-width: 760px)" srcset="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_900/v1780296029/FOR_MOBILE_dbeja3.png">
-        <img src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_1800/v1778744471/ChatGPT_Image_May_14_2026_11_40_44_AM_jzx8xg.png" alt="PureForm silicone back, body, scalp and face brushes" width="1536" height="1024" fetchpriority="high" decoding="async">
-      </picture>
+      <div class="home-hero-scene">
+        <picture class="home-hero-media">
+          <source media="(max-width: 760px)" srcset="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_900/v1780296029/FOR_MOBILE_dbeja3.png">
+          <img src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_1800/v1778744471/ChatGPT_Image_May_14_2026_11_40_44_AM_jzx8xg.png" alt="PureForm silicone back, body, scalp and face brushes" width="1536" height="1024" fetchpriority="high" decoding="async">
+        </picture>
+        <div class="home-hero-bubbles" id="heroBubbles" aria-hidden="true">
+          <span class="home-hero-bubble bu1"></span><span class="home-hero-bubble bu2"></span>
+          <span class="home-hero-bubble bu3"></span><span class="home-hero-bubble bu4"></span>
+          <span class="home-hero-bubble bu5"></span><span class="home-hero-bubble bu6"></span>
+          <span class="home-hero-bubble bu7"></span><span class="home-hero-bubble bu8"></span>
+          <span class="home-hero-bubble bu9"></span><span class="home-hero-bubble bu10"></span>
+          <span class="home-hero-bubble bu11"></span><span class="home-hero-bubble bu12"></span>
+        </div>
+        <button class="home-hero-motion-toggle" type="button" aria-label="Pause bubble animation" aria-controls="heroBubbles" title="Pause bubble animation" hidden>
+          <svg class="home-hero-motion-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"></path></svg>
+          <svg class="home-hero-motion-play" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"></path></svg>
+        </button>
+      </div>
       <div class="home-hero-content">
         <div class="home-hero-copy-block">
           <p class="eyebrow">A cleaner daily shower &middot; 4-piece set</p>
@@ -111,16 +127,35 @@
         <p class="home-section-copy">Every color includes all four pieces. Keep delicate face care separate from your body routine.</p>
       </div>
       <div class="home-tools">
-        <div><div class="home-tool-media"><img src="assets/pureform-back-scrubber.webp" alt="Long-handled silicone back scrubber" loading="lazy" width="400" height="400"></div><h3>Back scrubber</h3><p>A long handle for the places that are harder to reach.</p></div>
-        <div><div class="home-tool-media"><img src="assets/pureform-body-brush.webp" alt="Silicone body brush with grip strap" loading="lazy" width="400" height="400"></div><h3>Body brush</h3><p>Flexible bristles and a hand strap for everyday cleansing.</p></div>
-        <div><div class="home-tool-media"><img src="assets/pureform-scalp-massager.webp" alt="Silicone scalp massager" loading="lazy" width="400" height="400"></div><h3>Scalp massager</h3><p>A comfortable massage as you work in your shampoo.</p></div>
-        <div><div class="home-tool-media"><img src="assets/pureform-face-brush.webp" alt="Small silicone face brush" loading="lazy" width="400" height="400"></div><h3>Face brush</h3><p>A dedicated piece for your face-cleansing routine.</p></div>
+        <div><div class="home-tool-media"><img src="assets/pureform-body-brush.webp" alt="Long-handled Grey silicone back scrubber" loading="lazy" decoding="async" width="400" height="400"></div><h3>Back scrubber</h3><p>A long handle for the places that are harder to reach.</p></div>
+        <div><div class="home-tool-media"><img src="assets/pureform-scalp-massager.webp" alt="Grey silicone body brush with hand strap" loading="lazy" decoding="async" width="400" height="400"></div><h3>Body brush</h3><p>Flexible bristles and a hand strap for everyday cleansing.</p></div>
+        <div><div class="home-tool-media"><img src="assets/pureform-face-brush.webp" alt="Grey silicone scalp massager" loading="lazy" decoding="async" width="400" height="400"></div><h3>Scalp massager</h3><p>A comfortable massage as you work in your shampoo.</p></div>
+        <div><div class="home-tool-media"><img src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_400/v1780227617/p_face_1_f4vdyz.png" alt="Small Pink silicone face brush held in a hand" loading="lazy" decoding="async" width="400" height="400"></div><h3>Face brush</h3><p>A dedicated piece for your face-cleansing routine.</p></div>
       </div>
+      <p class="home-tools-note">Tools shown in Grey and Pink. Every set includes all four pieces in one color. <a href="pureform-product-detail.html?product=pureform-4pc-set-grey#productRoutine">Use &amp; care</a></p>
       <div class="home-benefits" id="features">
         <div><strong>Easy to rinse</strong><p>Non-absorbent silicone rinses clean after each use.</p></div>
         <div><strong>Simple to care for</strong><p>Rinse, shake off excess water, and leave each tool to air dry.</p></div>
         <div><strong>Made for daily routines</strong><p>Separate tools for back, body, scalp and face care.</p></div>
       </div>
+    </section>
+    <section class="home-section home-lifestyle" id="daily-ritual" aria-labelledby="lifestyleTitle">
+      <div class="home-section-head"><div><p class="eyebrow">The daily ritual</p><h2 id="lifestyleTitle">At home in your routine.</h2></div><a class="home-text-link" href="products.html">Shop the sets</a></div>
+      <div class="home-lifestyle-grid" role="group" aria-label="PureForm lifestyle images" tabindex="0">
+        <figure class="home-lifestyle-shot">
+          <img src="assets/lifestyle/grey-vanity.webp" srcset="assets/lifestyle/grey-vanity-600.webp 600w, assets/lifestyle/grey-vanity.webp 1200w" sizes="(max-width: 760px) calc(100vw - 68px), (max-width: 1360px) calc((100vw - 128px) / 3), 411px" alt="Grey four-piece silicone brush set arranged beside a white bathroom basin" width="1200" height="1200" loading="lazy" decoding="async">
+          <figcaption><a href="pureform-product-detail.html?product=pureform-4pc-set-grey">Four essentials. One set.</a></figcaption>
+        </figure>
+        <figure class="home-lifestyle-shot">
+          <img src="assets/lifestyle/grey-rinse.webp" srcset="assets/lifestyle/grey-rinse-600.webp 600w, assets/lifestyle/grey-rinse.webp 1200w" sizes="(max-width: 760px) calc(100vw - 68px), (max-width: 1360px) calc((100vw - 128px) / 3), 411px" alt="A hand rinsing the grey silicone body brush under a bathroom tap" width="1200" height="1200" loading="lazy" decoding="async">
+          <figcaption><a href="pureform-product-detail.html?product=pureform-4pc-set-grey">A fresh start, every day.</a></figcaption>
+        </figure>
+        <figure class="home-lifestyle-shot">
+          <img src="assets/lifestyle/pink-shower.webp" srcset="assets/lifestyle/pink-shower-600.webp 600w, assets/lifestyle/pink-shower.webp 1200w" sizes="(max-width: 760px) calc(100vw - 68px), (max-width: 1360px) calc((100vw - 128px) / 3), 411px" alt="Pink four-piece silicone brush set resting on a white tiled shower shelf" width="1200" height="1200" loading="lazy" decoding="async">
+          <figcaption><a href="pureform-product-detail.html?product=pureform-4pc-set-pink">Your shower, in Pink.</a></figcaption>
+        </figure>
+      </div>
+      <p class="home-lifestyle-note">AI-styled product scenes. Bathroom accessories not included.</p>
     </section>
     <section class="home-section home-reviews" id="reviews" aria-labelledby="reviewsTitle" tabindex="-1">
       <div class="home-section-head"><div><p class="eyebrow">Customer notes</p><h2 id="reviewsTitle">Customer reviews</h2></div><a class="home-text-link" href="reviews.html">Read all reviews</a></div>
@@ -171,5 +206,6 @@
   <script src="assets/pureform-cart.js"></script>
   <script src="assets/pureform-combo.js" defer></script>
   <script src="assets/pureform-store-flow.js" defer></script>
+  <script src="assets/pureform-hero-bubbles.js" defer></script>
 </body>
 </html>

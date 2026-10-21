@@ -17,6 +17,81 @@
     return;
   }
 
+  setupMenuTabs(nav.querySelector('.nav-links'), navLinks);
+
+  function setupMenuTabs(menu, links) {
+    if (!menu) return;
+    const highlight = document.createElement('li');
+    const indicator = document.createElement('li');
+    highlight.className = 'pf-nav-decoration pf-nav-hover-highlight';
+    indicator.className = 'pf-nav-decoration pf-nav-active-indicator';
+    [highlight, indicator].forEach(function (element) {
+      element.setAttribute('aria-hidden', 'true');
+      element.setAttribute('role', 'presentation');
+      menu.appendChild(element);
+    });
+    menu.classList.add('pf-nav-tabs');
+    let hovered = null;
+    let focused = null;
+    let frame = null;
+
+    function place(element, link, bounds, underline) {
+      if (!link || !bounds.width) {
+        element.classList.remove('is-visible');
+        return;
+      }
+      const rect = link.getBoundingClientRect();
+      element.style.setProperty('--pf-tab-x', rect.left - bounds.left + 'px');
+      element.style.setProperty('--pf-tab-y', (underline ? bounds.height + 2 : (bounds.height - 32) / 2) + 'px');
+      element.style.setProperty('--pf-tab-width', rect.width + 'px');
+      element.classList.add('is-visible');
+    }
+
+    function render() {
+      const bounds = menu.getBoundingClientRect();
+      const active = links.find(function (link) { return link.getAttribute('aria-current') === 'page' || link.classList.contains('is-active'); });
+      place(indicator, active, bounds, true);
+      place(highlight, hovered || focused, bounds, false);
+    }
+
+    function refresh() {
+      if (frame !== null) return;
+      frame = window.requestAnimationFrame(function () {
+        frame = null;
+        render();
+      });
+    }
+
+    links.forEach(function (link) {
+      link.addEventListener('pointerenter', function (event) {
+        if (event.pointerType === 'touch' || !window.matchMedia('(hover: hover)').matches) return;
+        hovered = link;
+        render();
+      });
+    });
+    menu.addEventListener('pointerleave', function () { hovered = null; render(); });
+    menu.addEventListener('focusin', function (event) {
+      focused = links.includes(event.target) && event.target.matches(':focus-visible') ? event.target : null;
+      if (focused) hovered = null;
+      render();
+    });
+    menu.addEventListener('focusout', function (event) {
+      focused = links.includes(event.relatedTarget) && event.relatedTarget.matches(':focus-visible') ? event.relatedTarget : null;
+      render();
+    });
+    window.addEventListener('resize', refresh);
+    window.addEventListener('pageshow', refresh);
+    if (window.ResizeObserver) {
+      try {
+        const observer = new window.ResizeObserver(refresh);
+        observer.observe(menu);
+        links.forEach(function (link) { observer.observe(link); });
+      } catch (_error) { /* Resize and font events still keep the menu usable. */ }
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh).catch(function () {});
+    render();
+  }
+
   const menuButton = document.createElement('button');
   menuButton.className = 'pf-mobile-menu-button';
   menuButton.type = 'button';

@@ -100,7 +100,9 @@
             <input class="pdp-quantity-input" id="productQuantity" type="number" inputmode="numeric" min="1" step="1" value="1" aria-label="Quantity" autocomplete="off">
             <button class="pdp-quantity-button" type="button" data-quantity-action="increase" aria-label="Increase quantity">+</button>
           </div>
+          <div class="pdp-selection-summary"><span id="productSelectionCount">1 set subtotal</span><strong id="productSelectionTotal">AED 43.89</strong></div>
           <a class="pdp-order-button" id="productOrderLink" href="cart.html"><span>Add to cart</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></a>
+          <p class="pdp-add-status" id="productAddStatus" role="status"></p>
           <p class="pdp-shipping">Secure card checkout &middot; No cash on delivery</p>
         </div>
       </div>
@@ -120,7 +122,7 @@
         <a href="contact.html"><strong>Customer support</strong><span>Help with your set or order</span></a>
       </div>
       <nav class="pdp-section-nav" aria-label="Product information">
-        <a href="#productDetails">Product details</a><a href="#productSpecifications">Specifications</a><a href="#productDelivery">Delivery &amp; returns</a><a href="#productReviews">Reviews</a>
+        <a href="#productDetails">Product details</a><a href="#productRoutine">Use &amp; care</a><a href="#productSpecifications">Specifications</a><a href="#productDelivery">Delivery &amp; returns</a><a href="#productReviews">Reviews</a>
       </nav>
       <div class="pdp-information">
         <details id="productDetails" open>
@@ -128,11 +130,23 @@
           <div class="pdp-details-body">
             <p class="pdp-lead" id="productLead">A complete PureForm silicone brush set for face, scalp, body and back care.</p>
             <div class="pdp-tool-grid">
-              <figure><img src="assets/pureform-back-scrubber.png" alt="Long-handled silicone back scrubber" width="200" height="160" loading="lazy" decoding="async"><figcaption><strong>Back scrubber</strong>A long handle for harder-to-reach areas.</figcaption></figure>
-              <figure><img src="assets/pureform-body-brush.png" alt="Silicone body brush" width="200" height="160" loading="lazy" decoding="async"><figcaption><strong>Body brush</strong>Flexible bristles for your daily cleanse.</figcaption></figure>
-              <figure><img src="assets/pureform-scalp-massager.png" alt="Silicone scalp massager" width="200" height="160" loading="lazy" decoding="async"><figcaption><strong>Scalp massager</strong>A comfortable grip for scalp care.</figcaption></figure>
-              <figure><img src="assets/pureform-face-brush.png" alt="Small silicone face brush" width="200" height="160" loading="lazy" decoding="async"><figcaption><strong>Face brush</strong>A separate tool for your face-care routine.</figcaption></figure>
+              <figure><img src="assets/pureform-body-brush.webp" alt="Long-handled Grey silicone back scrubber" width="200" height="160" loading="lazy" decoding="async"><figcaption><strong>Back scrubber</strong>A long handle for harder-to-reach areas.</figcaption></figure>
+              <figure><img src="assets/pureform-scalp-massager.webp" alt="Grey silicone body brush with hand strap" width="200" height="160" loading="lazy" decoding="async"><figcaption><strong>Body brush</strong>Flexible bristles for your daily cleanse.</figcaption></figure>
+              <figure><img src="assets/pureform-face-brush.webp" alt="Grey silicone scalp massager" width="200" height="160" loading="lazy" decoding="async"><figcaption><strong>Scalp massager</strong>A comfortable grip for scalp care.</figcaption></figure>
+              <figure><img src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_400/v1780227617/p_face_1_f4vdyz.png" alt="Small Pink silicone face brush held in a hand" width="200" height="160" loading="lazy" decoding="async"><figcaption><strong>Face brush</strong>A separate tool for your face-care routine.</figcaption></figure>
             </div>
+            <p class="pdp-tools-note">Tools shown in Grey and Pink. All four pieces come in your selected set color.</p>
+          </div>
+        </details>
+        <details id="productRoutine">
+          <summary><h2>Use &amp; care</h2></summary>
+          <div class="pdp-details-body">
+            <ol class="pdp-routine-steps">
+              <li><span aria-hidden="true">01</span><div><h3>Wet &amp; lather</h3><p>Wet the tool and add your usual cleanser. Keep the face brush separate from body tools.</p></div></li>
+              <li><span aria-hidden="true">02</span><div><h3>A light touch</h3><p>Use gentle strokes without pressing hard. The long handle reaches your back; the hand-strap brush is for your body.</p></div></li>
+              <li><span aria-hidden="true">03</span><div><h3>Rinse &amp; air dry</h3><p>Rinse each piece after use, shake off excess water and leave it in an open, ventilated place to dry.</p></div></li>
+            </ol>
+            <p class="pdp-tools-note">For personal use. Avoid broken or irritated skin and stop if uncomfortable. Need help choosing a tool? <a href="contact.html">Ask PureForm</a>.</p>
           </div>
         </details>
         <details id="productSpecifications">
@@ -492,7 +506,7 @@
       }
 
       function isProductAvailable(product) {
-        return product && product.inventory_status !== 'out_of_stock' && (product.inventory_quantity === undefined || Number(product.inventory_quantity) > 0);
+        return product && product.visible !== false && product.inventory_status !== 'out_of_stock' && (product.inventory_quantity === undefined || Number(product.inventory_quantity) > 0);
       }
 
       function getAvailabilityText(product) {
@@ -629,6 +643,8 @@
         });
 
         updateOrderLink();
+        document.getElementById('productSelectionCount').textContent = selectedQuantity + (selectedQuantity === 1 ? ' set subtotal' : ' sets subtotal');
+        document.getElementById('productSelectionTotal').textContent = 'AED ' + ((Number(product.price) || 0) * selectedQuantity).toFixed(2);
       }
 
       function setupQuantityControl() {
@@ -675,7 +691,10 @@
             return;
           }
 
-          window.PureFormCart.addItem(activeProductId, selectedQuantity);
+          if (!window.PureFormCart.addItems([{ id: activeProductId, quantity: selectedQuantity }])) {
+            document.getElementById('productAddStatus').textContent = 'Not enough additional stock for this quantity. Check your cart or choose fewer sets.';
+            return;
+          }
           window.location.href = 'cart.html';
         });
       }
@@ -700,13 +719,23 @@
         });
       }
 
-      function renderProduct(id, pushState) {
-        activeProductId = products[id] ? id : fallbackId;
-        var product = products[activeProductId];
+      function updatePricing(product) {
         var priceNote = getPriceText(product) + ' includes VAT.';
         if (product.discountActive && product.regularPriceText) {
           priceNote += ' Discount applied from ' + product.regularPriceText + '.';
         }
+        productPrice.textContent = getPriceText(product);
+        var discounted = Boolean(product.discountActive && product.regularPrice > product.price);
+        productCompare.textContent = discounted ? product.regularPriceText : '';
+        productCompare.hidden = !discounted;
+        productSaving.textContent = discounted ? 'Save AED ' + (product.regularPrice - product.price).toFixed(2) + ' (' + product.discountLabel + ')' : '';
+        productSaving.hidden = !discounted;
+        productPriceNote.textContent = priceNote + ' Card details are processed by the hosted payment gateway. PureForm never stores your card number or security code.';
+      }
+
+      function renderProduct(id, pushState) {
+        activeProductId = products[id] ? id : fallbackId;
+        var product = products[activeProductId];
         productName.textContent = product.name;
         document.getElementById('productSalesStatus').setAttribute('data-pf-live-status', activeProductId);
         var status = document.querySelector('.pdp-status');
@@ -717,15 +746,9 @@
         document.getElementById('productColor').textContent = product.color;
         document.getElementById('productSpecColor').textContent = product.color;
         productLead.textContent = getProductDescription(product);
-        productPrice.textContent = getPriceText(product);
-        var discounted = Boolean(product.discountActive && product.regularPrice > product.price);
-        productCompare.textContent = discounted ? product.regularPriceText : '';
-        productCompare.hidden = !discounted;
-        productSaving.textContent = discounted ? 'Save AED ' + (product.regularPrice - product.price).toFixed(2) + ' (' + product.discountLabel + ')' : '';
-        productSaving.hidden = !discounted;
+        updatePricing(product);
         renderFitList(product.fit || []);
         productCare.textContent = 'PureForm tools are made from soft silicone. Rinse after every use, shake off water, and let the piece dry in open air.';
-        productPriceNote.textContent = priceNote + ' Card details are processed by the hosted payment gateway. PureForm never stores your card number or security code.';
         availabilityLine.textContent = getAvailabilityText(product);
         renderGallery(product);
         renderRelatedProducts();
@@ -746,6 +769,7 @@
         root.replaceChildren();
         Object.keys(products).forEach(function (id) {
           var product = products[id];
+          if (product.visible === false) return;
           var link = document.createElement('a');
           link.href = 'pureform-product-detail.html?product=' + encodeURIComponent(id);
           var swatch = document.createElement('span');
@@ -761,12 +785,19 @@
       }
 
       function syncCatalog(nextCatalog) {
-        if (!nextCatalog || !Object.keys(nextCatalog).length) {
+        if (!nextCatalog || typeof nextCatalog !== 'object') {
           return;
         }
-
-        products = nextCatalog;
+        products = withCurrentProduct(nextCatalog);
         renderProduct(getRequestedProduct(), false);
+      }
+
+      function withCurrentProduct(nextCatalog) {
+        var next = Object.assign({}, nextCatalog);
+        if (!next[activeProductId] && products[activeProductId]) {
+          next[activeProductId] = Object.assign({}, products[activeProductId], { visible: false, inventory_status: 'out_of_stock', inventory_quantity: 0 });
+        }
+        return next;
       }
 
       window.addEventListener('pureform:catalog-ready', function (event) {
@@ -774,8 +805,9 @@
       });
       window.addEventListener('pureform:catalog-refresh', function (event) {
         var next = event.detail && event.detail.catalog;
-        if (!next || !next[activeProductId]) return;
-        products = next;
+        if (!next || typeof next !== 'object') return;
+        products = withCurrentProduct(next);
+        updatePricing(products[activeProductId]);
         availabilityLine.textContent = getAvailabilityText(products[activeProductId]);
         var status = document.querySelector('.pdp-status');
         status.textContent = isProductAvailable(products[activeProductId]) ? 'In stock' : 'Out of stock';
@@ -804,6 +836,12 @@
           productZoom.close();
         }
       });
+      function openProductSection() {
+        var target = document.getElementById(window.location.hash.slice(1));
+        if (target && target.tagName === 'DETAILS' && /^product/.test(target.id)) target.open = true;
+      }
+      window.addEventListener('hashchange', openProductSection);
+      openProductSection();
       document.querySelectorAll('a[href^="#product"]').forEach(function (link) {
         link.addEventListener('click', function () {
           var target = document.getElementById(link.hash.slice(1));

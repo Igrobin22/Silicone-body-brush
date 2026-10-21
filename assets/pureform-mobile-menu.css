@@ -142,7 +142,7 @@ body > nav.site-header {
   text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
-  transition: color var(--pf-motion-fast) ease, transform var(--pf-motion-fast) var(--pf-ease-out);
+  transition: color var(--pf-motion-fast) ease;
 }
 
 .site-header .nav-links a:hover,
@@ -153,7 +153,6 @@ body > nav.site-header {
 .nav-action-link.is-active,
 .promo-links a.is-active {
   color: var(--dark);
-  transform: translateY(-1px);
 }
 
 .promo-links a.is-active {
@@ -807,4 +806,54 @@ body > nav.site-header + .hero,
     justify-self: end !important;
     margin: 0 !important;
   }
+}
+/* Shared hover highlight and current-page line, adapted from the supplied tabs. */
+@media (width > 820px) {
+  body > nav.site-header .nav-links.pf-nav-tabs {
+    position: relative;
+    isolation: isolate;
+    gap: 6px;
+    min-height: 44px;
+  }
+  .site-header .pf-nav-tabs > li:not(.pf-nav-decoration) { position: relative; z-index: 1; }
+  .site-header .nav-links.pf-nav-tabs a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 9px;
+    border-radius: 6px;
+    background: transparent;
+    line-height: 1.4;
+    transform: none;
+  }
+  .site-header .pf-nav-tabs a:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
+  .site-header .pf-nav-tabs > .pf-nav-decoration {
+    position: absolute;
+    inset: 0 auto auto 0;
+    z-index: 0;
+    display: block;
+    width: var(--pf-tab-width, 0px);
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: rgba(14, 15, 17, .08);
+    opacity: 0;
+    transform: translate(var(--pf-tab-x, 0px), var(--pf-tab-y, 0px));
+    pointer-events: none;
+  }
+  .site-header .pf-nav-tabs > .pf-nav-active-indicator { height: 2px; border-radius: 1px; background: #111; }
+  .site-header .pf-nav-tabs > .pf-nav-decoration.is-visible { opacity: 1; }
+}
+@media (820px < width <= 1100px) {
+  body > nav.site-header .nav-links.pf-nav-tabs { gap: 2px; }
+  .site-header .nav-links.pf-nav-tabs a { padding-inline: 4px; }
+}
+@media (width > 820px) and (prefers-reduced-motion: no-preference) {
+  .site-header .pf-nav-tabs > .pf-nav-hover-highlight { transition: transform 300ms ease-out, width 300ms ease-out, opacity 160ms ease; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header .pf-nav-tabs > .pf-nav-decoration { transition: none !important; animation: none !important; }
 }

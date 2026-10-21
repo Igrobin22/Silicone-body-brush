@@ -31,10 +31,6 @@
     }
   };
 
-  var catalog = window.PureFormCatalog && typeof window.PureFormCatalog.getCatalogSync === 'function'
-    ? window.PureFormCatalog.getCatalogSync()
-    : Object.assign({}, fallbackCatalog);
-
   var aliases = {
     grey: 'pureform-4pc-set-grey',
     black: 'pureform-4pc-set-black',
@@ -44,13 +40,39 @@
     'pink-4-piece-silicone-brush-set': 'pureform-4pc-set-pink'
   };
 
+  var catalog = buildCatalog(window.PureFormCatalog && typeof window.PureFormCatalog.getCatalogSync === 'function'
+    ? window.PureFormCatalog.getCatalogSync()
+    : fallbackCatalog);
+
+  function buildCatalog(nextCatalog, previousCatalog) {
+    var products = Object.create(null);
+    Object.keys(nextCatalog).forEach(function (key) {
+      var id = aliases[key] || key;
+      if (Object.prototype.hasOwnProperty.call(fallbackCatalog, id) && nextCatalog[key] && typeof nextCatalog[key] === 'object' && !Array.isArray(nextCatalog[key])) {
+        products[id] = nextCatalog[key];
+      }
+    });
+
+    return Object.keys(fallbackCatalog).reduce(function (result, id) {
+      var product = products[id];
+      result[id] = Object.assign({}, fallbackCatalog[id], product || (previousCatalog && previousCatalog[id]), { id: id });
+      // Keep saved items reviewable without making removed listings purchasable.
+      if (!product || product.visible === false) {
+        result[id].inventory_quantity = 0;
+        result[id].inventory_status = 'out_of_stock';
+        result[id].visible = false;
+      }
+      return result;
+    }, {});
+  }
+
   function normalizeId(id) {
     var normalized = String(id || '').trim();
     if (window.PureFormCatalog && typeof window.PureFormCatalog.resolveSlug === 'function') {
       normalized = window.PureFormCatalog.resolveSlug(normalized);
     }
     normalized = aliases[normalized] || normalized;
-    return catalog[normalized] ? normalized : '';
+    return Object.prototype.hasOwnProperty.call(fallbackCatalog, normalized) ? normalized : '';
   }
 
   function clampQuantity(quantity) {
@@ -64,7 +86,7 @@
       return 0;
     }
 
-    if (product.inventory_status === 'out_of_stock') {
+    if (product.visible === false || product.inventory_status === 'out_of_stock') {
       return 0;
     }
 
@@ -86,22 +108,12 @@
   }
 
   function setCatalog(nextCatalog) {
-    if (!nextCatalog || typeof nextCatalog !== 'object') {
+    if (!nextCatalog || typeof nextCatalog !== 'object' || Array.isArray(nextCatalog)) {
       return;
     }
 
-    catalog = Object.keys(nextCatalog).reduce(function (cleanCatalog, key) {
-      if (fallbackCatalog[key] || aliases[key]) {
-        cleanCatalog[key] = Object.assign({}, fallbackCatalog[key] || {}, nextCatalog[key]);
-      }
-
-      return cleanCatalog;
-    }, {});
-
-    if (!Object.keys(catalog).length) {
-      catalog = Object.assign({}, fallbackCatalog);
-    }
-
+    catalog = buildCatalog(nextCatalog, catalog);
+    window.PureFormCart.catalog = catalog;
     saveCart(getCart());
   }
 
@@ -150,12 +162,16 @@
       memoryCart = cleanItems.slice();
     }
 
-    updateNavCount(cleanItems);
-    window.dispatchEvent(new CustomEvent('pureform:cart-change', {
-      detail: { items: cleanItems, count: getCount(cleanItems), subtotal: getSubtotal(cleanItems) }
-    }));
-
+    announceCart(cleanItems);
     return cleanItems;
+  }
+
+  function announceCart(items) {
+    memoryCart = items.slice();
+    updateNavCount(items);
+    window.dispatchEvent(new CustomEvent('pureform:cart-change', {
+      detail: { items: items, count: getCount(items), subtotal: getSubtotal(items) }
+    }));
   }
 
   function getCart() {
@@ -364,20 +380,22 @@
   }
 
   window.addEventListener('storage', function (event) {
-    if (event.key === storageKey) {
-      updateNavCount();
+    if (event.key === storageKey || event.key === null) {
+      if (event.storageArea && event.storageArea !== localStorage) return;
+      announceCart(getCart());
     }
+  });
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted) announceCart(getCart());
   });
 
   window.addEventListener('pureform:catalog-ready', function (event) {
     setCatalog(event.detail && event.detail.catalog);
-    window.PureFormCart.catalog = catalog;
   });
   window.addEventListener('pureform:catalog-refresh', function (event) {
     var next = event.detail && event.detail.catalog;
     if (next && JSON.stringify(next) !== JSON.stringify(catalog)) {
       setCatalog(next);
-      window.PureFormCart.catalog = catalog;
     }
   });
 })();

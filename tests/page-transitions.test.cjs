@@ -102,9 +102,23 @@ test('incoming native snapshots show viewport content immediately but preserve o
   page.listeners.pagereveal({ viewTransition: {} });
   assert.equal(visible.classes.has('is-visible'), true);
   assert.equal(visible.classes.has('pf-page-visible'), true);
+  assert.equal(visible.classes.has('pf-motion-instant'), true);
   assert.equal(offscreen.classes.size, 0);
   assert.equal(above.classes.size, 0);
   assert.match(css, /\[data-flow-reveal\]\.pf-page-visible\s*\{\s*opacity: 1;\s*transform: none;\s*transition: none;/);
+  assert.match(css, /\[data-flow-reveal\]\.pf-page-visible\s*\{[^}]*translate: 0 0;[^}]*scale: 1;[^}]*animation: none;/);
+});
+
+test('navigation dissolves over opaque content instead of blinking through a blank page', () => {
+  assert.match(css, /::view-transition-old\(root\)\s*\{\s*animation: none;\s*opacity: 1;/);
+  assert.match(css, /::view-transition-new\(root\)\s*\{\s*animation: pf-page-in/);
+  assert.doesNotMatch(css, /@keyframes pf-page-out/);
+  assert.match(css, /@keyframes pf-page-soft-in\s*\{\s*from \{ opacity: \.98;/);
+  assert.match(css, /html\.pf-page-fallback main\s*\{\s*animation: pf-page-soft-in 160ms/);
+  assert.match(css, /--pf-page-duration: 240ms;/);
+  const menu = readFileSync(path.join(root, 'assets/pureform-mobile-menu.css'), 'utf8');
+  const activeLinks = menu.match(/\.site-header \.nav-links a:hover,[\s\S]*?\n\}/)[0];
+  assert.doesNotMatch(activeLinks, /transform:/);
 });
 
 test('native CSS opts in, keeps header snapshots stationary and opts out for reduced motion', () => {

@@ -1,6 +1,6 @@
 :root {
-  --pf-page-ease: cubic-bezier(.23, 1, .32, 1);
-  --pf-page-duration: 220ms;
+  --pf-page-ease: cubic-bezier(.4, 0, .2, 1);
+  --pf-page-duration: 240ms;
   scrollbar-gutter: stable;
 }
 
@@ -9,8 +9,9 @@
   to { opacity: 1; }
 }
 
-@keyframes pf-page-out {
-  to { opacity: 0; }
+@keyframes pf-page-soft-in {
+  from { opacity: .98; }
+  to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -26,12 +27,26 @@
     view-transition-name: pf-menu-toggle;
   }
 
-  ::view-transition-group(root) {
-    animation-duration: var(--pf-page-duration);
+  .pf-nav-active-indicator.is-visible {
+    view-transition-name: pf-nav-indicator;
   }
 
+  ::view-transition-group(pf-nav-indicator) {
+    animation-duration: var(--pf-page-duration);
+    animation-timing-function: var(--pf-page-ease);
+  }
+
+  ::view-transition-old(pf-nav-indicator) { display: none; }
+  ::view-transition-new(pf-nav-indicator) { animation: none; }
+
+  ::view-transition-group(root) {
+    animation: none;
+  }
+
+  /* Keep an opaque page underneath the dissolve: never fade through white. */
   ::view-transition-old(root) {
-    animation: pf-page-out var(--pf-page-duration) ease both;
+    animation: none;
+    opacity: 1;
     mix-blend-mode: normal;
   }
 
@@ -53,13 +68,16 @@
   }
 
   html.pf-page-fallback main {
-    animation: pf-page-in var(--pf-page-duration) var(--pf-page-ease) both;
+    animation: pf-page-soft-in 160ms ease-out both;
   }
 
   html.pf-flow-ready [data-flow-reveal].pf-page-visible {
     opacity: 1;
     transform: none;
     transition: none;
+    translate: 0 0;
+    scale: 1;
+    animation: none;
   }
 }
 

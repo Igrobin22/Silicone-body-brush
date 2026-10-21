@@ -30,8 +30,9 @@ function fixture() {
     renderFitList() {}, renderGallery() {}, renderRelatedProducts() {}, renderSetLinks() {},
     setQuantity() {}, updateStructuredData() {},
   });
+  const pricing = html.match(/      function updatePricing\(product\) \{[\s\S]*?\n      \}/)[0];
   const render = html.match(/      function renderProduct\(id, pushState\) \{[\s\S]*?\n      \}/)[0];
-  new vm.Script(render).runInContext(context);
+  new vm.Script(pricing + '\n' + render).runInContext(context);
   return { context, product, element, render: () => context.renderProduct('pink', false) };
 }
 
@@ -82,13 +83,48 @@ test('product sections, native image dialog and bounded photos remain accessible
   assert.match(html, /thumbnail\.alt = ''/);
   assert.match(html, /image\.setAttribute\('fetchpriority', 'high'\)/);
   assert.match(html, /image\.width = 1000/);
-  for (const id of ['productDetails', 'productSpecifications', 'productDelivery', 'productReviews']) {
+  for (const id of ['productDetails', 'productRoutine', 'productSpecifications', 'productDelivery', 'productReviews']) {
     assert.equal((html.match(new RegExp('id="' + id + '"', 'g')) || []).length, 1);
     assert.ok(html.includes('href="#' + id + '"'));
   }
   assert.match(html, /target\.tagName === 'DETAILS'\) target\.open = true/);
+  assert.match(html, /window.addEventListener\('hashchange', openProductSection\)/);
+  assert.match(html, /openProductSection\(\);/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /scroll-snap-type: x mandatory/);
   assert.match(css, /\.pdp-quantity-input \{ font-size: 16px; \}/);
   assert.match(css, /\.pdp-gallery-frame img \{[^}]*object-fit: contain/);
+});
+
+test('catalog refresh updates price and discounts without recreating the gallery', () => {
+  const f = fixture();
+  f.render();
+  const callbacks = {};
+  f.context.window = { addEventListener(name, callback) { callbacks[name] = callback; } };
+  f.context.renderGallery = () => assert.fail('A stock or price refresh must not reset the gallery');
+  const preserve = html.match(/      function withCurrentProduct\(nextCatalog\) \{[\s\S]*?\n      \}/)[0];
+  const refresh = html.match(/      window.addEventListener\('pureform:catalog-refresh',[\s\S]*?\n      \}\);/)[0];
+  new vm.Script(preserve + '\n' + refresh).runInContext(f.context);
+  callbacks['pureform:catalog-refresh']({ detail: { catalog: { pink: { ...f.product, price: 42, priceText: 'AED 42.00', discountActive: false } } } });
+  assert.equal(f.element('price').textContent, 'AED 42.00');
+  assert.equal(f.element('compare').hidden, true);
+  assert.equal(f.element('saving').hidden, true);
+  callbacks['pureform:catalog-refresh']({ detail: { catalog: {} } });
+  assert.equal(f.context.products.pink.visible, false);
+  assert.equal(f.context.products.pink.inventory_quantity, 0);
+});
+
+test('tool photographs match their labels and routine content makes no new product promises', () => {
+  const sources = ['pureform-body-brush.webp', 'pureform-scalp-massager.webp', 'pureform-face-brush.webp', 'p_face_1_f4vdyz.png'];
+  const labels = ['Back scrubber', 'Body brush', 'Scalp massager', 'Face brush'];
+  const home = readFileSync(path.join(__dirname, '../index.html'), 'utf8');
+  for (const [index, label] of labels.entries()) {
+    const figure = [...html.matchAll(/<figure><img ([\s\S]*?)<\/figure>/g)].find(match => match[0].includes('<strong>' + label + '</strong>'));
+    const tile = [...home.matchAll(/<div><div class="home-tool-media">([\s\S]*?)<\/p><\/div>/g)].find(match => match[0].includes('<h3>' + label + '</h3>'));
+    assert.ok(figure[0].includes(sources[index]));
+    assert.ok(tile[0].includes(sources[index]));
+  }
+  assert.match(html, /All four pieces come in your selected set color/);
+  assert.equal((html.match(/<li><span aria-hidden="true">0[123]<\/span>/g) || []).length, 3);
+  assert.match(html, /!window.PureFormCart.addItems\(\[\{ id: activeProductId, quantity: selectedQuantity \}\]\)/);
 });

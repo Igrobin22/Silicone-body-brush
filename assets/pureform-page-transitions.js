@@ -21,11 +21,11 @@
 
   window.addEventListener('pagereveal', function (event) {
     if (!event.viewTransition || reduceMotion.matches) return;
-    // Prepare the incoming snapshot; section keyframes still run once per node.
+    // The first viewport must be settled, not transparent inside its page dissolve.
     Array.prototype.forEach.call(document.querySelectorAll('[data-flow-reveal]'), function (item) {
       var bounds = item.getBoundingClientRect();
       if (bounds.bottom > 0 && bounds.top < window.innerHeight) {
-        item.classList.add('is-visible', 'pf-page-visible');
+        item.classList.add('is-visible', 'pf-page-visible', 'pf-motion-instant');
       }
     });
   });
