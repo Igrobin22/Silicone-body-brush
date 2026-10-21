@@ -16,7 +16,7 @@
   try {
     preference = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (window.getComputedStyle(document.documentElement).getPropertyValue('--pf-intro-ready').trim() !== '1') return;
-    if (!preview && window.sessionStorage.getItem('pureform.intro.v3')) return;
+    if (!preview && window.sessionStorage.getItem('pureform.intro.v4')) return;
   } catch (_error) { return; }
 
   if (preference.matches || document.hidden) return;
@@ -30,21 +30,22 @@
     try { if (document.referrer && new URL(document.referrer).origin === location.origin) return; } catch (_error) { return; }
   }
 
-  try { window.sessionStorage.setItem('pureform.intro.v3', '1'); } catch (_error) { return; }
+  try { window.sessionStorage.setItem('pureform.intro.v4', '1'); } catch (_error) { return; }
 
   var screen = document.createElement('div');
   screen.className = 'pf-intro-screen';
   screen.setAttribute('aria-hidden', 'true');
   screen.innerHTML = '<p class="pf-intro-label">PureForm &middot; The daily ritual</p>' +
     '<div class="pf-intro-stage">' +
-    '<figure class="pf-intro-shot pf-intro-grey"><img src="assets/lifestyle/grey-vanity-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Grey &middot; 4-piece set</figcaption></figure>' +
-    '<figure class="pf-intro-shot pf-intro-pink"><img src="assets/lifestyle/pink-shower-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Pink &middot; 4-piece set</figcaption></figure>' +
+    '<figure class="pf-intro-shot pf-intro-grey"><img src="assets/lifestyle/grey-vanity-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Grey</figcaption></figure>' +
+    '<figure class="pf-intro-shot pf-intro-black"><img src="assets/intro/black-listing-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Black</figcaption></figure>' +
+    '<figure class="pf-intro-shot pf-intro-pink"><img src="assets/lifestyle/pink-shower-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Pink</figcaption></figure>' +
     '</div><div class="pf-intro-title"><div class="pf-intro-wordmark">PureForm</div>' +
     '<p class="pf-intro-tagline">Soft touch. Deep clean. Every day.</p></div>' +
-    '<p class="pf-intro-note">AI-styled product scenes</p>';
+    '<p class="pf-intro-note">Grey &amp; Pink: AI-styled scenes</p>';
 
   var photos = Array.from(screen.querySelectorAll('img'));
-  var timer = window.setTimeout(dismiss, 3800);
+  var timer = window.setTimeout(dismiss, 4000);
   var imageTimer = window.setTimeout(function () {
     if (photos.some(function (photo) { return !photo.complete || !photo.naturalWidth; })) dismiss();
   }, 350);

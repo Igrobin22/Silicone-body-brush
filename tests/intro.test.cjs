@@ -10,7 +10,7 @@ const css = read('assets/pureform-intro.css');
 
 function fixture({ url = 'https://pureform.test/index.html', referrer = '', navigation = 'navigate', painted = false,
   reduced = false, hidden = false, seen = false, blockedStorage = false, styled = true, body = true, photoReady = true } = {}) {
-  const storage = new Map(seen ? [['pureform.intro.v3', '1']] : []);
+  const storage = new Map(seen ? [['pureform.intro.v4', '1']] : []);
   const timers = new Map();
   let nextTimer = 1;
   const documentEvents = new Map();
@@ -18,7 +18,7 @@ function fixture({ url = 'https://pureform.test/index.html', referrer = '', navi
   const mediaEvents = new Map();
   const children = [];
   const nodes = [];
-  const photos = Array.from({ length: 2 }, () => ({ complete: photoReady, naturalWidth: photoReady ? 500 : 0, events: {},
+  const photos = Array.from({ length: 3 }, () => ({ complete: photoReady, naturalWidth: photoReady ? 500 : 0, events: {},
     addEventListener(type, fn) { this.events[type] = fn; }, removeEventListener(type) { delete this.events[type]; } }));
   const preference = { matches: reduced,
     addEventListener: (type, fn) => mediaEvents.set(type, fn),
@@ -51,20 +51,22 @@ function fixture({ url = 'https://pureform.test/index.html', referrer = '', navi
   return { storage, timers, documentEvents, windowEvents, mediaEvents, children, nodes, document, preference, photos };
 }
 
-test('first external homepage visit reuses two disclosed Grey and Pink scenes without sample video', () => {
+test('first external homepage visit shows Grey, Black and Pink with the existing listing photo and disclosed scenes', () => {
   const page = fixture();
   assert.equal(page.children.length, 1);
   assert.equal(page.children[0].attributes['aria-hidden'], 'true');
   assert.match(page.children[0].innerHTML, /PureForm/);
-  assert.equal((page.children[0].innerHTML.match(/<img /g) || []).length, 2);
+  assert.equal((page.children[0].innerHTML.match(/<img /g) || []).length, 3);
   assert.match(page.children[0].innerHTML, /assets\/lifestyle\/grey-vanity-600.webp/);
   assert.match(page.children[0].innerHTML, /assets\/lifestyle\/pink-shower-600.webp/);
-  assert.match(page.children[0].innerHTML, /AI-styled product scenes/);
+  assert.match(page.children[0].innerHTML, /assets\/intro\/black-listing-600.webp/);
+  assert.deepEqual([...page.children[0].innerHTML.matchAll(/<figcaption>([^<]+)<\/figcaption>/g)].map(match => match[1]), ['Grey', 'Black', 'Pink']);
+  assert.match(page.children[0].innerHTML, /Grey &amp; Pink: AI-styled scenes/);
   assert.match(page.children[0].innerHTML, /Soft touch\. Deep clean\. Every day\./);
-  assert.equal((page.children[0].innerHTML.match(/fetchpriority="low"/g) || []).length, 2);
+  assert.equal((page.children[0].innerHTML.match(/fetchpriority="low"/g) || []).length, 3);
   assert.doesNotMatch(source, /<svg|<video|<canvas|fetch\(|document\.fonts|preventDefault|stopPropagation|\.focus\(/);
-  assert.equal(page.storage.get('pureform.intro.v3'), '1');
-  assert.equal(page.timers.get(1).ms, 3800);
+  assert.equal(page.storage.get('pureform.intro.v4'), '1');
+  assert.equal(page.timers.get(1).ms, 4000);
   assert.equal(page.timers.get(2).ms, 350);
 });
 
@@ -105,9 +107,9 @@ test('CSS exit and JavaScript timeout independently remove the intro and clean u
     assert.equal(page.windowEvents.size, 0);
     assert.equal(page.mediaEvents.size, 0);
   }
-  assert.match(css, /animation: pf-intro-exit 700ms cubic-bezier\(\.76, 0, \.24, 1\) 2700ms forwards;/);
-  assert.match(css, /animation: pf-intro-drop 600ms cubic-bezier\(\.5, 0, \.9, \.4\) 1850ms forwards;/);
-  assert.match(css, /animation: pf-intro-title 650ms cubic-bezier\(\.22, 1, \.36, 1\) 2100ms both;/);
+  assert.match(css, /animation: pf-intro-exit 700ms cubic-bezier\(\.76, 0, \.24, 1\) 2900ms forwards;/);
+  assert.match(css, /animation: pf-intro-drop 600ms cubic-bezier\(\.5, 0, \.9, \.4\) 2050ms forwards;/);
+  assert.match(css, /animation: pf-intro-title 650ms cubic-bezier\(\.22, 1, \.36, 1\) 2300ms both;/);
   assert.match(css, /to \{ transform: translateY\(-100%\); visibility: hidden; \}/);
   assert.doesNotMatch(css, /infinite|will-change|filter:|perspective|rotateY/);
   assert.doesNotMatch(source, /document\.body\.style|scrollIntoView|scrollTo\(/);
@@ -129,6 +131,20 @@ test('broken or slow photos skip the decoration instead of delaying the homepage
   assert.equal(ready.children.length, 1);
 });
 
+test('every color, including Black, participates in image readiness and error cleanup', () => {
+  for (const index of [0, 1, 2]) {
+    const slow = fixture();
+    slow.photos[index].complete = false;
+    slow.timers.get(2).fn();
+    assert.equal(slow.children.length, 0);
+    assert.ok(slow.photos.every(photo => Object.keys(photo.events).length === 0));
+    const broken = fixture();
+    broken.photos[index].events.error();
+    assert.equal(broken.children.length, 0);
+    assert.equal(broken.timers.size, 0);
+  }
+});
+
 test('interaction, tab hiding, page exit and motion preference changes dismiss immediately', () => {
   const finishes = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'focusin'].map(type => page => page.documentEvents.get(type)());
   finishes.push(page => { page.document.hidden = true; page.documentEvents.get('visibilitychange')(); });
@@ -147,9 +163,9 @@ test('only a loopback preview may replay and it still honors reduced motion and 
 
 test('intro stays lightweight, uses bounded photos and only the homepage loads its non-blocking script', () => {
   assert.ok(Buffer.byteLength(source) < 8000);
-  assert.ok(Buffer.byteLength(css) < 5000);
+  assert.ok(Buffer.byteLength(css) < 6000);
   assert.match(css, /object-fit: contain/);
-  assert.ok(['assets/lifestyle/grey-vanity-600.webp', 'assets/lifestyle/pink-shower-600.webp'].reduce((total, file) => total + statSync(path.join(__dirname, '..', file)).size, 0) < 100000);
+  assert.ok(['assets/lifestyle/grey-vanity-600.webp', 'assets/intro/black-listing-600.webp', 'assets/lifestyle/pink-shower-600.webp'].reduce((total, file) => total + statSync(path.join(__dirname, '..', file)).size, 0) < 125000);
   for (const file of ['index.html']) {
     const html = read(file);
     assert.equal((html.match(/src="assets\/pureform-intro\.js" defer>/g) || []).length, 1, file);

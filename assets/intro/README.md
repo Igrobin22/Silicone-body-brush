@@ -1,15 +1,24 @@
 # Opening Scene
 
-The current opening reuses `../lifestyle/grey-vanity-600.webp` and
-`../lifestyle/pink-shower-600.webp` from the homepage. These are reference-based
-AI-styled brand scenes, disclosed as such within the opening. The two square
-photos total 91,026 bytes and remain uncropped. See `../lifestyle/README.md` for
-their provenance. No new media, video player or animation dependency is needed.
+The current opening shows all three store colors, in Grey / Black / Pink order:
 
-The Grey scene starts large, recedes left as Pink enters, then both slide down
+- Grey: `../lifestyle/grey-vanity-600.webp`, the existing AI-styled vanity scene.
+- Black: `black-listing-600.webp`, a 600px WebP of the existing Black listing's
+  `/assets/pureform-body-brush.png` photograph. It shows the back-brush detail,
+  not a newly generated or recolored full set. The source image is unchanged;
+  only its delivery size and encoding were optimized from the existing WebP.
+- Pink: `../lifestyle/pink-shower-600.webp`, the existing AI-styled shower scene.
+
+The Grey and Pink scenes are disclosed as AI-styled in the opening. All three
+square images remain uncropped and total 101,036 bytes. See
+`../lifestyle/README.md` for the scene provenance. No new photography, video
+player or animation dependency is needed.
+
+The Grey scene starts large, recedes left as Black and Pink enter, then all slide down
 to reveal PureForm before the layer lifts into the original hero. This adapts
 the supplied HeroLaunch sequence in the site's existing CSS/vanilla JavaScript.
-Portrait phones stack the two scenes vertically so both stay large and legible.
+Portrait phones show Grey and Black above Pink so every color fits with a
+readable caption. Wider screens show three evenly spaced photographs.
 
 ## Earlier Product-Photo Opening
 

@@ -1,12 +1,14 @@
 :root { --pf-intro-ready: 1; }
 
 .pf-intro-screen {
-  --pf-intro-photo: min(40vw, 480px, calc((100svh - 144px) / var(--pf-intro-zoom)));
-  --pf-intro-gap: 32px;
-  --pf-intro-zoom: 1.55;
-  --pf-intro-grey-x: calc(-100% - var(--pf-intro-gap) / 2);
+  --pf-intro-photo: min(28vw, 340px, calc((100svh - 144px) / var(--pf-intro-zoom)));
+  --pf-intro-gap: 24px;
+  --pf-intro-zoom: 2.1;
+  --pf-intro-grey-x: calc(-150% - var(--pf-intro-gap));
   --pf-intro-grey-y: -50%;
-  --pf-intro-pink-x: calc(var(--pf-intro-gap) / 2);
+  --pf-intro-black-x: -50%;
+  --pf-intro-black-y: -50%;
+  --pf-intro-pink-x: calc(50% + var(--pf-intro-gap));
   --pf-intro-pink-y: -50%;
   position: fixed;
   inset: 0;
@@ -106,6 +108,11 @@
   to { opacity: 1; transform: translate(var(--pf-intro-pink-x), var(--pf-intro-pink-y)); }
 }
 
+@keyframes pf-intro-black {
+  from { opacity: 0; transform: translate(100vw, var(--pf-intro-black-y)); }
+  to { opacity: 1; transform: translate(var(--pf-intro-black-x), var(--pf-intro-black-y)); }
+}
+
 @keyframes pf-intro-drop {
   from { opacity: 1; transform: translateY(0); }
   to { opacity: 0; transform: translateY(100vh); }
@@ -117,12 +124,13 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .pf-intro-screen { display: block; animation: pf-intro-exit 700ms cubic-bezier(.76, 0, .24, 1) 2700ms forwards; }
+  .pf-intro-screen { display: block; animation: pf-intro-exit 700ms cubic-bezier(.76, 0, .24, 1) 2900ms forwards; }
   .pf-intro-grey { animation: pf-intro-grey 1250ms cubic-bezier(.22, 1, .36, 1) both; }
-  .pf-intro-pink { animation: pf-intro-pink 700ms cubic-bezier(.22, 1, .36, 1) 650ms both; }
-  .pf-intro-stage { animation: pf-intro-drop 600ms cubic-bezier(.5, 0, .9, .4) 1850ms forwards; }
+  .pf-intro-black { animation: pf-intro-black 750ms cubic-bezier(.22, 1, .36, 1) 500ms both; }
+  .pf-intro-pink { animation: pf-intro-pink 750ms cubic-bezier(.22, 1, .36, 1) 750ms both; }
+  .pf-intro-stage { animation: pf-intro-drop 600ms cubic-bezier(.5, 0, .9, .4) 2050ms forwards; }
   .pf-intro-shot figcaption { animation: pf-intro-caption 300ms ease-out 1050ms both; }
-  .pf-intro-title { animation: pf-intro-title 650ms cubic-bezier(.22, 1, .36, 1) 2100ms both; }
+  .pf-intro-title { animation: pf-intro-title 650ms cubic-bezier(.22, 1, .36, 1) 2300ms both; }
 }
 
 @media (max-width: 480px) {
@@ -134,13 +142,19 @@
 
 @media (max-width: 600px) and (orientation: portrait) {
   .pf-intro-screen {
-    --pf-intro-photo: min(60vw, 260px, calc((100svh - 208px) / 2));
-    --pf-intro-zoom: 1.45;
-    --pf-intro-grey-x: -50%;
+    --pf-intro-photo: min(42vw, 220px, calc((100svh - 240px) / 2));
+    --pf-intro-zoom: 2;
+    --pf-intro-grey-x: calc(-100% - 8px);
     --pf-intro-grey-y: calc(-100% - 24px);
+    --pf-intro-black-x: 8px;
+    --pf-intro-black-y: calc(-100% - 24px);
     --pf-intro-pink-x: -50%;
     --pf-intro-pink-y: 24px;
   }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .pf-intro-screen { --pf-intro-zoom: 1.45; }
 }
 
 @media (prefers-reduced-motion: reduce) {
