@@ -1,6 +1,19 @@
-# Opening Product Photos
+# Opening Scene
 
-The launch sequence uses existing PureForm catalog photography, not stock media
+The current opening reuses `../lifestyle/grey-vanity-600.webp` and
+`../lifestyle/pink-shower-600.webp` from the homepage. These are reference-based
+AI-styled brand scenes, disclosed as such within the opening. The two square
+photos total 91,026 bytes and remain uncropped. See `../lifestyle/README.md` for
+their provenance. No new media, video player or animation dependency is needed.
+
+The Grey scene starts large, recedes left as Pink enters, then both slide down
+to reveal PureForm before the layer lifts into the original hero. This adapts
+the supplied HeroLaunch sequence in the site's existing CSS/vanilla JavaScript.
+Portrait phones stack the two scenes vertically so both stay large and legible.
+
+## Earlier Product-Photo Opening
+
+The earlier opening used existing PureForm catalog photography, not stock media
 or generated lifestyle scenes. Images are contained without cropping.
 
 - Grey: `../pureform-back-scrubber.webp`, the existing transparent four-piece set.

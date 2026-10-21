@@ -16,7 +16,7 @@
   try {
     preference = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (window.getComputedStyle(document.documentElement).getPropertyValue('--pf-intro-ready').trim() !== '1') return;
-    if (!preview && window.sessionStorage.getItem('pureform.intro.v2')) return;
+    if (!preview && window.sessionStorage.getItem('pureform.intro.v3')) return;
   } catch (_error) { return; }
 
   if (preference.matches || document.hidden) return;
@@ -30,19 +30,21 @@
     try { if (document.referrer && new URL(document.referrer).origin === location.origin) return; } catch (_error) { return; }
   }
 
-  try { window.sessionStorage.setItem('pureform.intro.v2', '1'); } catch (_error) { return; }
+  try { window.sessionStorage.setItem('pureform.intro.v3', '1'); } catch (_error) { return; }
 
   var screen = document.createElement('div');
   screen.className = 'pf-intro-screen';
   screen.setAttribute('aria-hidden', 'true');
-  screen.innerHTML = '<div class="pf-intro-wordmark">PureForm</div>' +
+  screen.innerHTML = '<p class="pf-intro-label">PureForm &middot; The daily ritual</p>' +
     '<div class="pf-intro-stage">' +
-    '<figure class="pf-intro-shot pf-intro-grey"><img src="assets/pureform-back-scrubber.webp" alt="" width="500" height="500" loading="eager" decoding="async" fetchpriority="low"><figcaption>Grey set</figcaption></figure>' +
-    '<figure class="pf-intro-shot pf-intro-pink"><img src="assets/intro/pink-set.webp" alt="" width="640" height="640" loading="eager" decoding="async" fetchpriority="low"><figcaption>Pink set</figcaption></figure>' +
-    '</div><p class="pf-intro-tagline">Four tools. One daily ritual.</p>';
+    '<figure class="pf-intro-shot pf-intro-grey"><img src="assets/lifestyle/grey-vanity-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Grey &middot; 4-piece set</figcaption></figure>' +
+    '<figure class="pf-intro-shot pf-intro-pink"><img src="assets/lifestyle/pink-shower-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Pink &middot; 4-piece set</figcaption></figure>' +
+    '</div><div class="pf-intro-title"><div class="pf-intro-wordmark">PureForm</div>' +
+    '<p class="pf-intro-tagline">Soft touch. Deep clean. Every day.</p></div>' +
+    '<p class="pf-intro-note">AI-styled product scenes</p>';
 
   var photos = Array.from(screen.querySelectorAll('img'));
-  var timer = window.setTimeout(dismiss, 2400);
+  var timer = window.setTimeout(dismiss, 3800);
   var imageTimer = window.setTimeout(function () {
     if (photos.some(function (photo) { return !photo.complete || !photo.naturalWidth; })) dismiss();
   }, 350);
