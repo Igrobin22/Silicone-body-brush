@@ -27,7 +27,7 @@ function fixture() {
     getPriceText: p => p.priceText, getProductDescription: () => 'Owner description',
     getAvailabilityText: p => p.available === false ? 'Out of stock' : 'In stock',
     isProductAvailable: p => p.available !== false,
-    renderFitList() {}, renderGallery() {}, renderRelatedProducts() {}, renderSetLinks() {},
+    renderFitList() {}, renderGallery() {}, renderToolPhotos() {}, renderRelatedProducts() {}, renderSetLinks() {},
     setQuantity() {}, updateStructuredData() {},
   });
   const pricing = html.match(/      function updatePricing\(product\) \{[\s\S]*?\n      \}/)[0];
@@ -121,10 +121,11 @@ test('tool photographs match their labels and routine content makes no new produ
   for (const [index, label] of labels.entries()) {
     const figure = [...html.matchAll(/<figure><img ([\s\S]*?)<\/figure>/g)].find(match => match[0].includes('<strong>' + label + '</strong>'));
     const tile = [...home.matchAll(/<div><div class="home-tool-media">([\s\S]*?)<\/p><\/div>/g)].find(match => match[0].includes('<h3>' + label + '</h3>'));
-    assert.ok(figure[0].includes(sources[index]));
+    assert.ok(figure[0].includes('data-pf-tool='));
     assert.ok(tile[0].includes(sources[index]));
   }
   assert.match(html, /All four pieces come in your selected set color/);
+  assert.match(html, /image.src = product.toolImages && product.toolImages\[index\]/);
   assert.equal((html.match(/<li><span aria-hidden="true">0[123]<\/span>/g) || []).length, 3);
   assert.match(html, /!window.PureFormCart.addItems\(\[\{ id: activeProductId, quantity: selectedQuantity \}\]\)/);
 });

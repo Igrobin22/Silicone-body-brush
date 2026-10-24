@@ -123,6 +123,7 @@ main { padding: 0; }
 .pdp-section-copy { max-width: 420px; color: var(--mid); font-size: 13px; }
 .pdp-section-kicker { margin-bottom: 6px; color: var(--mid); font-size: 12px; }
 .pdp-review-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.pdp-review-grid:has(> :only-child) { display: grid; grid-template-columns: minmax(0, 420px); overflow: visible; padding: 0; }
 .pdp-review-card { display: flex; flex-direction: column; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 8px; }
 .pdp-review-photo { height: 200px; background: var(--off); }
 .pdp-review-photo img { width: 100%; height: 100%; object-fit: contain; }

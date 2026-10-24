@@ -71,6 +71,22 @@ test('raw versioned Cloudinary photos use bounded delivery without modifying adm
   assert.equal(catalog.normalizeListing({ ...record, photo_urls: product.images }).image, product.image);
 });
 
+test('every gallery, tool detail and local fallback stays in its selected color; admin order wins', async () => {
+  const catalog = await fixture();
+  for (const [color, count] of Object.entries({ grey: 5, black: 7, pink: 9 })) {
+    const row = { slug: 'pureform-4pc-set-' + color, price: 40 };
+    const product = catalog.normalizeListing(row);
+    assert.equal(product.images.length, count);
+    assert.equal(product.imageFallback, 'assets/products/' + color + '-main.webp');
+    assert.equal(product.toolImages.length, 4);
+    for (const url of product.toolImages) assert.ok(product.images.includes(url));
+    const admin = catalog.normalizeListing({ ...row, photo_urls: ['https://example.test/new-main.webp', product.images[0]] });
+    assert.equal(admin.image, 'https://example.test/new-main.webp');
+    assert.equal(admin.images.length, 2);
+    assert.equal(admin.images[1], product.images[0]);
+  }
+});
+
 test('existing crops, signed URLs, local files and other image hosts stay untouched', async () => {
   const catalog = await fixture();
   const images = [

@@ -28,7 +28,7 @@ function fixture() {
   // Expose private functions only inside the isolated test copy, never in the shipped script.
   assert.match(source, /\}\)\(\);\s*$/);
   const instrumented = source.replace(/\}\)\(\);\s*$/, `
-    globalThis.adminTest = { state, els, orderSelect, onOrdersTableChange, onOrdersTableClick, onOrderSubmit, renderStats, renderOrdersTable, fillOrderForm, syncOrderFilterTabs,
+    globalThis.adminTest = { state, els, orderSelect, onOrdersTableChange, onOrdersTableClick, onOrderSubmit, renderStats, renderOrdersTable, fillOrderForm, syncOrderFilterTabs, renderListingsTable, renderContentTable, focusEditor,
       captureUpdates(fn) { updateOrder = fn; setView = function () {}; } };
   })();`);
   const context = vm.createContext({ document, window: {}, Intl, URL, URLSearchParams });
@@ -162,6 +162,35 @@ test('order filters announce the selected state', () => {
   page.state.orderFilter = 'new';
   page.syncOrderFilterTabs();
   assert.deepEqual(page.els.orderFilterTabs.map(button => button.attributes['aria-pressed']), ['false', 'true', 'false', 'false']);
+});
+
+test('listing and content rows expose every field label for layouts without inner scrolling', () => {
+  const page = fixture();
+  page.els.listingsTableBody = element();
+  page.els.contentTableBody = element();
+  page.state.listings = [{ id: 'black', name: 'Black set', slug: 'pureform-4pc-set-black', price: 87.78, discount: 50, visible: true }];
+  page.state.contentBlocks = [{ id: 'announcement', key: 'home.announcement', label: 'Announcement', block_type: 'text' }];
+  page.renderListingsTable();
+  page.renderContentTable();
+  assert.deepEqual(page.els.listingsTableBody.children[0].children.map(cell => cell.dataset.label), ['Listing', 'Price', 'Discount', 'Stock', 'Visible', 'Actions']);
+  assert.deepEqual(page.els.contentTableBody.children[0].children.map(cell => cell.dataset.label), ['Key', 'Label', 'Type', 'Updated', 'Actions']);
+});
+
+test('editors move keyboard focus and use ordinary document scrolling', () => {
+  const page = fixture();
+  const title = element();
+  page.focusEditor(title);
+  assert.equal(title.focusOptions.preventScroll, true);
+  assert.equal(title.scrollOptions.block, 'start');
+  assert.equal(title.scrollOptions.behavior, 'auto');
+  for (const file of ['index.html', 'dashboard.html']) {
+    const html = readFileSync(path.join(__dirname, '../admin/', file), 'utf8');
+    assert.match(html, /id="listingFormTitle" tabindex="-1"/);
+    assert.match(html, /href="#listingsHeading">Back to listings/);
+    assert.match(html, /href="#contentHeading">Back to content/);
+    assert.match(html, /admin-table records-table listings-table/);
+    assert.match(html, /admin-table records-table content-table/);
+  }
 });
 
 test('refund totals reduce customer revenue and remain read-only in order details', () => {

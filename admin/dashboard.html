@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/pureform-admin.css">
+  <link rel="stylesheet" href="../assets/pureform-admin-workspace.css">
 </head>
 <body class="admin-page" data-admin-page="dashboard">
   <main id="adminApp" class="admin-app">
@@ -26,7 +27,7 @@
       <aside class="admin-sidebar" aria-label="Admin navigation">
         <div>
           <a class="admin-brand" href="../index.html">PureForm</a>
-          <p class="sidebar-note">Admin dashboard</p>
+          <p class="sidebar-note">Store admin <span class="store-locale">UAE / AED</span></p>
         </div>
         <nav class="admin-nav" aria-label="Dashboard sections">
           <a class="nav-tab is-active" data-view="overview" href="dashboard.html" aria-current="page">Overview</a>
@@ -43,11 +44,11 @@
       <div class="admin-main">
         <header class="admin-topbar">
           <div>
-            <p class="eyebrow">Supabase Backend</p>
+            <p class="eyebrow">PureForm / Store</p>
             <h1 id="viewTitle">Overview</h1>
           </div>
           <div class="topbar-actions">
-            <button type="button" id="refreshButton" class="btn btn-secondary">Refresh</button>
+            <button type="button" id="refreshButton" class="btn btn-secondary workspace-icon-button" title="Refresh dashboard" aria-label="Refresh"><span class="visually-hidden">Refresh</span></button>
             <a class="btn btn-primary" href="../index.html">View site</a>
           </div>
         </header>
@@ -57,29 +58,29 @@
         <section id="overviewPanel" class="view-panel" aria-labelledby="overviewHeading">
           <div class="section-head dashboard-section-head">
             <div>
-              <p class="eyebrow">Control Room</p>
-              <h2 id="overviewHeading">Store health at a glance.</h2>
+              <p class="eyebrow">Store</p>
+              <h2 id="overviewHeading">Store summary</h2>
             </div>
           </div>
           <div id="statsGrid" class="stats-grid"></div>
           <div class="panel-grid">
             <article class="admin-card">
               <div class="card-head">
-                <h3>Inventory Watch</h3>
+                <h3>Inventory</h3>
                 <span id="inventoryBadge" class="badge">0 units</span>
               </div>
               <div id="inventoryList" class="mini-list"></div>
             </article>
             <article class="admin-card">
               <div class="card-head">
-                <h3>Active Discounts</h3>
+                <h3>Discounts</h3>
                 <span id="discountBadge" class="badge">0 active</span>
               </div>
               <div id="discountList" class="mini-list"></div>
             </article>
             <article class="admin-card">
               <div class="card-head">
-                <h3>Recent Orders</h3>
+                <h3>Recent orders</h3>
                 <span id="recentOrdersBadge" class="badge">0 new</span>
               </div>
               <div id="recentOrdersList" class="mini-list"></div>
@@ -98,6 +99,14 @@
               <button type="button" class="order-filter-tab" data-order-filter="open">Open</button>
               <button type="button" class="order-filter-tab" data-order-filter="completed">Done</button>
             </div>
+          </div>
+
+          <div class="workspace-toolbar" aria-label="Order search and filters">
+            <label class="workspace-search"><span class="visually-hidden">Search orders</span><input id="orderSearch" type="search" placeholder="Search orders, customers or email" autocomplete="off"></label>
+            <label class="workspace-select"><span>Payment</span><select id="orderPaymentFilter"><option value="all">All payments</option><option value="paid">Paid</option><option value="unpaid">Awaiting payment</option><option value="refund">Refund activity</option><option value="failed">Failed</option></select></label>
+            <label class="workspace-select"><span>Source</span><select id="orderSourceFilter"><option value="all">All orders</option><option value="customer">Customer orders</option><option value="sandbox">Sandbox tests</option></select></label>
+            <button type="button" class="workspace-clear" data-clear-filters="orders" title="Clear order filters" aria-label="Clear order filters">&#215;</button>
+            <p id="orderResults" class="workspace-results" role="status"></p>
           </div>
 
           <div class="manager-grid orders-manager-grid">
@@ -184,15 +193,23 @@
           <div class="section-head split">
             <div>
               <p class="eyebrow">Listings</p>
-              <h2 id="listingsHeading">Product listings.</h2>
+              <h2 id="listingsHeading">Product catalog</h2>
             </div>
             <button type="button" id="newListingButton" class="btn btn-primary">Add listing</button>
           </div>
 
+          <div class="workspace-toolbar" aria-label="Product search and filters">
+            <label class="workspace-search"><span class="visually-hidden">Search products</span><input id="listingSearch" type="search" placeholder="Search products" autocomplete="off"></label>
+            <label class="workspace-select"><span>View</span><select id="listingVisibilityFilter"><option value="all">All products</option><option value="visible">Visible</option><option value="hidden">Hidden</option><option value="low">Low or out of stock</option></select></label>
+            <label class="workspace-select"><span>Sort</span><select id="listingSort"><option value="store">Store order</option><option value="name">Name A to Z</option><option value="stock">Stock: lowest first</option><option value="price">Price: lowest first</option></select></label>
+            <button type="button" class="workspace-clear" data-clear-filters="listings" title="Clear product filters" aria-label="Clear product filters">&#215;</button>
+            <p id="listingResults" class="workspace-results" role="status"></p>
+          </div>
+
           <div class="manager-grid">
             <article class="admin-card table-card">
-              <div class="table-scroll">
-                <table class="admin-table">
+              <div class="table-scroll records-table-wrap">
+                <table class="admin-table records-table listings-table">
                   <caption>All listings</caption>
                   <thead>
                     <tr>
@@ -209,16 +226,18 @@
               </div>
             </article>
 
-            <article class="admin-card editor-card">
+            <article id="listingEditor" class="admin-card editor-card" hidden>
               <form id="listingForm" class="admin-form dense-form">
                 <div class="form-head split">
                   <div>
                     <p class="eyebrow">Editor</p>
-                    <h3 id="listingFormTitle">New listing</h3>
+                    <h3 id="listingFormTitle" tabindex="-1">New listing</h3>
+                    <a class="editor-back-link" href="#listingsHeading">Back to listings</a>
                   </div>
                   <button type="button" id="deleteListingButton" class="text-button danger" hidden>Delete</button>
                 </div>
                 <input id="listingId" name="id" type="hidden">
+                <fieldset class="editor-section"><legend>Product details</legend>
                 <label>
                   <span>Name</span>
                   <input id="listingName" name="name" type="text" required>
@@ -231,6 +250,8 @@
                   <span>Description</span>
                   <textarea id="listingDescription" name="description" rows="4"></textarea>
                 </label>
+                </fieldset>
+                <fieldset class="editor-section"><legend>Pricing &amp; discounts</legend>
                 <div class="form-grid two">
                   <label>
                     <span>Price (AED)</span>
@@ -259,6 +280,8 @@
                   <span>Discount ends</span>
                   <input id="listingDiscountEndsAt" name="discount_ends_at" type="datetime-local">
                 </label>
+                </fieldset>
+                <fieldset class="editor-section"><legend>Inventory &amp; visibility</legend>
                 <div class="form-grid two">
                   <label>
                     <span>Inventory</span>
@@ -288,18 +311,26 @@
                     <span>Visible on public site</span>
                   </label>
                 </div>
+                </fieldset>
+                <fieldset class="editor-section"><legend>Media</legend>
                 <div class="photo-url-editor" aria-labelledby="listingPhotosLabel">
                   <div class="photo-url-editor-head">
                     <div>
-                      <span id="listingPhotosLabel">Photo URLs</span>
-                      <small>Each URL gets its own preview.</small>
+                      <span id="listingPhotosLabel">Product photos</span>
+                      <small>First photo is the main image. Up to 24 photos.</small>
                     </div>
-                    <button type="button" id="addListingPhotoButton" class="photo-add-button" aria-label="Add another photo URL">+</button>
+                    <div class="photo-editor-actions">
+                      <button type="button" id="uploadListingPhotoButton" class="photo-add-button photo-upload-button" aria-label="Upload photos" title="Upload photos">&#8593; <span>Upload photos</span></button>
+                      <button type="button" id="addListingPhotoButton" class="photo-add-button" aria-label="Add another photo URL" title="Add photo link">+</button>
+                    </div>
                   </div>
                   <textarea id="listingPhotos" name="photo_urls" hidden aria-hidden="true" tabindex="-1"></textarea>
-                  <div id="listingPhotoPreview" class="photo-url-list" aria-live="polite" aria-label="Listing photo URL fields"></div>
+                  <input id="listingPhotoFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+                  <p id="listingPhotoStatus" class="photo-editor-status" role="status"></p>
+                  <div id="listingPhotoPreview" class="photo-url-list" aria-label="Listing photos in display order"></div>
                 </div>
-                <button type="submit" class="btn btn-primary full-width">Save listing</button>
+                </fieldset>
+                <div class="editor-footer"><span class="editor-save-state" id="listingSaveState" role="status"></span><div class="editor-footer-actions"><button type="button" class="btn btn-secondary" data-discard-editor="listing">Discard</button><button type="submit" class="btn btn-primary">Save listing</button></div></div>
               </form>
             </article>
           </div>
@@ -308,16 +339,22 @@
         <section id="contentPanel" class="view-panel" aria-labelledby="contentHeading" hidden>
           <div class="section-head split">
             <div>
-              <p class="eyebrow">Content Data</p>
-              <h2 id="contentHeading">Announcements, popup, and site copy.</h2>
+              <p class="eyebrow">Website</p>
+              <h2 id="contentHeading">Website content</h2>
             </div>
             <button type="button" id="newContentButton" class="btn btn-primary">Add block</button>
           </div>
 
+          <div class="workspace-toolbar" aria-label="Content search">
+            <label class="workspace-search"><span class="visually-hidden">Search content</span><input id="contentSearch" type="search" placeholder="Search content by key or label" autocomplete="off"></label>
+            <button type="button" class="workspace-clear" data-clear-filters="content" title="Clear content search" aria-label="Clear content search">&#215;</button>
+            <p id="contentResults" class="workspace-results" role="status"></p>
+          </div>
+
           <div class="manager-grid">
             <article class="admin-card table-card">
-              <div class="table-scroll">
-                <table class="admin-table">
+              <div class="table-scroll records-table-wrap">
+                <table class="admin-table records-table content-table">
                   <caption>All content blocks</caption>
                   <thead>
                     <tr>
@@ -333,12 +370,13 @@
               </div>
             </article>
 
-            <article class="admin-card editor-card">
+            <article id="contentEditor" class="admin-card editor-card" hidden>
               <form id="contentForm" class="admin-form dense-form">
                 <div class="form-head split">
                   <div>
                     <p class="eyebrow">Editor</p>
-                    <h3 id="contentFormTitle">New block</h3>
+                    <h3 id="contentFormTitle" tabindex="-1">New block</h3>
+                    <a class="editor-back-link" href="#contentHeading">Back to content</a>
                   </div>
                   <button type="button" id="deleteContentButton" class="text-button danger" hidden>Delete</button>
                 </div>
@@ -364,7 +402,7 @@
                   <span>Value</span>
                   <textarea id="contentValue" name="value" rows="8"></textarea>
                 </label>
-                <button type="submit" class="btn btn-primary full-width">Save content</button>
+                <div class="editor-footer"><span class="editor-save-state" id="contentSaveState" role="status"></span><div class="editor-footer-actions"><button type="button" class="btn btn-secondary" data-discard-editor="content">Discard</button><button type="submit" class="btn btn-primary">Save content</button></div></div>
               </form>
             </article>
           </div>

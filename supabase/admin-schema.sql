@@ -568,9 +568,10 @@ values
     true,
     array[
       'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553521/Main_with_background_anlah0.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553513/grey_white_bg_irnzyc.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553535/grey_Head_h1duwj.png'
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1792822128/grey_body_acy8rv.jpg',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553535/grey_Head_h1duwj.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553529/grey_face_qpwaey.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553512/grey_Handle_zkieiu.png'
     ],
     10
   ),
@@ -588,7 +589,13 @@ values
     'Black set listing. Keep stock count synced with available black inventory.',
     true,
     array[
-      '/assets/pureform-body-brush.png'
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821805/main_rjtosu.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821849/b_handle_2_tphvrt.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821853/b_head_2_o21dux.jpg',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821851/b_head_1_jz208y.jpg',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821846/b_handle_1_wo3prl.jpg',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821842/b_body_l5gx9z.jpg',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821844/b_face_1_xnh9qv.jpg'
     ],
     20
   ),
@@ -606,16 +613,15 @@ values
     'Low stock alert. Uses dedicated pink product photography.',
     true,
     array[
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/main_img_voei63.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227618/main_img_without_bg_mbrxsg.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227616/p_body_1_kgg059.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/p_body_2_lv1x37.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/p_face_1_f4vdyz.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_face_2_yoirlr.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_head_1_yquyts.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227620/p_head_2_vtl4pl.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_handle_1_crtic9.png',
-      'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_handle_2_komo0m.png'
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227617/main_img_voei63.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227619/p_handle_1_crtic9.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227619/p_handle_2_komo0m.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227617/p_face_1_f4vdyz.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227619/p_face_2_yoirlr.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227616/p_body_1_kgg059.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227617/p_body_2_lv1x37.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227620/p_head_2_vtl4pl.png',
+      'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227619/p_head_1_yquyts.png'
     ],
     30
   )

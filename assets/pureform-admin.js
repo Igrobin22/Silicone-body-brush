@@ -13,6 +13,9 @@
   var PAYMENT_STATUS_OPTIONS = ['pending', 'requires_payment', 'paid', 'failed', 'refunded', 'cancelled'];
   var FULFILLMENT_STATUS_OPTIONS = ['unfulfilled', 'reserved', 'packed', 'shipped', 'delivered', 'cancelled'];
   var VALID_ADMIN_VIEWS = ['overview', 'orders', 'listings', 'content'];
+  var PHOTO_BUCKET = 'product-photos';
+  var MAX_PHOTOS = 24;
+  var MAX_PHOTO_BYTES = 8 * 1024 * 1024;
 
   var state = {
     supabase: null,
@@ -25,7 +28,12 @@
     ordersUnavailable: false,
     contentBlocks: [],
     activeView: 'overview',
-    page: 'login'
+    page: 'login',
+    photoFormVersion: 0,
+    photoUploadPending: false,
+    formBaselines: {},
+    savingForms: {},
+    listingEditVersion: null
   };
 
   var els = {};
@@ -34,6 +42,7 @@
 
   function init() {
     collectElements();
+    decorateWorkspace();
     state.page = document.body.dataset.adminPage || (els.dashboardView && !els.authView ? 'dashboard' : 'login');
     state.activeView = getRouteState().view;
     document.body.classList.toggle('has-default-supabase-config', hasConfig(DEFAULT_CONFIG));
@@ -95,11 +104,17 @@
     els.deleteListingButton = document.getElementById('deleteListingButton');
     els.listingPhotoPreview = document.getElementById('listingPhotoPreview');
     els.addListingPhotoButton = document.getElementById('addListingPhotoButton');
+    els.listingPhotoFiles = document.getElementById('listingPhotoFiles');
+    els.uploadListingPhotoButton = document.getElementById('uploadListingPhotoButton');
+    els.listingPhotoStatus = document.getElementById('listingPhotoStatus');
     els.newContentButton = document.getElementById('newContentButton');
     els.contentTableBody = document.getElementById('contentTableBody');
     els.contentForm = document.getElementById('contentForm');
     els.contentFormTitle = document.getElementById('contentFormTitle');
     els.deleteContentButton = document.getElementById('deleteContentButton');
+    ['orderSearch', 'orderPaymentFilter', 'orderSourceFilter', 'listingSearch', 'listingVisibilityFilter', 'listingSort', 'contentSearch', 'orderResults', 'listingResults', 'contentResults'].forEach(function (id) {
+      els[id] = document.getElementById(id);
+    });
   }
 
   function bindEvents() {
@@ -107,7 +122,7 @@
     bind(els.clearConfigButton, 'click', clearConfig);
     bind(els.loginForm, 'submit', onLoginSubmit);
     bind(els.signOutButton, 'click', signOut);
-    bind(els.refreshButton, 'click', loadDashboardData);
+    bind(els.refreshButton, 'click', function () { if (mayLeaveEditor()) loadDashboardData(); });
 
     els.navTabs.forEach(function (button) {
       button.addEventListener('click', function (event) {
@@ -116,14 +131,34 @@
         }
 
         event.preventDefault();
+        if (!mayLeaveEditor()) return;
         setView(button.dataset.view, { push: true });
+        applyRouteSelection({ view: button.dataset.view });
       });
     });
 
     window.addEventListener('popstate', function () {
+      if (!mayLeaveEditor()) {
+        updateAdminRoute(currentEditorRoute());
+        return;
+      }
       var route = getRouteState();
       setView(route.view, { skipRoute: true });
       applyRouteSelection(route);
+    });
+    window.addEventListener('beforeunload', function (event) {
+      if (hasUnsavedEditor() || state.photoUploadPending) { event.preventDefault(); event.returnValue = ''; }
+    });
+    bind(els.dashboardView, 'click', onWorkspaceClick);
+    [els.orderForm, els.listingForm, els.contentForm].forEach(function (form) {
+      bind(form, 'input', function () { updateEditorSaveState(form); });
+      bind(form, 'change', function () { updateEditorSaveState(form); });
+    });
+    [els.orderSearch, els.listingSearch, els.contentSearch].forEach(function (input) {
+      bind(input, 'input', renderWorkspaceTables);
+    });
+    [els.orderPaymentFilter, els.orderSourceFilter, els.listingVisibilityFilter, els.listingSort].forEach(function (input) {
+      bind(input, 'change', renderWorkspaceTables);
     });
 
     els.orderFilterTabs.forEach(function (button) {
@@ -139,8 +174,10 @@
     bind(els.orderForm, 'submit', onOrderSubmit);
 
     bind(els.newListingButton, 'click', function () {
+      if (!mayLeaveEditor()) return;
       fillListingForm();
       setView('listings', { push: true, action: 'new' });
+      focusEditor(els.listingFormTitle);
     });
 
     bind(els.listingsTableBody, 'click', onListingsTableClick);
@@ -156,17 +193,22 @@
     });
     bind(els.listingPhotoPreview, 'input', onPhotoUrlListInput);
     bind(els.listingPhotoPreview, 'click', onPhotoUrlListClick);
+    bind(els.uploadListingPhotoButton, 'click', function () { els.listingPhotoFiles.click(); });
+    bind(els.listingPhotoFiles, 'change', onListingPhotoUpload);
     bind(document.getElementById('listingPhotos'), 'input', renderPhotoPreviewFromForm);
     bind(document.getElementById('listingName'), 'input', maybeFillSlug);
     bind(document.getElementById('listingPrice'), 'input', renderPricePreview);
     bind(document.getElementById('listingDiscount'), 'input', renderPricePreview);
     bind(document.getElementById('listingDiscountMode'), 'change', renderPricePreview);
+    bind(document.getElementById('listingDiscountMode'), 'change', syncDiscountFields);
     bind(document.getElementById('listingDiscountStartsAt'), 'input', renderPricePreview);
     bind(document.getElementById('listingDiscountEndsAt'), 'input', renderPricePreview);
 
     bind(els.newContentButton, 'click', function () {
+      if (!mayLeaveEditor()) return;
       fillContentForm();
       setView('content', { push: true, action: 'new' });
+      focusEditor(els.contentFormTitle);
     });
 
     bind(els.contentTableBody, 'click', onContentTableClick);
@@ -178,6 +220,156 @@
     if (element) {
       element.addEventListener(eventName, handler);
     }
+  }
+
+  function decorateWorkspace() {
+    var paths = {
+      overview: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',
+      orders: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z"/><path d="M9 7h6M9 11h6M9 15h3"/>',
+      listings: '<path d="m12 3 9 5-9 5-9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/>',
+      content: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 9v11"/>',
+      refresh: '<path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/>',
+      external: '<path d="M14 3h7v7M21 3l-9 9M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/>'
+    };
+    function icon(name) {
+      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+      svg.setAttribute('stroke-width', '1.6');
+      svg.setAttribute('stroke-linecap', 'round');
+      svg.setAttribute('stroke-linejoin', 'round');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.classList.add('workspace-icon');
+      svg.innerHTML = paths[name];
+      return svg;
+    }
+    els.navTabs.forEach(function (link) { link.prepend(icon(link.dataset.view)); });
+    if (els.refreshButton) els.refreshButton.prepend(icon('refresh'));
+    var storeLink = document.querySelector('.admin-topbar a');
+    if (storeLink) storeLink.appendChild(icon('external'));
+  }
+
+  function editorFormForView() {
+    return { orders: els.orderForm, listings: els.listingForm, content: els.contentForm }[state.activeView] || null;
+  }
+
+  function formSnapshot(form) {
+    if (!editorFormKey(form) || typeof FormData !== 'function') return null;
+    return JSON.stringify(Array.from(new FormData(form).entries()).map(function (entry) { return [entry[0], String(entry[1])]; }));
+  }
+
+  function rememberEditor(form) {
+    var snapshot = formSnapshot(form);
+    if (snapshot === null) return;
+    state.formBaselines[editorFormKey(form)] = snapshot;
+    updateEditorSaveState(form);
+  }
+
+  function hasUnsavedEditor() {
+    var form = editorFormForView();
+    var snapshot = formSnapshot(form);
+    var key = editorFormKey(form);
+    return snapshot !== null && state.formBaselines[key] !== undefined && snapshot !== state.formBaselines[key];
+  }
+
+  function updateEditorSaveState(form) {
+    var key = editorFormKey(form);
+    if (!key) return;
+    var status = document.getElementById(key.replace('Form', 'SaveState'));
+    if (!status) return;
+    var changed = state.formBaselines[key] !== undefined && formSnapshot(form) !== state.formBaselines[key];
+    status.textContent = changed ? 'Unsaved changes' : '';
+  }
+
+  function editorFormKey(form) {
+    // Named controls such as name="id" shadow HTMLFormElement.id.
+    return form && form.getAttribute ? form.getAttribute('id') : null;
+  }
+
+  function resetActiveEditor() {
+    if (state.activeView === 'listings') fillListingForm(findListing(document.getElementById('listingId').value));
+    if (state.activeView === 'content') fillContentForm(findContentBlock(document.getElementById('contentId').value));
+    if (state.activeView === 'orders') fillOrderForm(findOrder(document.getElementById('orderId').value));
+  }
+
+  function mayLeaveEditor() {
+    if (Object.values(state.savingForms).some(Boolean)) { setDashboardStatus('Please wait for the current save to finish.', 'neutral'); return false; }
+    if (!hasUnsavedEditor() && !state.photoUploadPending) return true;
+    if (!window.confirm(state.photoUploadPending ? 'Leave this upload? Uploaded files will not be published unless the listing is saved.' : 'Discard your unsaved changes?')) return false;
+    resetActiveEditor();
+    return true;
+  }
+
+  function currentEditorRoute() {
+    var route = { view: state.activeView };
+    if (state.activeView === 'listings') route.listing = document.getElementById('listingId').value;
+    if (state.activeView === 'content') route.block = document.getElementById('contentId').value;
+    if (state.activeView === 'orders') route.order = document.getElementById('orderId').value;
+    if ((state.activeView === 'listings' && !route.listing) || (state.activeView === 'content' && !route.block)) route.action = 'new';
+    return route;
+  }
+
+  function setEditorVisible(name, visible) {
+    var editor = document.getElementById(name + 'Editor');
+    if (editor) editor.hidden = !visible;
+  }
+
+  function syncDiscountFields() {
+    var mode = document.getElementById('listingDiscountMode');
+    if (!mode) return;
+    ['listingDiscountStartsAt', 'listingDiscountEndsAt'].forEach(function (id) {
+      var input = document.getElementById(id);
+      if (input) input.disabled = mode.value === 'ongoing';
+    });
+    updateEditorSaveState(els.listingForm);
+  }
+
+  function onWorkspaceClick(event) {
+    var clear = event.target.closest('[data-clear-filters]');
+    if (clear) {
+      var view = clear.dataset.clearFilters;
+      var inputs = view === 'orders' ? ['orderSearch', 'orderPaymentFilter', 'orderSourceFilter'] : view === 'listings' ? ['listingSearch', 'listingVisibilityFilter', 'listingSort'] : ['contentSearch'];
+      inputs.forEach(function (id) { if (els[id]) els[id].value = id === 'listingSort' ? 'store' : /Search$/.test(id) ? '' : 'all'; });
+      if (view === 'orders') state.orderFilter = 'all';
+      renderWorkspaceTables();
+      if (els[inputs[0]]) els[inputs[0]].focus();
+      return;
+    }
+    var discard = event.target.closest('[data-discard-editor]');
+    var back = event.target.closest('a.editor-back-link');
+    if (discard || back) {
+      event.preventDefault();
+      if (!mayLeaveEditor()) return;
+      resetActiveEditor();
+      var name = state.activeView === 'listings' ? 'listing' : 'content';
+      setEditorVisible(name, false);
+      updateAdminRoute({ view: state.activeView });
+      focusEditor(document.getElementById(name === 'listing' ? 'listingsHeading' : 'contentHeading'));
+      return;
+    }
+    var link = event.target.closest('a[data-admin-route]');
+    if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button) return;
+    event.preventDefault();
+    if (!mayLeaveEditor()) return;
+    var url = new URL(link.href, window.location.href);
+    if (url.origin !== window.location.origin) return;
+    var route = { view: normalizeView(url.searchParams.get('view')), listing: url.searchParams.get('listing'), order: url.searchParams.get('order'), block: url.searchParams.get('block') };
+    setView(route.view, Object.assign({ push: true }, route));
+    applyRouteSelection(route);
+    focusEditor(route.listing ? els.listingFormTitle : route.order ? els.orderFormTitle : document.getElementById(route.view + 'Heading'));
+  }
+
+  function setFormBusy(form, busy) {
+    var key = editorFormKey(form);
+    if (!key) return;
+    state.savingForms[key] = busy;
+    form.setAttribute('aria-busy', String(busy));
+    var button = form.querySelector('button[type="submit"]');
+    if (!button) return;
+    if (!button.dataset.idleLabel) button.dataset.idleLabel = button.textContent;
+    button.disabled = busy;
+    button.textContent = busy ? 'Saving...' : button.dataset.idleLabel;
   }
 
   function loadConfig() {
@@ -316,6 +508,12 @@
     state.session = session;
 
     if (!session || !session.user) {
+      state.profile = null;
+      state.formBaselines = {};
+      state.savingForms = {};
+      state.photoFormVersion += 1;
+      state.photoUploadPending = false;
+      if (els.dashboardView) els.dashboardView.hidden = true;
       showAuth();
       return;
     }
@@ -357,6 +555,7 @@
     if (!state.supabase) {
       return;
     }
+    if (!mayLeaveEditor()) return;
 
     await state.supabase.auth.signOut();
     state.session = null;
@@ -516,11 +715,13 @@
 
     if (route.view === 'listings') {
       fillListingForm(route.action === 'new' ? null : findListing(route.listing));
+      setEditorVisible('listing', Boolean(route.action === 'new' || findListing(route.listing)));
       return;
     }
 
     if (route.view === 'content') {
       fillContentForm(route.action === 'new' ? null : findContentBlock(route.block));
+      setEditorVisible('content', Boolean(route.action === 'new' || findContentBlock(route.block)));
       return;
     }
 
@@ -543,6 +744,7 @@
     }
 
     setDashboardStatus('Refreshing dashboard data...', 'neutral');
+    if (els.refreshButton) els.refreshButton.disabled = true;
 
     try {
       await Promise.all([loadListings(), loadOrders(), loadContentBlocks()]);
@@ -550,10 +752,12 @@
       if (state.ordersUnavailable) {
         setDashboardStatus('Dashboard updated. Run the updated Supabase SQL to enable checkout order capture.', 'neutral');
       } else {
-        setDashboardStatus('Dashboard updated.', 'success');
+        setDashboardStatus('Updated ' + new Intl.DateTimeFormat('en', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Dubai' }).format(new Date()) + ' UAE', 'success');
       }
     } catch (error) {
       setDashboardStatus('Could not load dashboard data: ' + getErrorMessage(error), 'error');
+    } finally {
+      if (els.refreshButton) els.refreshButton.disabled = false;
     }
   }
 
@@ -609,7 +813,7 @@
     renderOrdersTable();
     renderListingsTable();
     renderContentTable();
-    applyRouteSelection();
+    if (!hasUnsavedEditor() && !state.photoUploadPending) applyRouteSelection();
   }
 
   function renderStats() {
@@ -669,8 +873,9 @@
       function (order) {
         return {
           title: orderNumber(order),
-          meta: customerName(order) + ' / ' + itemSummary(order),
-          value: formatCurrency(order.total)
+          meta: (order.source === 'stripe_sandbox' ? 'Sandbox / ' : '') + customerName(order) + ' / ' + itemSummary(order),
+          value: formatCurrency(order.total),
+          href: 'dashboard.html?view=orders&order=' + encodeURIComponent(order.id)
         };
       },
       state.ordersUnavailable ? 'Run the updated Supabase SQL to create the orders table.' : 'No customer orders yet.'
@@ -688,7 +893,8 @@
         return {
           title: item.name,
           meta: statusLabel(item.inventory_status) + ' / ' + Number(item.inventory_quantity || 0) + ' units',
-          value: item.visible ? 'Visible' : 'Hidden'
+          value: item.visible ? 'Visible' : 'Hidden',
+          href: 'dashboard.html?view=listings&listing=' + encodeURIComponent(item.id)
         };
       },
       'No inventory records yet.'
@@ -707,7 +913,8 @@
         return {
           title: item.name,
           meta: formatCurrency(Number(item.price || 0)) + ' -> ' + formatCurrency(discountedPrice(item)) + ' / ' + discountWindowLabel(item),
-          value: Number(item.discount || 0) + '% off'
+          value: Number(item.discount || 0) + '% off',
+          href: 'dashboard.html?view=listings&listing=' + encodeURIComponent(item.id)
         };
       },
       'No active discounts.'
@@ -731,8 +938,9 @@
 
     items.forEach(function (item) {
       var mapped = mapper(item);
-      var row = document.createElement('div');
+      var row = document.createElement(mapped.href ? 'a' : 'div');
       row.className = 'mini-item';
+      if (mapped.href) { row.href = mapped.href; row.dataset.adminRoute = 'true'; }
 
       var copy = document.createElement('div');
       var title = document.createElement('strong');
@@ -759,22 +967,55 @@
   }
 
   function filteredOrders() {
+    var orders = state.orders;
     if (state.orderFilter === 'new') {
-      return state.orders.filter(function (order) { return order.status === 'new'; });
-    }
-
-    if (state.orderFilter === 'open') {
-      return state.orders.filter(isOpenOrder);
-    }
-
-    if (state.orderFilter === 'completed') {
-      return state.orders.filter(function (order) {
+      orders = orders.filter(function (order) { return order.status === 'new'; });
+    } else if (state.orderFilter === 'open') {
+      orders = orders.filter(isOpenOrder);
+    } else if (state.orderFilter === 'completed') {
+      orders = orders.filter(function (order) {
         return order.status === 'completed' || order.status === 'cancelled';
       });
     }
 
-    return state.orders;
+    return filterOrderRecords(orders, inputValue(els.orderSearch), inputValue(els.orderPaymentFilter), inputValue(els.orderSourceFilter));
   }
+
+  function inputValue(input) { return String(input && input.value || '').trim().toLowerCase(); }
+
+  function matchesSearch(values, query) {
+    return !query || values.some(function (value) { return String(value || '').toLowerCase().includes(query); });
+  }
+
+  function filterOrderRecords(orders, query, payment, source) {
+    return orders.filter(function (order) {
+      var sandbox = order.source === 'stripe_sandbox';
+      if (source === 'customer' && sandbox || source === 'sandbox' && !sandbox) return false;
+      if (payment === 'paid' && order.payment_status !== 'paid') return false;
+      if (payment === 'unpaid' && !['pending', 'requires_payment'].includes(order.payment_status)) return false;
+      if (payment === 'failed' && order.payment_status !== 'failed') return false;
+      if (payment === 'refund' && order.payment_status !== 'refunded' && !Number(order.refunded_total) && !Number(order.refund_pending_total) && !order.refund_attention_required) return false;
+      return matchesSearch([orderNumber(order), customerName(order), customerContact(order), order.phone, itemSummary(order)], query);
+    });
+  }
+
+  function filterListingRecords(listings, query, visibility, sort) {
+    var rows = listings.filter(function (item) {
+      if (visibility === 'visible' && !item.visible || visibility === 'hidden' && item.visible) return false;
+      if (visibility === 'low' && Number(item.inventory_quantity) > 5 && !['low_stock', 'out_of_stock'].includes(item.inventory_status)) return false;
+      return matchesSearch([item.name, item.slug, item.description], query);
+    });
+    if (sort === 'name') rows.sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });
+    if (sort === 'stock') rows.sort(function (a, b) { return Number(a.inventory_quantity || 0) - Number(b.inventory_quantity || 0); });
+    if (sort === 'price') rows.sort(function (a, b) { return discountedPrice(a) - discountedPrice(b); });
+    return rows;
+  }
+
+  function setResultCount(element, count, total, label) {
+    if (element) element.textContent = count + ' of ' + total + ' ' + label;
+  }
+
+  function renderWorkspaceTables() { renderOrdersTable(); renderListingsTable(); renderContentTable(); }
 
   function isOpenOrder(order) {
     return order && order.status !== 'completed' && order.status !== 'cancelled';
@@ -787,6 +1028,7 @@
 
     var orders = filteredOrders();
     var selectedId = document.getElementById('orderId') ? document.getElementById('orderId').value : '';
+    setResultCount(els.orderResults, orders.length, state.orders.length, 'orders');
     els.ordersTableBody.innerHTML = '';
     syncOrderFilterTabs();
 
@@ -841,6 +1083,7 @@
       var paymentCell = document.createElement('td');
       var paymentLabel = document.createElement('span');
       paymentLabel.className = 'order-payment-label';
+      paymentLabel.className += ' payment-badge payment-' + String(order.payment_status || 'pending').replace(/_/g, '-');
       paymentLabel.textContent = statusLabel(order.payment_status);
       paymentLabel.title = 'Payment status verified by Stripe';
       paymentCell.appendChild(paymentLabel);
@@ -896,6 +1139,7 @@
     if (!button) {
       return;
     }
+    if (!mayLeaveEditor()) return;
 
     var row = button.closest('tr');
     var order = row ? findOrder(row.dataset.id) : null;
@@ -933,12 +1177,14 @@
     }
 
     if (input.dataset.action === 'quick-order-status') {
+      if (!mayLeaveEditor()) { renderOrdersTable(); return; }
       await updateOrder(order.id, { status: input.value }, 'Order status updated.');
     }
   }
 
   async function onOrderSubmit(event) {
     event.preventDefault();
+    if (state.savingForms.orderForm) return;
 
     var id = document.getElementById('orderId').value;
     if (!id) {
@@ -956,6 +1202,7 @@
 
   async function updateOrder(id, payload, successMessage) {
     try {
+      setFormBusy(els.orderForm, true);
       setDashboardStatus('Updating order...', 'neutral');
       var result = await state.supabase.from('site_orders').update(payload).eq('id', id).select().single();
       if (result.error) {
@@ -970,6 +1217,8 @@
     } catch (error) {
       setDashboardStatus('Order update failed: ' + getErrorMessage(error), 'error');
       renderOrdersTable();
+    } finally {
+      setFormBusy(els.orderForm, false);
     }
   }
 
@@ -1010,6 +1259,7 @@
     renderOrderSummary(order);
     renderOrderItems(order);
     renderOrdersTable();
+    rememberEditor(els.orderForm);
   }
 
   function renderOrderSummary(order) {
@@ -1089,11 +1339,15 @@
     els.listingsTableBody.innerHTML = '';
 
     if (!state.listings.length) {
+      setResultCount(els.listingResults, 0, 0, 'products');
       appendEmptyRow(els.listingsTableBody, 6, 'No listings yet. Add the first product or service.');
       return;
     }
 
-    state.listings.forEach(function (listing) {
+    var listings = filterListingRecords(state.listings, inputValue(els.listingSearch), inputValue(els.listingVisibilityFilter), inputValue(els.listingSort));
+    setResultCount(els.listingResults, listings.length, state.listings.length, 'products');
+    if (!listings.length) { appendEmptyRow(els.listingsTableBody, 6, 'No products match these filters.'); return; }
+    listings.forEach(function (listing) {
       var row = document.createElement('tr');
       row.dataset.id = listing.id;
 
@@ -1105,7 +1359,7 @@
       thumb.className = 'listing-thumb';
       thumb.alt = '';
       thumb.loading = 'lazy';
-      thumb.src = firstPhoto(listing) || '../assets/pureform-body-brush.webp';
+      thumb.src = photoPreviewUrl(firstPhoto(listing) || '../assets/pureform-body-brush.webp');
 
       var copy = document.createElement('div');
       var title = document.createElement('span');
@@ -1186,6 +1440,7 @@
       row.appendChild(stockCell);
       row.appendChild(visibleCell);
       row.appendChild(actionsCell);
+      labelRecordCells(row, ['Listing', 'Price', 'Discount', 'Stock', 'Visible', 'Actions']);
       els.listingsTableBody.appendChild(row);
     });
   }
@@ -1198,11 +1453,15 @@
     els.contentTableBody.innerHTML = '';
 
     if (!state.contentBlocks.length) {
+      setResultCount(els.contentResults, 0, 0, 'content blocks');
       appendEmptyRow(els.contentTableBody, 5, 'No content blocks yet.');
       return;
     }
 
-    state.contentBlocks.forEach(function (block) {
+    var blocks = state.contentBlocks.filter(function (block) { return matchesSearch([block.key, block.label, block.block_type], inputValue(els.contentSearch)); });
+    setResultCount(els.contentResults, blocks.length, state.contentBlocks.length, 'content blocks');
+    if (!blocks.length) { appendEmptyRow(els.contentTableBody, 5, 'No content matches this search.'); return; }
+    blocks.forEach(function (block) {
       var row = document.createElement('tr');
       row.dataset.id = block.id;
 
@@ -1219,6 +1478,7 @@
       actionsCell.appendChild(actionRow);
       row.appendChild(actionsCell);
 
+      labelRecordCells(row, ['Key', 'Label', 'Type', 'Updated', 'Actions']);
       els.contentTableBody.appendChild(row);
     });
   }
@@ -1230,6 +1490,18 @@
     button.dataset.action = action;
     button.textContent = label;
     return button;
+  }
+
+  function labelRecordCells(row, labels) {
+    Array.prototype.forEach.call(row.children, function (cell, index) { cell.dataset.label = labels[index]; });
+  }
+
+  function focusEditor(title) {
+    if (!title) return;
+    var panel = title.closest ? title.closest('.editor-card') : null;
+    if (panel) panel.hidden = false;
+    title.focus({ preventScroll: true });
+    title.scrollIntoView({ block: 'start', behavior: 'auto' });
   }
 
   function textCell(value) {
@@ -1257,10 +1529,12 @@
     if (!listing) {
       return;
     }
+    if (!mayLeaveEditor()) return;
 
     if (button.dataset.action === 'edit-listing') {
       fillListingForm(listing);
       setView('listings', { push: true, listing: listing.id });
+      focusEditor(els.listingFormTitle);
       return;
     }
 
@@ -1285,6 +1559,7 @@
     if (!listing) {
       return;
     }
+    if (!mayLeaveEditor()) { renderListingsTable(); return; }
 
     if (input.dataset.action === 'quick-stock') {
       await updateListing(listing.id, {
@@ -1301,17 +1576,25 @@
 
   async function onListingSubmit(event) {
     event.preventDefault();
-
-    var payload = collectListingPayload();
-    var id = document.getElementById('listingId').value;
+    if (state.savingForms.listingForm) return;
+    if (state.photoUploadPending) {
+      setPhotoStatus('Wait for the photo upload to finish before saving.', 'neutral');
+      return;
+    }
 
     try {
+      var payload = collectListingPayload();
+      var id = document.getElementById('listingId').value;
+      setFormBusy(els.listingForm, true);
       setDashboardStatus('Saving listing...', 'neutral');
-      var result = id
-        ? await state.supabase.from('site_listings').update(payload).eq('id', id).select().single()
-        : await state.supabase.from('site_listings').insert(payload).select().single();
+      var query = id
+        ? state.supabase.from('site_listings').update(payload).eq('id', id)
+        : state.supabase.from('site_listings').insert(payload);
+      if (id && state.listingEditVersion) query = query.eq('updated_at', state.listingEditVersion);
+      var result = await query.select().single();
 
       if (result.error) {
+        if (result.error.code === 'PGRST116') throw new Error('This listing changed or is no longer available. Refresh before saving. Your edits have been kept.');
         throw result.error;
       }
 
@@ -1322,6 +1605,8 @@
       setDashboardStatus('Listing saved.', 'success');
     } catch (error) {
       setDashboardStatus('Listing save failed: ' + getErrorMessage(error), 'error');
+    } finally {
+      setFormBusy(els.listingForm, false);
     }
   }
 
@@ -1371,7 +1656,10 @@
   }
 
   function fillListingForm(listing) {
+    state.photoFormVersion += 1;
+    setPhotoStatus('', 'neutral');
     var isExisting = Boolean(listing);
+    state.listingEditVersion = isExisting ? listing.updated_at || null : null;
     document.getElementById('listingId').value = isExisting ? listing.id : '';
     document.getElementById('listingName').value = isExisting ? listing.name : '';
     document.getElementById('listingSlug').value = isExisting ? listing.slug : '';
@@ -1391,6 +1679,8 @@
     els.deleteListingButton.hidden = !isExisting;
     renderPhotoPreviewFromForm();
     renderPricePreview();
+    syncDiscountFields();
+    rememberEditor(els.listingForm);
   }
 
   function collectListingPayload() {
@@ -1404,7 +1694,7 @@
       price: price,
       discount: discount,
       discount_mode: document.getElementById('listingDiscountMode').value,
-      discount_starts_at: fromDateTimeLocal(document.getElementById('listingDiscountStartsAt').value),
+      discount_starts_at: document.getElementById('listingDiscountMode').value === 'ongoing' ? null : fromDateTimeLocal(document.getElementById('listingDiscountStartsAt').value),
       discount_ends_at: document.getElementById('listingDiscountMode').value === 'ongoing'
         ? null
         : fromDateTimeLocal(document.getElementById('listingDiscountEndsAt').value),
@@ -1456,7 +1746,10 @@
 
     var img = document.createElement('img');
     img.alt = '';
-    img.loading = 'lazy';
+    // Hidden lazy images cannot enter the viewport to trigger their own load.
+    img.loading = 'eager';
+    img.decoding = 'async';
+    img.setAttribute('fetchpriority', 'low');
 
     var placeholder = document.createElement('span');
     placeholder.textContent = 'Preview';
@@ -1465,8 +1758,9 @@
     preview.appendChild(placeholder);
 
     var input = document.createElement('input');
-    input.type = 'url';
+    input.type = 'text';
     input.inputMode = 'url';
+    input.spellcheck = false;
     input.placeholder = 'https://res.cloudinary.com/...';
     input.value = url || '';
     input.dataset.photoUrlInput = 'true';
@@ -1475,11 +1769,26 @@
     removeButton.type = 'button';
     removeButton.className = 'photo-remove-button';
     removeButton.dataset.action = 'remove-photo-url';
-    removeButton.textContent = '×';
+    removeButton.textContent = '\u00d7';
+
+    var position = document.createElement('span');
+    position.className = 'photo-position';
+    var controls = document.createElement('div');
+    controls.className = 'photo-row-actions';
+    ['up', 'down'].forEach(function (direction) {
+      var move = document.createElement('button');
+      move.type = 'button';
+      move.className = 'photo-move-button';
+      move.dataset.action = 'move-photo-' + direction;
+      move.textContent = direction === 'up' ? '\u2191' : '\u2193';
+      controls.appendChild(move);
+    });
+    controls.appendChild(removeButton);
 
     row.appendChild(preview);
+    row.appendChild(position);
     row.appendChild(input);
-    row.appendChild(removeButton);
+    row.appendChild(controls);
     els.listingPhotoPreview.appendChild(row);
 
     updatePhotoRowPreview(row);
@@ -1499,14 +1808,23 @@
   }
 
   function onPhotoUrlListClick(event) {
-    var button = event.target.closest('[data-action="remove-photo-url"]');
+    var button = event.target.closest('button[data-action]');
     if (!button) {
       return;
     }
 
     var row = button.closest('.photo-url-row');
-    if (row) {
+    if (!row) return;
+    if (button.dataset.action === 'move-photo-up' && row.previousElementSibling) {
+      row.parentNode.insertBefore(row, row.previousElementSibling);
+    } else if (button.dataset.action === 'move-photo-down' && row.nextElementSibling) {
+      row.parentNode.insertBefore(row.nextElementSibling, row);
+    } else if (button.dataset.action === 'remove-photo-url') {
+      var focusRow = row.nextElementSibling || row.previousElementSibling;
       row.remove();
+      if (focusRow) focusRow.querySelector('[data-photo-url-input]').focus();
+    } else {
+      return;
     }
 
     if (els.listingPhotoPreview && !els.listingPhotoPreview.querySelector('.photo-url-row')) {
@@ -1515,6 +1833,11 @@
 
     refreshPhotoRowIndexes();
     syncPhotoUrlsFromFields();
+    if (button.isConnected) {
+      var focusTarget = button.disabled ? row.querySelector('[data-photo-url-input]') : button;
+      focusTarget.focus({ preventScroll: true });
+    }
+    setPhotoStatus('Photo order changed. Save listing to publish.', 'neutral');
   }
 
   function updatePhotoRowPreview(row) {
@@ -1555,7 +1878,18 @@
       placeholder.textContent = 'No preview';
     };
 
-    img.src = url;
+    img.src = photoPreviewUrl(url);
+  }
+
+  function photoPreviewUrl(value) {
+    try {
+      var url = new URL(value);
+      if (url.protocol === 'https:' && url.hostname === 'res.cloudinary.com' && !url.search && !url.hash && !url.username && !url.password) {
+        url.pathname = url.pathname.replace(/^(\/[^/]+\/image\/upload\/)(v\d+\/)/, '$1f_auto,q_auto,c_limit,w_160/$2');
+        return url.href;
+      }
+    } catch (_error) { /* Existing URL validation runs before saving. */ }
+    return value;
   }
 
   function refreshPhotoRowIndexes() {
@@ -1563,10 +1897,18 @@
       return;
     }
 
-    Array.prototype.slice.call(els.listingPhotoPreview.querySelectorAll('.photo-url-row')).forEach(function (row, index) {
+    var rows = Array.prototype.slice.call(els.listingPhotoPreview.querySelectorAll('.photo-url-row'));
+    rows.forEach(function (row, index) {
       var input = row.querySelector('[data-photo-url-input]');
       var button = row.querySelector('[data-action="remove-photo-url"]');
       var number = index + 1;
+      row.querySelector('.photo-position').textContent = index === 0 ? 'Main photo' : 'Photo ' + number;
+      ['up', 'down'].forEach(function (direction) {
+        var move = row.querySelector('[data-action="move-photo-' + direction + '"]');
+        move.disabled = direction === 'up' ? index === 0 : index === rows.length - 1;
+        move.title = 'Move photo ' + number + ' ' + direction;
+        move.setAttribute('aria-label', move.title);
+      });
 
       if (input) {
         input.setAttribute('aria-label', 'Photo URL ' + number);
@@ -1574,13 +1916,97 @@
 
       if (button) {
         button.setAttribute('aria-label', 'Remove photo URL ' + number);
+        button.title = 'Remove photo ' + number;
       }
     });
+    if (els.addListingPhotoButton) els.addListingPhotoButton.disabled = rows.length >= MAX_PHOTOS;
   }
 
   function getPhotoUrlsFromForm() {
     syncPhotoUrlsFromFields();
-    return parsePhotoUrls(document.getElementById('listingPhotos').value);
+    var urls = parsePhotoUrls(document.getElementById('listingPhotos').value);
+    if (urls.length > MAX_PHOTOS) throw new Error('A listing can have up to ' + MAX_PHOTOS + ' photos.');
+    urls.forEach(function (value, index) {
+      if (/^\/?assets\/[a-z0-9_./-]+$/i.test(value) && value.indexOf('..') === -1) return;
+      var message = 'Photo ' + (index + 1) + ': use an HTTPS photo link.';
+      var url;
+      try { url = new URL(value); } catch (_error) { throw new Error(message); }
+      if (url.protocol !== 'https:' || url.username || url.password) throw new Error(message);
+    });
+    return urls;
+  }
+
+  function setPhotoStatus(message, tone) {
+    if (!els.listingPhotoStatus) return;
+    els.listingPhotoStatus.textContent = message;
+    els.listingPhotoStatus.dataset.tone = tone;
+  }
+
+  async function prepareListingPhoto(file) {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Choose JPG, PNG or WebP photos.');
+    if (!file.size || file.size > MAX_PHOTO_BYTES) throw new Error('Each photo must be smaller than 8 MB.');
+    var bitmap = await window.createImageBitmap(file);
+    try {
+      if (bitmap.width * bitmap.height > 50000000) throw new Error('Choose photos smaller than 50 megapixels.');
+      var scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      var blob = await new Promise(function (resolve) { canvas.toBlob(resolve, 'image/webp', 0.88); });
+      if (!blob || blob.type !== 'image/webp') throw new Error('This browser could not prepare the photo. Try a current browser.');
+      return blob;
+    } finally {
+      bitmap.close();
+    }
+  }
+
+  async function onListingPhotoUpload() {
+    var files = Array.prototype.slice.call(els.listingPhotoFiles.files || []);
+    els.listingPhotoFiles.value = '';
+    if (!files.length || state.photoUploadPending) return;
+    var version = state.photoFormVersion;
+    var uploaded = 0;
+    try {
+      if (!state.session || !state.profile || state.profile.role !== 'admin') throw new Error('Sign in as a store admin to upload photos.');
+      var slug = document.getElementById('listingSlug').value.trim();
+      if (!Object.values(OFFICIAL_SLUG_BY_COLOR).includes(slug)) throw new Error('Select Grey, Black or Pink before uploading.');
+      if (getPhotoUrlsFromForm().length + files.length > MAX_PHOTOS) throw new Error('A listing can have up to ' + MAX_PHOTOS + ' photos.');
+      // Validate the entire selection before any upload, then preserve its order.
+      files.forEach(function (file) {
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || !file.size || file.size > MAX_PHOTO_BYTES) {
+          throw new Error('Choose JPG, PNG or WebP photos smaller than 8 MB each.');
+        }
+      });
+      state.photoUploadPending = true;
+      els.uploadListingPhotoButton.disabled = true;
+      for (var index = 0; index < files.length; index += 1) {
+        if (version !== state.photoFormVersion) break;
+        setPhotoStatus('Uploading photo ' + (index + 1) + ' of ' + files.length + '...', 'neutral');
+        var blob = await prepareListingPhoto(files[index]);
+        if (version !== state.photoFormVersion) break;
+        if (getPhotoUrlsFromForm().length >= MAX_PHOTOS) throw new Error('The gallery is full. Remove a photo before uploading more.');
+        var objectPath = state.session.user.id + '/' + slug + '/' + window.crypto.randomUUID() + '.webp';
+        var bucket = state.supabase.storage.from(PHOTO_BUCKET);
+        var result = await bucket.upload(objectPath, blob, { contentType: 'image/webp', cacheControl: '31536000', upsert: false });
+        if (result.error) throw new Error('Upload failed. Check your admin session and product-photo storage setup, then retry.');
+        if (version !== state.photoFormVersion) break;
+        if (getPhotoUrlsFromForm().length >= MAX_PHOTOS) throw new Error('The gallery is full. Remove a photo before uploading more.');
+        var url = bucket.getPublicUrl(objectPath).data.publicUrl;
+        Array.prototype.slice.call(els.listingPhotoPreview.querySelectorAll('.photo-url-row')).forEach(function (row) {
+          if (!row.querySelector('input').value.trim()) row.remove();
+        });
+        addPhotoUrlField(url);
+        syncPhotoUrlsFromFields();
+        uploaded += 1;
+      }
+      if (version === state.photoFormVersion) setPhotoStatus(uploaded + ' photo(s) uploaded. Save listing to publish.', 'success');
+    } catch (error) {
+      if (version === state.photoFormVersion) setPhotoStatus((uploaded ? uploaded + ' photo(s) added. ' : '') + getErrorMessage(error), 'error');
+    } finally {
+      state.photoUploadPending = false;
+      els.uploadListingPhotoButton.disabled = false;
+    }
   }
 
   function syncPhotoUrlsFromFields() {
@@ -1594,6 +2020,7 @@
       .filter(Boolean);
 
     photosInput.value = urls.join('\n');
+    updateEditorSaveState(els.listingForm);
   }
 
   function renderPricePreview() {
@@ -1645,10 +2072,12 @@
     if (!block) {
       return;
     }
+    if (!mayLeaveEditor()) return;
 
     if (button.dataset.action === 'edit-content') {
       fillContentForm(block);
       setView('content', { push: true, block: block.id });
+      focusEditor(els.contentFormTitle);
       return;
     }
 
@@ -1660,6 +2089,7 @@
 
   async function onContentSubmit(event) {
     event.preventDefault();
+    if (state.savingForms.contentForm) return;
 
     var payload = {
       key: document.getElementById('contentKey').value.trim(),
@@ -1680,6 +2110,7 @@
     var id = document.getElementById('contentId').value;
 
     try {
+      setFormBusy(els.contentForm, true);
       setDashboardStatus('Saving content block...', 'neutral');
       var result = id
         ? await state.supabase.from('site_content_blocks').update(payload).eq('id', id).select().single()
@@ -1696,6 +2127,8 @@
       setDashboardStatus('Content block saved.', 'success');
     } catch (error) {
       setDashboardStatus('Content save failed: ' + getErrorMessage(error), 'error');
+    } finally {
+      setFormBusy(els.contentForm, false);
     }
   }
 
@@ -1736,6 +2169,7 @@
     document.getElementById('contentValue').value = isExisting ? block.value : '';
     els.contentFormTitle.textContent = isExisting ? 'Edit block' : 'New block';
     els.deleteContentButton.hidden = !isExisting;
+    rememberEditor(els.contentForm);
   }
 
   function findListing(id) {

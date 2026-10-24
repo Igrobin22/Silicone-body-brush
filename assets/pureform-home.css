@@ -529,6 +529,13 @@ body.home-page {
   gap: 24px;
 }
 
+.home-review-grid:has(> :only-child) {
+  display: grid;
+  grid-template-columns: minmax(0, 420px);
+  overflow: visible;
+  padding: 0;
+}
+
 /* Keep landmark focus visible without framing the whole page section. */
 .home-reviews:focus {
   outline: none;

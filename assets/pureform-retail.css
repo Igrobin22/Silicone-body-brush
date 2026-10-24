@@ -105,11 +105,14 @@
 .retail-page .policy-card:first-child { padding-top: 0; }
 .retail-page .policy-card .card-title { margin-bottom: 10px; }
 .retail-page .policy-card p { max-width: 800px; line-height: 1.9; }
+.retail-page .reviews-grid:has(> :only-child) { grid-template-columns: minmax(0, 420px); }
 .retail-page .review-card { padding: 16px; border: 1px solid #e8e9e6; border-radius: 8px; }
 .retail-page .review-card .card-title { font-size: 17px; }
 .retail-page .review-card .card-kicker { display: none; }
 .retail-page .review-card .review-card-photo { height: 200px; border: 0; border-radius: 4px; }
 .retail-page .review-card p { font-size: 13px; line-height: 1.8; }
+.retail-page .review-card .review-location { margin-bottom: 16px; }
+.retail-page .review-card .review-date { margin-top: 16px; font-size: 12px; }
 .retail-page .support-layout { display: grid; grid-template-columns: minmax(240px, .8fr) minmax(0, 1.2fr); gap: 64px; align-items: start; }
 .retail-page .support-layout .section-title { font-size: 22px; }
 .retail-support-links { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 20px; }

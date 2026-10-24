@@ -16,22 +16,31 @@
   var DEFAULT_SLUG = OFFICIAL_SLUGS[0];
   var config = window.PUREFORM_SUPABASE_CONFIG || {};
   var greyPhotos = [
-    'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png',
     'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553521/Main_with_background_anlah0.png',
-    'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553513/grey_white_bg_irnzyc.png',
-    'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553535/grey_Head_h1duwj.png'
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1792822128/grey_body_acy8rv.jpg',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553535/grey_Head_h1duwj.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553529/grey_face_qpwaey.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1779553512/grey_Handle_zkieiu.png'
+  ];
+  var blackPhotos = [
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821805/main_rjtosu.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821849/b_handle_2_tphvrt.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821853/b_head_2_o21dux.jpg',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821851/b_head_1_jz208y.jpg',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821846/b_handle_1_wo3prl.jpg',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821842/b_body_l5gx9z.jpg',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1792821844/b_face_1_xnh9qv.jpg'
   ];
   var pinkPhotos = [
-    'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/main_img_voei63.png',
-    'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227618/main_img_without_bg_mbrxsg.png',
-    'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227616/p_body_1_kgg059.png',
-    'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/p_body_2_lv1x37.png',
-    'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227617/p_face_1_f4vdyz.png',
-    'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_face_2_yoirlr.png',
-    'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_head_1_yquyts.png',
-    'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227620/p_head_2_vtl4pl.png',
-    'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_handle_1_crtic9.png',
-    'https://res.cloudinary.com/dqjilscgl/image/upload/q_auto/f_auto/v1780227619/p_handle_2_komo0m.png'
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227617/main_img_voei63.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227619/p_handle_1_crtic9.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227619/p_handle_2_komo0m.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227617/p_face_1_f4vdyz.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227619/p_face_2_yoirlr.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227616/p_body_1_kgg059.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227617/p_body_2_lv1x37.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227620/p_head_2_vtl4pl.png',
+    'https://res.cloudinary.com/dqjilscgl/image/upload/v1780227619/p_head_1_yquyts.png'
   ];
 
   var fallbackListings = [
@@ -60,7 +69,7 @@
       inventory_status: 'in_stock',
       inventory_note: 'Black set / 4 tools',
       visible: true,
-      photo_urls: ['assets/pureform-body-brush.png', 'assets/pureform-back-scrubber.png', 'assets/pureform-scalp-massager.png', 'assets/pureform-face-brush.png'],
+      photo_urls: blackPhotos,
       sort_order: 2
     },
     {
@@ -124,8 +133,15 @@
   function fallbackPhotosForSlug(slug) {
     slug = canonicalSlug(slug);
     if (slug === 'pureform-4pc-set-pink') return pinkPhotos.slice();
-    if (slug === 'pureform-4pc-set-black') return ['assets/pureform-body-brush.png', 'assets/pureform-back-scrubber.png', 'assets/pureform-scalp-massager.png', 'assets/pureform-face-brush.png'];
+    if (slug === 'pureform-4pc-set-black') return blackPhotos.slice();
     return greyPhotos.slice();
+  }
+
+  function toolPhotosForColor(color) {
+    var photos = color === 'Black' ? [blackPhotos[4], blackPhotos[5], blackPhotos[3], blackPhotos[6]]
+      : color === 'Pink' ? [pinkPhotos[1], pinkPhotos[5], pinkPhotos[8], pinkPhotos[3]]
+      : [greyPhotos[4], greyPhotos[1], greyPhotos[2], greyPhotos[3]];
+    return photos.map(storefrontPhotoUrl);
   }
 
   function storefrontPhotoUrl(value) {
@@ -216,6 +232,8 @@
         : inventoryQuantity <= 5 ? 'Only ' + inventoryQuantity + ' left' : 'In stock',
       visible: item ? item.visible !== false : true,
       images: photos,
+      toolImages: toolPhotosForColor(color),
+      imageFallback: 'assets/products/' + color.toLowerCase() + '-main.webp',
       image: photos[0],
       meta: color + ' set / 4 tools',
       tag: color + ' Set',
@@ -366,6 +384,7 @@
       card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
       card.setAttribute('data-pf-product', item.id);
       card.setAttribute('aria-label', 'View ' + item.name + ' details');
+      img.dataset.pfFallback = item.imageFallback;
       img.src = item.image;
       img.width = 700;
       img.height = 700;
@@ -406,6 +425,7 @@
 
       card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
       card.setAttribute('data-pf-product', item.id);
+      img.dataset.pfFallback = item.imageFallback;
       img.src = item.image;
       img.width = 700;
       img.height = 700;
@@ -441,6 +461,7 @@
       var price = createElement('p', 'card-text pf-catalog-card-price', item.priceText);
 
       card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
+      img.dataset.pfFallback = item.imageFallback;
       img.src = item.image;
       img.alt = item.name;
       img.loading = 'lazy';
