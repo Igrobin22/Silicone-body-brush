@@ -24,6 +24,7 @@
     profile: null,
     listings: [],
     orders: [],
+    shippingJobs: null,
     orderFilter: 'all',
     ordersUnavailable: false,
     contentBlocks: [],
@@ -97,6 +98,10 @@
     els.orderFormTitle = document.getElementById('orderFormTitle');
     els.orderDetailSummary = document.getElementById('orderDetailSummary');
     els.orderItemsList = document.getElementById('orderItemsList');
+    els.shippingForm = document.getElementById('shippingForm');
+    els.shippingStatus = document.getElementById('shippingStatus');
+    els.shippingMessage = document.getElementById('shippingMessage');
+    els.retryShippingButton = document.getElementById('retryShippingButton');
     els.newListingButton = document.getElementById('newListingButton');
     els.listingsTableBody = document.getElementById('listingsTableBody');
     els.listingForm = document.getElementById('listingForm');
@@ -118,6 +123,8 @@
   }
 
   function bindEvents() {
+    bind(els.shippingForm, 'submit', onShippingSubmit);
+    bind(els.retryShippingButton, 'click', onShippingRetry);
     bind(els.configForm, 'submit', onConfigSubmit);
     bind(els.clearConfigButton, 'click', clearConfig);
     bind(els.loginForm, 'submit', onLoginSubmit);
@@ -150,7 +157,7 @@
       if (hasUnsavedEditor() || state.photoUploadPending) { event.preventDefault(); event.returnValue = ''; }
     });
     bind(els.dashboardView, 'click', onWorkspaceClick);
-    [els.orderForm, els.listingForm, els.contentForm].forEach(function (form) {
+    [els.orderForm, els.listingForm, els.contentForm, els.shippingForm].forEach(function (form) {
       bind(form, 'input', function () { updateEditorSaveState(form); });
       bind(form, 'change', function () { updateEditorSaveState(form); });
     });
@@ -270,7 +277,9 @@
     var form = editorFormForView();
     var snapshot = formSnapshot(form);
     var key = editorFormKey(form);
-    return snapshot !== null && state.formBaselines[key] !== undefined && snapshot !== state.formBaselines[key];
+    var shippingSnapshot = state.activeView === 'orders' && els.shippingForm && !els.shippingForm.hidden ? formSnapshot(els.shippingForm) : null;
+    return (snapshot !== null && state.formBaselines[key] !== undefined && snapshot !== state.formBaselines[key]) ||
+      (shippingSnapshot !== null && state.formBaselines.shippingForm !== undefined && shippingSnapshot !== state.formBaselines.shippingForm);
   }
 
   function updateEditorSaveState(form) {
@@ -747,7 +756,7 @@
     if (els.refreshButton) els.refreshButton.disabled = true;
 
     try {
-      await Promise.all([loadListings(), loadOrders(), loadContentBlocks()]);
+      await Promise.all([loadListings(), loadOrders(), loadContentBlocks(), loadShippingJobs()]);
       renderDashboard();
       if (state.ordersUnavailable) {
         setDashboardStatus('Dashboard updated. Run the updated Supabase SQL to enable checkout order capture.', 'neutral');
@@ -807,6 +816,76 @@
     state.orders = result.data || [];
     state.ordersUnavailable = false;
   }
+
+  async function loadShippingJobs() {
+    state.shippingJobs = null;
+    try {
+      var result = await state.supabase.from('site_shipping_jobs').select('id,order_id,status,last_error,shipment_id,tracking_number,courier,updated_at');
+      if (result.error) return;
+      var jobs = {};
+      (result.data || []).forEach(function (job) { jobs[job.order_id] = job; });
+      state.shippingJobs = jobs;
+    } catch (error) { /* Shipping setup must not prevent the existing Orders screen from loading. */ }
+  }
+
+  function renderShippingForm(order, preserveEntries) {
+    if (!els.shippingForm) return;
+    preserveEntries = preserveEntries && order && els.shippingForm.dataset.orderId === order.id;
+    var job = order && state.shippingJobs && state.shippingJobs[order.id];
+    els.shippingForm.hidden = !job;
+    if (!job) return;
+    els.shippingForm.dataset.orderId = order.id;
+    var labels = { pending: 'Waiting for /process_all', processing: 'Laptop preparing form', needs_review: 'Owner review needed', created: 'Existing shipment recorded', failed: 'Preparation failed', cancelled: 'Shipping stopped' };
+    var reasons = { missing_customer_email: 'Customer email is required by Shiplifier.', missing_package_profile: 'Confirm packing measurements for this quantity.', missing_verified_profile: 'Verify the pickup profile.', form_changed: 'The Shiplifier form needs checking.', login_required: 'Sign in to the laptop shipping browser.', worker_interrupted: 'Check Shiplifier before retrying.', prepared_for_review: 'Review the prepared form in the laptop browser.', order_no_longer_eligible: 'Order payment or fulfillment changed.' };
+    els.shippingStatus.textContent = (labels[job.status] || job.status) + (job.last_error ? '. ' + (reasons[job.last_error] || 'Check the shipping setup.') : '');
+    if (!preserveEntries) {
+      document.getElementById('shippingShipmentId').value = job.shipment_id || '';
+      document.getElementById('shippingTracking').value = job.tracking_number || '';
+    }
+    Array.prototype.forEach.call(els.shippingForm.querySelectorAll('input,button[type="submit"]'), function (control) { control.disabled = ['processing', 'created', 'cancelled'].indexOf(job.status) !== -1; });
+    els.retryShippingButton.hidden = ['needs_review', 'failed'].indexOf(job.status) === -1;
+    els.retryShippingButton.disabled = false;
+    els.shippingMessage.textContent = '';
+    if (!preserveEntries) rememberEditor(els.shippingForm);
+  }
+
+  async function saveShippingAction(action) {
+    if (!state.profile || !state.supabase || !els.shippingForm || els.shippingForm.dataset.saving === 'true') return;
+    var orderId = els.shippingForm.dataset.orderId;
+    var job = state.shippingJobs && state.shippingJobs[orderId];
+    if (!job) return;
+    if (action === 'retry' && !window.confirm('Check Shiplifier first. Retry only if no shipment was booked for this order. Prepare the form again?')) return;
+    var payload = { p_id: job.id, p_expected_updated_at: job.updated_at };
+    if (action === 'record') {
+      payload.p_shipment_id = document.getElementById('shippingShipmentId').value.trim();
+      payload.p_tracking = document.getElementById('shippingTracking').value.trim();
+      payload.p_courier = 'C3X';
+    }
+    els.shippingForm.dataset.saving = 'true';
+    setFormBusy(els.shippingForm, true);
+    els.shippingMessage.textContent = 'Saving shipping details…';
+    try {
+      var result = await state.supabase.rpc(action === 'retry' ? 'retry_site_shipping_job' : 'record_site_shipment', payload);
+      if (result.error || result.data !== true) throw new Error('Shipping data changed or could not be saved. Refresh and check the order.');
+      await loadShippingJobs();
+      if (els.shippingForm.dataset.orderId === orderId) {
+        renderShippingForm(findOrder(orderId));
+        els.shippingMessage.textContent = action === 'retry' ? 'Queued again. Send /process_all, then run the laptop worker.' : 'Tracking saved. Update fulfillment when the courier collects the parcel.';
+      }
+    } catch (error) {
+      if (els.shippingForm.dataset.orderId === orderId) els.shippingMessage.textContent = 'Could not save shipping details. Refresh and check the current order; your entries are still here.';
+    } finally {
+      delete els.shippingForm.dataset.saving;
+      setFormBusy(els.shippingForm, false);
+      var currentJob = state.shippingJobs && state.shippingJobs[els.shippingForm.dataset.orderId];
+      if (currentJob && ['processing', 'created', 'cancelled'].indexOf(currentJob.status) !== -1) {
+        Array.prototype.forEach.call(els.shippingForm.querySelectorAll('input,button[type="submit"]'), function (control) { control.disabled = true; });
+      }
+    }
+  }
+
+  function onShippingSubmit(event) { event.preventDefault(); saveShippingAction('record'); }
+  function onShippingRetry() { saveShippingAction('retry'); }
 
   function renderDashboard() {
     renderStats();
@@ -1210,9 +1289,10 @@
       }
 
       await loadOrders();
+      await loadShippingJobs();
       renderStats();
       renderOrdersTable();
-      fillOrderForm(findOrder(id) || result.data);
+      fillOrderForm(findOrder(id) || result.data, true);
       setDashboardStatus(successMessage || 'Order updated.', 'success');
     } catch (error) {
       setDashboardStatus('Order update failed: ' + getErrorMessage(error), 'error');
@@ -1222,7 +1302,8 @@
     }
   }
 
-  function fillOrderForm(order) {
+  function fillOrderForm(order, preserveShippingEntries) {
+    renderShippingForm(order, preserveShippingEntries);
     document.getElementById('orderPaymentStatus').disabled = true;
     var controls = [
       document.getElementById('orderStatus'),

@@ -10,3 +10,7 @@ verify_jwt = false
 # Telegram requests use a dedicated mandatory secret header, not a Supabase JWT.
 [functions.telegram-bot]
 verify_jwt = false
+
+# Dedicated server-to-server secret; never expose it to the storefront.
+[functions.shipping-worker]
+verify_jwt = false

@@ -16,3 +16,8 @@ supabase/.branches/
 .playwright-cli/
 output/playwright/
 output/imagegen/
+tools/shipping-worker/node_modules/
+# Private shipping profiles and browser sessions belong outside the repository.
+tools/shipping-worker/profile.json
+tools/shipping-worker/credentials.xml
+tools/shipping-worker/browser/

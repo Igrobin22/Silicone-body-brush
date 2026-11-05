@@ -212,6 +212,14 @@ Group product editing into native fieldsets for details, pricing/discounts, inve
 
 Reference patterns reviewed on 24 October 2026: [Shopify product search/filter workflows](https://help.shopify.com/en/manual/products/searching-filtering), [Shopify's single-column resource layouts](https://shopify.dev/docs/apps/design/layout), and [WooCommerce order lists and status filters](https://woocommerce.com/document/managing-orders/overview-and-bulk-management/). These inform task hierarchy, not a platform migration or copied branding. Adapt them using existing vanilla JavaScript, HTML and CSS only.
 
+Admin order details may include a C3X delivery fieldset below the existing order
+form. Use normal document flow, the existing editor-section styles and labeled
+tracking inputs, with no inner scrolling. Show actual queue status and plain
+reasons when preparation needs review. Recording an existing Shiplifier booking
+must not alter gateway payment or mark the parcel shipped. Keep created tracking
+read-only; retry preparation only after an explicit owner check for duplicates.
+Hide these controls gracefully when the separate shipping backend is unavailable.
+
 ### Product Photos
 
 Keep each product gallery in its selected color, including tool-detail photos and failed-image fallbacks. The owner-supplied galleries dated 24 October 2026 contain Grey 5, Black 7 and Pink 9 photos. Preserve original URLs and their order in admin; the first photo supplies the main product image. Optimize public Cloudinary delivery without cropping or changing the products. Future admin changes remain authoritative.

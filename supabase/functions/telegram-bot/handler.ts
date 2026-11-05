@@ -2,7 +2,7 @@ import { database, env } from '../_shared/payments.ts';
 import { dispatchTelegram, secretMatches, telegramReady, telegramRequest } from '../_shared/telegram.ts';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const ownerKinds = ['stock', 'discount', 'confirm', 'cancel', 'reply'];
+const ownerKinds = ['stock', 'discount', 'confirm', 'cancel', 'reply', 'process_all'];
 const response = (payload: unknown, status = 200) => new Response(JSON.stringify(payload), {
   status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
 });
@@ -12,6 +12,7 @@ export function parseCommand(text: string): Record<string, unknown> {
   const command = parts[0].toLowerCase();
   if (['/start', '/help', '/settings'].includes(command)) return { kind: 'help' };
   if (['/inventory', '/discounts', '/orders'].includes(command) && parts.length === 1) return { kind: command.slice(1) };
+  if (['/process_all', '/shipping'].includes(command) && parts.length === 1) return {kind:command.slice(1)};
   if (command === '/support' && parts.length > 1) return { kind: 'support', text: text.trim().slice(parts[0].length).trim().slice(0, 1000) };
   if (['/confirm', '/cancel'].includes(command) && parts.length === 2 && uuid.test(parts[1])) return { kind: command.slice(1), id: parts[1] };
   if (command === '/reply' && parts.length > 2 && uuid.test(parts[1])) return { kind: 'reply', id: parts[1], text: parts.slice(2).join(' ').slice(0, 1000) };
@@ -74,7 +75,8 @@ export async function handler(request: Request) {
   if (callback && (!uuid.test(String(command.id || '')) || !['confirm', 'cancel'].includes(String(command.kind)) ||
     message.from?.id !== Number(env('TELEGRAM_BOT_TOKEN').split(':')[0]))) return response({ received: true });
   try {
-    const { error } = await database().rpc('process_site_telegram_update', {
+    const shippingCommand=['process_all','shipping'].includes(String(command.kind));
+    const { error } = await database().rpc(shippingCommand?'process_site_shipping_update':'process_site_telegram_update', {
       p_update_id: update.update_id, p_sender_id: sender.id, p_chat_id: message.chat.id, p_owner_id: owner, p_command: command,
     });
     if (error) return response({ error: 'Telegram update could not be saved.' }, 503);

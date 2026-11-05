@@ -26,7 +26,7 @@ Deno.test('Telegram webhook authentication and safe delivery', async test => {
     const body = JSON.parse(String((options as RequestInit | undefined)?.body || '{}'));
     calls.push({path:url.pathname,body});
     const reply = (value: unknown,status=200) => new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json'}});
-    if (url.pathname.endsWith('/process_site_telegram_update')) return databaseFailure?reply({message:'private database error'},500):reply(true);
+    if (url.pathname.endsWith('/process_site_telegram_update')||url.pathname.endsWith('/process_site_shipping_update')) return databaseFailure?reply({message:'private database error'},500):reply(true);
     if (url.pathname.endsWith('/claim_site_telegram_jobs')) return reply(jobs);
     if (url.pathname.endsWith('/finish_site_telegram_job')) return reply(null);
     if (url.hostname === 'api.telegram.org') {
@@ -55,6 +55,8 @@ Deno.test('Telegram webhook authentication and safe delivery', async test => {
       assert.deepEqual(parseCommand('/stock GREY 24'),{kind:'stock',slug:'pureform-4pc-set-grey',value:24});
       assert.deepEqual(parseCommand('/discount pink 10.5'),{kind:'discount',slug:'pureform-4pc-set-pink',value:10.5});
       assert.deepEqual(parseCommand('/discount black off'),{kind:'discount',slug:'pureform-4pc-set-black',value:0});
+      assert.deepEqual(parseCommand('/process_all'),{kind:'process_all'});
+      assert.deepEqual(parseCommand('/shipping'),{kind:'shipping'});
       for (const text of ['/stock grey -1','/stock grey 1.5','/stock grey 100001','/discount pink 101','/discount pink 5.123','/stock red 3','please change stock to 5','/pay 1','/refund 20']) assert.equal(parseCommand(text).kind,'help');
     });
     await test.step('passes only authenticated identity and parsed fields, not the raw update',async () => {
@@ -62,6 +64,14 @@ Deno.test('Telegram webhook authentication and safe delivery', async test => {
       assert.equal((await handler(request({...update(),private_extra:'discard'}))).status,200);
       const rpc=calls.find(call=>call.path.endsWith('/process_site_telegram_update'))!.body;
       assert.deepEqual(rpc,{p_update_id:100,p_sender_id:123456789,p_chat_id:123456789,p_owner_id:123456789,p_command:{kind:'stock',slug:'pureform-4pc-set-grey',value:24}});
+    });
+    await test.step('routes shipping to its limited queue and ignores stale process commands',async()=>{
+      calls.length=0;
+      assert.equal((await handler(request(update('/process_all')))).status,200);
+      assert(calls.some(call=>call.path.endsWith('/process_site_shipping_update')));
+      calls.length=0;
+      assert.equal((await handler(request({update_id:101,message:{...message,text:'/process_all',date:Math.floor(Date.now()/1000)-301}}))).status,200);
+      assert.equal(calls.length,0);
     });
     await test.step('ignores group, bot, forwarded, edited and stale owner commands',async () => {
       calls.length=0;

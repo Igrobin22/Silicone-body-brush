@@ -224,6 +224,20 @@
                 </label>
                 <button type="submit" class="btn btn-primary full-width">Save order</button>
               </form>
+              <form id="shippingForm" class="admin-form dense-form" hidden>
+                <fieldset class="editor-section">
+                  <legend>C3X delivery via Shiplifier</legend>
+                  <p id="shippingStatus" role="status"></p>
+                  <p>After booking in Shiplifier, save its shipment ID and tracking number here. This records an existing booking.</p>
+                  <p><a class="text-button" href="https://app.shiplifier.com/en/orders/manual-orders" target="_blank" rel="noopener noreferrer">Open Shiplifier orders</a></p>
+                  <label><span>Shiplifier shipment ID</span><input id="shippingShipmentId" name="shipment_id" type="text" placeholder="SM…" pattern="SM[0-9]{4,24}" maxlength="26" required></label>
+                  <label><span>C3X tracking number</span><input id="shippingTracking" name="tracking_number" type="text" pattern="[A-Za-z0-9-]{5,80}" minlength="5" maxlength="80" required></label>
+                  <span id="shippingSaveState" class="editor-save-state" role="status"></span>
+                  <button type="submit" class="btn btn-primary">Save existing shipment</button>
+                  <button type="button" id="retryShippingButton" class="btn btn-secondary" hidden>Retry form preparation</button>
+                  <p id="shippingMessage" role="status" aria-live="polite"></p>
+                </fieldset>
+              </form>
             </article>
           </div>
         </section>

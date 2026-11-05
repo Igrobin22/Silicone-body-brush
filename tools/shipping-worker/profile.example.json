@@ -1,0 +1,24 @@
+{
+  "endpoint": "https://hibfipskhksboubibwbz.supabase.co/functions/v1/shipping-worker",
+  "preferredCourier": "C3X",
+  "origin": {
+    "verified": false, "mapPinVerified": false,
+    "company": "", "name": "", "email": "", "phone": "",
+    "country": "United Arab Emirates", "city": "Dubai",
+    "address": "", "apartment": "", "placeQuery": "", "placeLabel": "",
+    "latitude": null, "longitude": null
+  },
+  "pickup": {
+    "verified": false,
+    "country": "United Arab Emirates",
+    "city": "Dubai",
+    "address": "",
+    "phone": "",
+    "mapPinVerified": false,
+    "apartment": "", "placeQuery": "", "placeLabel": "",
+    "latitude": null, "longitude": null
+  },
+  "packages": {
+    "1": {"verified": true, "lengthCm": 13, "widthCm": 13, "heightCm": 35, "weightKg": 0.8, "fragile": false}
+  }
+}

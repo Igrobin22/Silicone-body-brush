@@ -225,3 +225,44 @@ Complete these sandbox checks on the deployed storefront:
 - Never collect or store card numbers, expiry dates or security codes in Supabase. Only provider IDs, payment state and order/delivery data belong there.
 
 References: [Stripe fulfillment and webhook requirements](https://docs.stripe.com/checkout/fulfillment), [Supabase secrets](https://supabase.com/docs/guides/functions/secrets), [Supabase deployment](https://supabase.com/docs/guides/functions/deploy).
+
+## Shiplifier preparation — backend activated, 5 November 2026
+
+The durable shipping queue and owner commands `/process_all` and `/shipping` are
+implemented in `migrations/20261105000100_shipping_queue.sql`. Newly paid **live**
+Stripe orders only are eligible; sandbox/unpaid/cancelled/refund-affected and
+already shipped orders stay out. Existing orders are not backfilled. Owner-only
+requests, unique order jobs, leases, stale-write checks and admin-only retry/
+tracking functions protect against duplicate preparation and unauthorized access.
+
+The separate `shipping-worker` Edge Function authenticates a dedicated random
+laptop key against a service-only SHA-256 verifier in `site_shipping_worker_auth`.
+The raw key is encrypted with Windows DPAPI outside the website. No extra Edge
+Function secret, service-role key or Stripe key is stored on the laptop. The
+worker cannot mark an order paid or a shipment created. It saves the verified
+business-address dialogs and prepares the first page for review; it does not
+save the customer pin, book/pay for a courier or trigger collection.
+C3X is preferred. Tracking from a booking manually completed in Shiplifier can
+be recorded by the signed-in store admin without altering fulfillment/payment.
+
+The shipping migration, `shipping-worker` version 2 and `telegram-bot` version 2
+are deployed to `hibfipskhksboubibwbz`. Authenticated laptop ping passed; anonymous
+and wrong-key requests were rejected. The queue contains no jobs or requested
+runs: all nine existing orders are sandbox orders and were not backfilled.
+No order, courier booking, label purchase or collection was created by testing.
+The private shipping-browser login and first-page preparation were verified
+against Shiplifier using only the owner's business address. The test advanced
+to the quote step without selecting a courier or pressing Submit Order; the
+final courier price could not be independently verified before browser control
+stopped. Automatic booking and tracking capture are not enabled. See
+`tools/shipping-worker/README.md` for private Windows setup, current limitations,
+test commands and remaining verification. Pickup configuration and credentials
+belong outside the website repository. The original Blender/3D and unrelated
+storefront work are separate pending local changes.
+
+The same deployment audit identified direct anon/authenticated grants on six
+backend-only payment functions. `20261105000200_private_payment_functions.sql`
+explicitly revokes those grants while retaining service-role execution. Live
+privilege queries and a PGlite regression reproducing Supabase's direct default
+grants verify the restriction. The fix does not change payment data or gateway
+settings. See [Supabase function privileges](https://supabase.com/docs/guides/database/functions#function-privileges).
