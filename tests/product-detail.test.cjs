@@ -22,7 +22,7 @@ function fixture() {
     publicCatalog: { updateLiveStatus() {} },
     document: { getElementById: element, querySelector: element },
     productName: element('name'), productLead: element('lead'), productPrice: element('price'),
-    productCompare: element('compare'), productSaving: element('saving'), productCare: element('care'),
+    productCare: element('care'),
     productPriceNote: element('payment'), availabilityLine: element('availability'),
     getPriceText: p => p.priceText, getProductDescription: () => 'Owner description',
     getAvailabilityText: p => p.available === false ? 'Out of stock' : 'In stock',
@@ -41,26 +41,20 @@ test('purchase header, price, color and specifications use the same catalog reco
   f.render();
   assert.equal(f.element('name').textContent, 'Owner product title');
   assert.equal(f.element('price').textContent, 'AED 37.80');
-  assert.equal(f.element('compare').textContent, 'AED 42.00');
-  assert.equal(f.element('compare').hidden, false);
-  assert.equal(f.element('saving').textContent, 'Save AED 4.20 (10% off)');
   assert.equal(f.element('productColor').textContent, 'Pink');
   assert.equal(f.element('productSpecColor').textContent, 'Pink');
   assert.equal(f.element('productBreadcrumb').textContent, 'Pink set');
   assert.equal(f.element('lead').textContent, 'Owner description');
 });
 
-test('ended discounts remove both the old price and saving instead of leaving stale offers', () => {
+test('an ended discount changes the selling price without publishing a compare-at price', () => {
   const f = fixture();
   f.render();
   f.product.discountActive = false;
   f.product.priceText = 'AED 42.00';
   f.render();
   assert.equal(f.element('price').textContent, 'AED 42.00');
-  for (const id of ['compare', 'saving']) {
-    assert.equal(f.element(id).hidden, true);
-    assert.equal(f.element(id).textContent, '');
-  }
+  assert.doesNotMatch(html, /id="product(?:Compare|Saving)"/);
 });
 
 test('stock changes update the visible status without inventing scarcity', () => {
@@ -107,15 +101,13 @@ test('catalog refresh updates price and discounts without recreating the gallery
   new vm.Script(preserve + '\n' + refresh).runInContext(f.context);
   callbacks['pureform:catalog-refresh']({ detail: { catalog: { pink: { ...f.product, price: 42, priceText: 'AED 42.00', discountActive: false } } } });
   assert.equal(f.element('price').textContent, 'AED 42.00');
-  assert.equal(f.element('compare').hidden, true);
-  assert.equal(f.element('saving').hidden, true);
   callbacks['pureform:catalog-refresh']({ detail: { catalog: {} } });
   assert.equal(f.context.products.pink.visible, false);
   assert.equal(f.context.products.pink.inventory_quantity, 0);
 });
 
 test('tool photographs match their labels and routine content makes no new product promises', () => {
-  const sources = ['pureform-body-brush.webp', 'pureform-scalp-massager.webp', 'pureform-face-brush.webp', 'p_face_1_f4vdyz.png'];
+  const sources = ['pureform-body-brush.webp', 'pureform-scalp-massager.webp', 'pureform-face-brush.webp', 'floating-scene/grey-face.webp'];
   const labels = ['Back scrubber', 'Body brush', 'Scalp massager', 'Face brush'];
   const home = readFileSync(path.join(__dirname, '../index.html'), 'utf8');
   for (const [index, label] of labels.entries()) {

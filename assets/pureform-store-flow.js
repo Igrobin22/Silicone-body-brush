@@ -221,6 +221,16 @@
           var variant = group[1] === 'alternate' ? (index % 2 ? 'right' : 'left') : group[1];
           item.setAttribute('data-flow-reveal', variant);
           item.style.setProperty('--pf-flow-delay', Math.min(index % 4, 3) * 55 + 'ms');
+          // Deferred reveal setup can run after the incoming page was captured.
+          // Never hide its already-painted first viewport to start another entrance.
+          if (document.documentElement.classList.contains('pf-page-transitioned')) {
+            var bounds = item.getBoundingClientRect();
+            if (bounds.bottom > 0 && bounds.top < window.innerHeight) {
+              item.classList.add('pf-page-visible');
+              reveal(item, true);
+              return;
+            }
+          }
           // Catalog refreshes must not replay an already-seen product row.
           if (motionPreference.matches || !observer || seenParents.has(item.parentElement)) {
             reveal(item, true);

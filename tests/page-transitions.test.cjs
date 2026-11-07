@@ -94,12 +94,15 @@ test('incoming native snapshots show viewport content immediately but preserve o
   const above = reveal(-300, -10);
   const page = fixture({ reveals: [visible, offscreen, above] });
   page.listeners.pagereveal({ viewTransition: null });
+  assert.equal(page.classes.has('pf-page-transitioned'), false);
   assert.equal(visible.classes.size, 0);
   page.preference.matches = true;
   page.listeners.pagereveal({ viewTransition: {} });
+  assert.equal(page.classes.has('pf-page-transitioned'), false);
   assert.equal(visible.classes.size, 0);
   page.preference.matches = false;
   page.listeners.pagereveal({ viewTransition: {} });
+  assert.equal(page.classes.has('pf-page-transitioned'), true);
   assert.equal(visible.classes.has('is-visible'), true);
   assert.equal(visible.classes.has('pf-page-visible'), true);
   assert.equal(visible.classes.has('pf-motion-instant'), true);
@@ -139,9 +142,9 @@ test('all participating storefront pages wait for their main markup without opti
     assert.match(head, /<link rel="expect" href="#main-content" blocking="render">/, file);
     assert.match(html, /<main id="main-content"/, file);
     assert.match(head, /src="assets\/pureform-page-transitions\.js" defer blocking="render"/, file);
-    assert.match(head, /src="assets\/pureform-mobile-menu\.js" defer blocking="render"/, file);
+    if (file !== 'checkout.html') assert.match(head, /src="assets\/pureform-mobile-menu\.js" defer blocking="render"/, file);
     assert.equal((html.match(/src="assets\/pureform-page-transitions\.js"/g) || []).length, 1, file);
-    assert.equal((html.match(/src="assets\/pureform-mobile-menu\.js"/g) || []).length, 1, file);
+    assert.equal((html.match(/src="assets\/pureform-mobile-menu\.js"/g) || []).length, file === 'checkout.html' ? 0 : 1, file);
   }
   for (const file of ['admin/index.html', 'admin/dashboard.html', 'admin/reset-password.html', 'faq.html']) {
     assert.doesNotMatch(readFileSync(path.join(root, file), 'utf8'), /pureform-page-transitions/, file);

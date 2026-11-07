@@ -6,12 +6,17 @@ const vm = require('node:vm');
 const read = file => readFileSync(path.join(__dirname, '..', file), 'utf8');
 const files = ['index.html', 'products.html', 'pureform-product-detail.html', 'reviews.html', 'about.html', 'policy.html', 'cart.html', 'checkout.html', 'contact.html'];
 const expected = [
-  ['index.html', 'Home'], ['products.html', 'Shop'], ['reviews.html', 'Reviews'],
+  ['index.html', 'Home'], ['products.html', 'Shop'],
   ['about.html', 'About'], ['policy.html', 'Policies & FAQ'],
 ];
 
-test('all storefront headers follow Home, Shop, Reviews, About, Policies & FAQ', () => {
+test('the storefront menu keeps four destinations and checkout keeps a cart link', () => {
   for(const file of files){
+    if (file === 'checkout.html') {
+      assert.match(read(file), /<header class="checkout-header[^"]*">[\s\S]*?href="cart.html">Back to cart/);
+      assert.doesNotMatch(read(file), /<ul class="nav-links">/);
+      continue;
+    }
     const nav = read(file).match(/<ul class="nav-links">([\s\S]*?)<\/ul>/)[1];
     const links = [...nav.matchAll(/<a\b([^>]+)>([^<]+)<\/a>/g)];
     assert.deepEqual(links.map(m=>[m[1].match(/href="([^"]+)"/)[1],m[2].replace(/&amp;/g,'&')]),expected,file);
@@ -23,11 +28,11 @@ test('all storefront headers follow Home, Shop, Reviews, About, Policies & FAQ',
   }
 });
 
-test('FAQ and policies have one canonical page and every existing topic remains present', () => {
+test('FAQ and policies have one canonical page and every current topic remains present', () => {
   const html=read('policy.html');
   assert.match(html,/<h1>Policies &amp; FAQ<\/h1>/);
   assert.equal((html.match(/class="retail-question"/g)||[]).length,12);
-  for(const id of ['faq','faq-product','faq-orders','faq-delivery','delivery','shipping','returns','return-process','refund','privacy','terms','support']){
+  for(const id of ['faq','faq-product','faq-orders','faq-delivery','delivery','shipping','privacy','terms','support']){
     assert.equal((html.match(new RegExp('id="'+id+'"','g'))||[]).length,1,id);
   }
   for(const file of files)assert.doesNotMatch(read(file),/href="faq.html(?:["#])/);

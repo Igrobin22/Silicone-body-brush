@@ -21,6 +21,7 @@
 
   window.addEventListener('pagereveal', function (event) {
     if (!event.viewTransition || reduceMotion.matches) return;
+    root.classList.add('pf-page-transitioned');
     // The first viewport must be settled, not transparent inside its page dissolve.
     Array.prototype.forEach.call(document.querySelectorAll('[data-flow-reveal]'), function (item) {
       var bounds = item.getBoundingClientRect();

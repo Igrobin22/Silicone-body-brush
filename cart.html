@@ -13,14 +13,14 @@
     href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,400..700;1,400..700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="assets/pureform-pages.css">
-  <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
+  <link rel="stylesheet" href="assets/pureform-mobile-menu.css?v=store-review">
   <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
   <link rel="stylesheet" href="assets/pureform-store-flow.css">
   <link rel="stylesheet" href="assets/pureform-page-transitions.css">
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
-  <link rel="stylesheet" href="assets/pureform-retail.css">
+  <link rel="stylesheet" href="assets/pureform-retail.css?v=store-review">
 </head>
 
 <body class="retail-page">
@@ -37,7 +37,6 @@
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="products.html">Shop</a></li>
-        <li><a href="reviews.html">Reviews</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="policy.html">Policies &amp; FAQ</a></li>
       </ul>
@@ -92,7 +91,7 @@
           <div class="cart-summary-line"><span>Subtotal</span><strong id="cartSubtotal">AED 0.00</strong></div>
           <div class="cart-summary-line"><span>UAE delivery</span><strong id="cartShipping">AED 0.00</strong></div>
           <div class="cart-summary-line cart-summary-total"><span>Total</span><strong id="cartTotal">AED 0.00</strong></div>
-          <p class="cart-summary-note">Free UAE delivery with any 2 or more sets. One set: AED 10 delivery. Pay securely by card at checkout.</p>
+          <p class="cart-summary-note">Estimated UAE delivery: 2&ndash;3 working days. Free delivery with any 2 or more sets. One set: AED 10 delivery. Pay securely by card at checkout.</p>
           <div class="cart-summary-actions">
             <a class="btn-p Btn buy-pay-button is-empty-cart" id="cartCheckoutLink" href="products.html#set-colors"><span>Choose a set first</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
             <button class="btn-s" id="cartClearButton" type="button" disabled>Clear cart</button>
@@ -105,21 +104,21 @@
     <section class="sec cart-recommendations" aria-labelledby="cartRecommendedTitle">
       <p class="eyebrow">Recommended Sets</p>
       <h2 class="section-title" id="cartRecommendedTitle">Explore more sets</h2>
-      <div class="grid-3" data-pf-catalog-grid="recommendations">
+      <div class="grid-3" data-pf-catalog-grid="recommendations" role="region" aria-label="More sets" tabindex="0">
         <a class="product-card cart-product-card product-card-grey" href="pureform-product-detail.html?product=pureform-4pc-set-grey">
-          <img src="https://res.cloudinary.com/dqjilscgl/image/upload/v1779553519/grey_transparent_all_4_piece_med27b.png" alt="Grey 4-piece silicone brush set" loading="lazy" decoding="async">
+          <img src="assets/products/grey-main.webp" alt="Grey 4-piece silicone brush set" width="700" height="700" loading="lazy" decoding="async">
           <div class="color-row"><span class="color-dot color-dot-grey" aria-hidden="true"></span><span>Grey Set</span></div>
           <h3 class="card-title">Grey 4-Piece Silicone Brush Set</h3>
           <p class="card-text">A clean neutral finish for the complete PureForm shower routine.</p>
         </a>
         <a class="product-card cart-product-card product-card-black" href="pureform-product-detail.html?product=pureform-4pc-set-black">
-          <img src="assets/pureform-body-brush.png" alt="Black PureForm silicone body brush" loading="lazy" decoding="async">
+          <img src="assets/products/black-main.webp" alt="Black 4-piece silicone brush set" width="700" height="700" loading="lazy" decoding="async">
           <div class="color-row"><span class="color-dot color-dot-black" aria-hidden="true"></span><span>Black Set</span></div>
           <h3 class="card-title">Black 4-Piece Silicone Brush Set</h3>
           <p class="card-text">The same four silicone tools in a clean Black finish.</p>
         </a>
         <a class="product-card cart-product-card product-card-pink" href="pureform-product-detail.html?product=pureform-4pc-set-pink">
-          <img src="assets/pureform-face-brush.png" alt="Pink PureForm silicone face brush" loading="lazy" decoding="async">
+          <img src="assets/products/pink-main.webp" alt="Pink 4-piece silicone brush set" width="700" height="700" loading="lazy" decoding="async">
           <div class="color-row"><span class="color-dot color-dot-pink" aria-hidden="true"></span><span>Pink Set</span></div>
           <h3 class="card-title">Pink 4-Piece Silicone Brush Set</h3>
           <p class="card-text">A softer Pink finish for face, scalp, body, and back care.</p>
@@ -129,7 +128,6 @@
   </main>
 
   <aside class="cart-sticky-checkout" id="cartStickyCheckout" aria-label="Sticky checkout summary" hidden>
-    <div class="cart-sticky-saved" id="cartStickySaved" hidden>AED 0.00 saved</div>
     <div class="cart-sticky-total">
       <span>Total</span>
       <strong id="cartStickyTotal">AED 0.00</strong>
@@ -142,7 +140,7 @@
       <div class="retail-footer-grid">
         <div><a class="retail-footer-brand" href="index.html">PureForm</a><p>Soft silicone. Daily clean. Better reach.</p><p>United Arab Emirates &middot; AED<br>Card payments only</p></div>
         <div><h2>Shop &amp; discover</h2><ul><li><a href="products.html">All shower sets</a></li><li><a href="index.html#included">What's included</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="about.html">About PureForm</a></li></ul></div>
-        <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#returns">Returns &amp; refunds</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
+        <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#faq-product">Product care</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
         <div><h2>Get in touch</h2><ul><li><a href="mailto:buyx.dxb@gmail.com">buyx.dxb@gmail.com</a></li><li><a href="https://t.me/Pureforbot">Telegram support</a></li><li><a href="policy.html#privacy">Privacy</a></li><li><a href="policy.html#terms">Store terms</a></li></ul></div>
       </div>
       <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>Free UAE delivery with 2+ sets</span></div>
@@ -150,7 +148,7 @@
   </footer>
 
   <script src="assets/pureform-supabase-config.js"></script>
-  <script src="assets/pureform-public-catalog.js"></script>
+  <script src="assets/pureform-public-catalog.js?v=store-review"></script>
   <script src="assets/pureform-cart.js"></script>
   <script>
     (function () {
@@ -169,11 +167,19 @@
       var status = document.getElementById('cartStatus');
       var stickyCheckout = document.getElementById('cartStickyCheckout');
       var stickyTotal = document.getElementById('cartStickyTotal');
-      var stickySaved = document.getElementById('cartStickySaved');
       var stickyCheckoutLink = document.getElementById('cartStickyCheckoutLink');
+      var deliveryChoices = document.getElementById('cartDeliveryChoices');
+      var choosingSecondSet = false;
 
       if (!cart || !itemsList) {
         return;
+      }
+
+      if (deliveryChoices && 'IntersectionObserver' in window) {
+        new IntersectionObserver(function (entries) {
+          choosingSecondSet = entries[0].isIntersecting && !deliveryChoices.hidden;
+          updateStickyCheckout(cart.getCount() > 0);
+        }).observe(deliveryChoices);
       }
 
       function setStatus(message) {
@@ -186,14 +192,12 @@
 
       function updateStickyCheckout(hasItems) {
         var totalValue = cart.getTotal();
-        var savingsValue = typeof cart.getSavings === 'function' ? cart.getSavings() : 0;
-
-        if (!stickyCheckout || !stickyTotal || !stickySaved || !stickyCheckoutLink) {
+        if (!stickyCheckout || !stickyTotal || !stickyCheckoutLink) {
           return;
         }
 
-        stickyCheckout.hidden = !hasItems;
-        document.body.classList.toggle('has-cart-sticky', hasItems);
+        stickyCheckout.hidden = !hasItems || choosingSecondSet;
+        document.body.classList.toggle('has-cart-sticky', !stickyCheckout.hidden);
 
         if (!hasItems) {
           return;
@@ -201,8 +205,6 @@
 
         stickyTotal.textContent = cart.formatAED(totalValue);
         stickyCheckoutLink.href = cart.getCheckoutUrl();
-        stickySaved.hidden = savingsValue <= 0;
-        stickySaved.textContent = cart.formatAED(savingsValue) + ' saved';
       }
 
       function renderItem(item, existingRow) {

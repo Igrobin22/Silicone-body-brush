@@ -32,16 +32,10 @@ function fixture({ reduced = false, observer = true, broken = false, missingHero
     intersect(value) { callback([{ target: hero, isIntersecting: value }]); } };
 }
 
-test('original soap-bubble layer is decorative, clipped and cannot intercept hero controls', () => {
-  const layer = html.match(/<div class="home-hero-bubbles"[^>]*>[\s\S]*?<\/div>/)[0];
-  assert.match(layer, /id="heroBubbles" aria-hidden="true"/);
-  assert.equal((layer.match(/class="home-hero-bubble bu\d+"/g) || []).length, 12);
-  assert.match(html, /aria-label="Pause bubble animation" aria-controls="heroBubbles"/);
-  assert.match(html, /src="assets\/pureform-hero-bubbles.js" defer/);
-  assert.match(css, /\.home-hero-bubbles\s*\{[^}]*overflow: hidden;[^}]*pointer-events: none;/);
-  assert.match(css, /\.home-hero-motion-toggle\s*\{[^}]*width: 44px;[^}]*height: 44px;/);
-  const frames = css.match(/@keyframes home-hero-bubble-float\s*\{[\s\S]*?\n\}/)[0];
-  assert.doesNotMatch(frames, /(?:top|left|bottom|width|height|filter):/);
+test('floating studio replaces the old bubble layer and does not load both animation controllers', () => {
+  assert.doesNotMatch(html, /id="heroBubbles"|src="assets\/pureform-hero-bubbles.js"/);
+  assert.match(html, /src="assets\/pureform-floating-scene.js" defer/);
+  assert.match(html, /data-floating-scene data-color="grey" data-motion="paused"/);
 });
 
 test('visible hero plays bubbles and manual pause/resume preserves the animation timeline', () => {

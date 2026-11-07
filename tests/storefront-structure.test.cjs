@@ -10,34 +10,35 @@ test('storefront pages share one complete static footer and lightweight layout s
   const footer = read('index.html').match(/<footer class="retail-footer">[\s\S]*?<\/footer>/)[0];
   for (const file of files) {
     const html = read(file);
-    assert.equal(html.match(/<footer class="retail-footer">[\s\S]*?<\/footer>/)[0], footer, file);
+    if (file === 'checkout.html') assert.match(html, /<footer class="checkout-footer retail-wrap">/);
+    else assert.equal(html.match(/<footer class="retail-footer">[\s\S]*?<\/footer>/)[0], footer, file);
     assert.equal((html.match(/<footer /g) || []).length, 1, file);
-    assert.ok(html.includes('href="assets/pureform-retail.css"'), file);
+    assert.match(html, /href="assets\/pureform-retail\.css\?v=store-review"/, file);
   }
-  for (const link of ['products.html', 'policy.html#faq', 'contact.html', 'policy.html#delivery', 'policy.html#returns', 'policy.html#privacy', 'https://t.me/Pureforbot', 'mailto:buyx.dxb@gmail.com']) {
+  for (const link of ['products.html', 'policy.html#faq', 'contact.html', 'policy.html#delivery', 'policy.html#faq-product', 'policy.html#privacy', 'https://t.me/Pureforbot', 'mailto:buyx.dxb@gmail.com']) {
     assert.ok(footer.includes('href="' + link + '"'), link);
   }
 });
 
 test('shared retail styles do not target or replace the homepage hero', () => {
   assert.doesNotMatch(css.replace(/\/\*[\s\S]*?\*\//g, ''), /\.home-hero|#hero|\.home-page\s+(?:main|h1|\*)\s*\{/);
-  assert.match(read('index.html'), /<section class="home-hero" id="hero" aria-labelledby="heroTitle">/);
+  assert.match(read('index.html'), /<section class="home-hero" id="hero" aria-labelledby="heroTitle" data-floating-scene/);
   assert.match(read('index.html'), /<span>Soft touch\.<\/span><span><em>Deep clean\.<\/em><\/span><span>Every day\.<\/span>/);
 });
 
-test('all public pages and the announcement seed omit the removed fixed return-period promise', () => {
+test('public storefront copy omits return/refund terms and the removed fixed-period promise', () => {
   const removedClaim = /(?:15|fifteen)(?:[\s-]|&(?:nbsp|ndash|mdash);|[\u2010-\u2015])*days?\b/i;
   for (const file of files.concat(['supabase/admin-schema.sql'])) {
     assert.doesNotMatch(read(file), removedClaim, file);
   }
   for (const file of files) {
-    assert.match(read(file), /UAE delivery &middot; Card payments only/, file);
+    if (file !== 'checkout.html') assert.match(read(file), /UAE delivery &middot; Card payments only/, file);
+    const markup = read(file).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+    assert.doesNotMatch(markup, /\b(?:returns?|returnable|returned|refunds?)\b/i, file);
   }
   const policy = read('policy.html');
-  assert.match(policy, /id="returns"/);
-  assert.match(policy, /Return eligibility/);
-  assert.match(policy, /Contact support with your order number/);
-  assert.match(policy, /damaged or incorrect/);
+  assert.match(policy, /id="support"/);
+  assert.match(policy, /Can I check arrival before paying/);
   assert.doesNotMatch(policy, /no returns|all sales are final/i);
   assert.doesNotMatch(read('cart.html'), /<span>Returns<\/span>/);
 });
@@ -60,13 +61,13 @@ test('FAQ disclosures are grouped with matching topic navigation and policies re
     assert.ok(faq.includes('id="'+id+'"'));
   }
   const policy=read('policy.html');
-  for(const id of ['delivery','shipping','returns','return-process','refund','privacy','terms','support']) {
+  for(const id of ['delivery','shipping','privacy','terms','support']) {
     assert.ok(policy.includes('href="#'+id+'"'));
     assert.equal((policy.match(new RegExp('id="'+id+'"','g'))||[]).length,1);
   }
 });
 
-test('cart and checkout show progress without changing secure checkout fields', () => {
+test('cart and checkout retain progress, hosted payment, and the optional code disclosure', () => {
   for(const file of ['cart.html','checkout.html']) {
     const html=read(file);
     assert.match(html,/aria-label="Order progress"/);
@@ -74,6 +75,8 @@ test('cart and checkout show progress without changing secure checkout fields', 
   }
   const checkout=read('checkout.html');
   for(const id of ['checkoutForm','checkoutSubtotal','checkoutShipping','checkoutTotal','checkoutMobileTotal','checkoutSubmit','checkoutVerifyPayment']) assert.ok(checkout.includes('id="'+id+'"'));
+  assert.match(checkout, /id="checkout-contact" name="contact" type="email"/);
+  assert.match(checkout, /<details class="checkout-code">\s*<summary>Have a code\?<\/summary>[\s\S]*?id="discountCode"[\s\S]*?<\/details>/);
   assert.doesNotMatch(checkout, /autocomplete="cc-(?:number|csc)"/);
   assert.match(css,/\.retail-page \.cart-quantity-control input \{ font-size: 16px;/);
 });

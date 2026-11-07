@@ -71,7 +71,8 @@ main { padding: 0; }
 .pdp-delivery h2, .pdp-highlights h2 { font: 600 14px/1.5 var(--sans); margin-bottom: 8px; }
 .pdp-delivery p { color: var(--mid); font-size: 13px; }
 .pdp-delivery strong { color: var(--dark); font-weight: 600; }
-.pdp-delivery a { display: inline-block; margin-top: 6px; font-size: 12px; }
+.pdp-delivery-links { display: flex; flex-wrap: wrap; gap: 0 18px; margin-top: 4px; }
+.pdp-delivery-links a { display: inline-flex; align-items: center; min-height: 44px; font-size: 12px; }
 .pdp-quantity-control { display: inline-grid; grid-template-columns: 44px 56px 44px; height: 46px; border: 1px solid #c8cbc6; border-radius: 4px; }
 .pdp-quantity-button, .pdp-quantity-input { min-width: 0; border: 0; background: var(--white); color: var(--dark); text-align: center; }
 .pdp-quantity-button { font-size: 20px; }
@@ -96,6 +97,7 @@ main { padding: 0; }
 .pdp-section-nav { display: flex; gap: 32px; overflow-x: auto; padding-block: 6px; border-bottom: 1px solid var(--border); white-space: nowrap; scrollbar-width: thin; }
 .pdp-section-nav a { display: inline-flex; align-items: center; min-height: 48px; color: var(--mid); text-decoration: none; font-size: 13px; }
 .pdp-section-nav a:hover { color: var(--dark); text-decoration: underline; }
+#productName { text-wrap: balance; }
 .pdp-information { padding-top: 12px; }
 .pdp-information details, .pdp-followup-section { scroll-margin-top: calc(var(--pdp-header-height) + 16px); }
 .pdp-information details { border-bottom: 1px solid var(--border); }
@@ -181,7 +183,7 @@ body:has(.pdp-zoom-dialog[open]) { overflow: hidden; }
   .pdp-benefits a { grid-template-columns: 1fr 1fr; align-items: baseline; gap: 12px; padding: 0; text-align: left; }
   .pdp-benefits a + a { border-left: 0; }
   .pdp-benefits span { text-align: right; }
-  .pdp-section-nav { gap: 24px; }
+  .pdp-section-nav { flex-wrap: wrap; gap: 0 20px; overflow: visible; }
   .pdp-information summary { min-height: 68px; }
   .pdp-information summary h2 { font-size: 20px; }
   .pdp-tool-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }

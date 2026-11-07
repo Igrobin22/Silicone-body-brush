@@ -7,7 +7,7 @@ const vm = require('node:vm');
 const source = readFileSync(path.join(__dirname, '../assets/pureform-public-catalog.js'), 'utf8');
 
 async function fixture() {
-  const window = { dispatchEvent() {} };
+  const window = { dispatchEvent() {}, addEventListener() {} };
   const context = vm.createContext({
     window, URL, document: { readyState: 'loading', addEventListener() {}, querySelector() { return null; }, querySelectorAll() { return []; } },
     CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } }
@@ -110,9 +110,10 @@ async function liveFixture() {
   let requests = 0;
   const events = [];
   const status = { textContent: '', hidden: false, getAttribute() { return 'pureform-4pc-set-grey'; } };
+  const announcement = { textContent: 'UAE delivery \u00b7 Card payments only' };
   const document = {
     readyState: 'loading', visibilityState: 'visible', addEventListener() {}, querySelector() { return null; },
-    querySelectorAll(selector) { return selector === '[data-pf-live-status]' ? [status] : []; }
+    querySelectorAll(selector) { return selector === '[data-pf-live-status]' ? [status] : selector === '.promo-message' ? [announcement] : []; }
   };
   const client = {
     from() {
@@ -137,7 +138,7 @@ async function liveFixture() {
   await window.PureFormCatalog.ready;
   window.PureFormCatalog.updateLiveStatus();
   return {
-    catalog: window.PureFormCatalog, status, document, events,
+    catalog: window.PureFormCatalog, status, announcement, document, events,
     setRows(value) { rows = value; }, setSales(value) { sales = value; }, setError(value) { error = value; },
     requests() { return requests; }
   };
@@ -145,16 +146,53 @@ async function liveFixture() {
 
 test('real stock and sales refresh in place without rebuilding unchanged product grids', async () => {
   const live = await liveFixture();
-  assert.equal(live.status.textContent, '24 available / 7 sold / 2 this week');
+  assert.equal(live.status.textContent, '7 sold / 2 this week');
   live.setRows([{ slug: 'pureform-4pc-set-grey', name: 'Grey', price: 50, inventory_quantity: 23, visible: true }]);
   live.setSales([{ slug: 'pureform-4pc-set-grey', total_sold: 8, sold_this_week: 3 }]);
   const before = live.events.filter(type => type === 'pureform:catalog-ready').length;
   await live.catalog.refresh();
-  assert.equal(live.status.textContent, '23 available / 8 sold / 3 this week');
+  assert.equal(live.status.textContent, '8 sold / 3 this week');
   assert.equal(live.events.filter(type => type === 'pureform:catalog-ready').length, before);
   assert.ok(live.events.includes('pureform:catalog-refresh'));
   await live.catalog.refresh();
-  assert.equal(live.status.textContent, '23 available / 8 sold / 3 this week');
+  assert.equal(live.status.textContent, '8 sold / 3 this week');
+});
+
+test('catalog prices still apply configured discounts without advertising percentages', async () => {
+  const live = await liveFixture();
+  live.setRows([{ slug: 'pureform-4pc-set-pink', price: 42, discount: 10, inventory_quantity: 12, visible: true }]);
+  await live.catalog.refresh();
+  assert.equal(live.catalog.getProduct('pureform-4pc-set-pink').priceText, 'AED 37.80');
+  assert.equal(live.announcement.textContent, 'UAE delivery \u00b7 Card payments only');
+});
+
+test('public stock only calls out genuine low inventory and omits zero sales', async () => {
+  const live = await liveFixture();
+  const slug = 'pureform-4pc-set-grey';
+  const row = { slug, price: 50, visible: true };
+  live.setSales([{ slug, total_sold: 0, sold_this_week: 0 }]);
+  live.setRows([{ ...row, inventory_quantity: 4 }]);
+  await live.catalog.refresh();
+  live.catalog.updateLiveStatus();
+  assert.equal(live.status.textContent, 'Only 4 left');
+  live.setRows([{ ...row, inventory_quantity: 5 }]);
+  await live.catalog.refresh();
+  assert.equal(live.status.hidden, true);
+  live.setSales([{ slug, total_sold: 8, sold_this_week: 0 }]);
+  await live.catalog.refresh();
+  assert.equal(live.status.textContent, '8 sold');
+});
+
+test('the shared catalog loads before the cart and storefront headers show the delivery message', () => {
+  for (const file of ['index.html', 'products.html', 'pureform-product-detail.html', 'cart.html', 'checkout.html', 'about.html', 'reviews.html', 'contact.html', 'policy.html']) {
+    const html = readFileSync(path.join(__dirname, '..', file), 'utf8');
+    const catalogScripts = [...html.matchAll(/src="assets\/pureform-public-catalog\.js(?:\?v=[\w-]+)?"/g)];
+    assert.equal(catalogScripts.length, 1, file);
+    const catalogScript = catalogScripts[0].index;
+    assert.ok(html.indexOf('src="assets/pureform-supabase-config.js"') < catalogScript, file);
+    assert.ok(catalogScript < html.indexOf('src="assets/pureform-cart.js"'), file);
+    if (file !== 'checkout.html') assert.match(html, /class="promo-message">UAE delivery &middot; Card payments only<\/div>/, file);
+  }
 });
 
 test('empty public catalog stays empty, and failed refresh hides stale claims until recovery', async () => {
@@ -189,5 +227,6 @@ test('invalid aggregate sales do not create fake sold counts', async () => {
   const live = await liveFixture();
   live.setSales([{ slug: 'pureform-4pc-set-grey', total_sold: 1, sold_this_week: 9 }]);
   await live.catalog.refresh();
-  assert.equal(live.status.textContent, '24 available');
+  assert.equal(live.status.textContent, '');
+  assert.equal(live.status.hidden, true);
 });

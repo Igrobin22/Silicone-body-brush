@@ -204,21 +204,6 @@ body.home-page {
   content: '\2713';
 }
 
-.home-hero-price {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 22px;
-}
-
-.home-hero-price strong {
-  font-family: var(--heading);
-  font-size: 28px;
-  font-weight: 400;
-}
-
-.home-hero-price span,
 .home-hero-note {
   color: var(--mid);
   font-size: 12px;
@@ -525,15 +510,15 @@ body.home-page {
 
 .home-review-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
 }
 
-.home-review-grid:has(> :only-child) {
-  display: grid;
-  grid-template-columns: minmax(0, 420px);
-  overflow: visible;
-  padding: 0;
+@media (max-width: 1000px) {
+  .home-review-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
 }
 
 /* Keep landmark focus visible without framing the whole page section. */
@@ -548,7 +533,7 @@ body.home-page {
 
 .home-review {
   display: grid;
-  grid-template-rows: 200px auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto;
   gap: 16px;
   min-width: 0;
   margin: 0;
@@ -579,9 +564,12 @@ body.home-page {
   line-height: 1.7;
 }
 
-.home-review cite {
+.home-review figcaption {
   color: var(--mid);
   font-size: 12px;
+}
+
+.home-review cite {
   font-style: normal;
 }
 
@@ -742,8 +730,7 @@ body.home-page {
   }
 
   .home-hero-copy,
-  .home-hero-highlights,
-  .home-hero-price {
+  .home-hero-highlights {
     display: none;
   }
 
@@ -907,19 +894,13 @@ body.home-page {
     margin-top: 8px;
   }
 
-  .home-review-grid {
-    display: flex;
-    gap: 14px;
-    overflow-x: auto;
-    padding: 2px 2px 12px;
-    scrollbar-width: thin;
-    scroll-snap-type: x proximity;
-    scroll-padding-inline: 2px;
+  .home-review {
+    gap: 10px;
+    padding: 12px;
   }
 
-  .home-review {
-    flex: 0 0 min(320px, calc(100% - 28px));
-    scroll-snap-align: start;
+  .home-review-photo {
+    height: clamp(112px, 34vw, 160px);
   }
 
   .home-footer {

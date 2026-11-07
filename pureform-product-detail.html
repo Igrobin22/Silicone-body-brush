@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="View PureForm product details, gallery, quantity, availability, delivery, returns, and order support.">
+  <meta name="description" content="View PureForm product details, gallery, quantity, availability, UAE delivery and order support.">
   <title>PureForm Product Detail</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,16 +12,16 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,400..700;1,400..700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="assets/pureform-mobile-menu.css">
+  <link rel="stylesheet" href="assets/pureform-mobile-menu.css?v=store-review">
   <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
   <link rel="stylesheet" href="assets/pureform-store-flow.css">
   <link rel="stylesheet" href="assets/pureform-page-transitions.css">
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
-  <link rel="stylesheet" href="assets/pureform-product.css">
+  <link rel="stylesheet" href="assets/pureform-product.css?v=store-review">
   <script type="application/ld+json" id="productJsonLd"></script>
-  <link rel="stylesheet" href="assets/pureform-retail.css">
+  <link rel="stylesheet" href="assets/pureform-retail.css?v=store-review">
 </head>
 
 <body class="pdp-reference-page retail-page">
@@ -38,7 +38,6 @@
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
         <li><a class="is-active" aria-current="page" href="products.html">Shop</a></li>
-        <li><a href="reviews.html">Reviews</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="policy.html">Policies &amp; FAQ</a></li>
       </ul>
@@ -68,16 +67,14 @@
       <div class="pdp-copy">
         <a class="pdp-brand" href="products.html">Shop PureForm</a>
         <h1 id="productName">Grey 4-Piece Silicone Brush Set</h1>
-        <div class="pdp-item-meta"><span id="productItem">4-piece set &middot; Grey</span><a href="#productReviews">1 photo review</a><span class="pdp-status" role="status">In stock</span></div>
+        <div class="pdp-item-meta"><span id="productItem">4-piece set &middot; Grey</span><a href="reviews.html">Read customer reviews</a><span class="pdp-status" role="status">In stock</span></div>
         <p class="pf-live-product-status" id="productSalesStatus" hidden></p>
       </div>
       <div class="pdp-buy">
         <div class="pdp-pricing">
           <div class="pdp-price-row">
             <span class="pdp-price" id="productPrice">AED 43.89</span>
-            <del class="pdp-compare" id="productCompare" hidden></del>
           </div>
-          <p class="pdp-saving" id="productSaving" hidden></p>
           <p class="pdp-price-caption">Per 4-piece set &middot; Delivery calculated separately</p>
         </div>
         <div class="pdp-option-section">
@@ -87,8 +84,11 @@
         <div class="pdp-delivery">
           <h2>Delivery</h2>
           <p><strong>Free with 2+ sets</strong> &middot; One set: AED 10 across the UAE</p>
-          <p id="availabilityLine">In stock &middot; Delivery timing confirmed by city</p>
-          <a href="policy.html#delivery">Delivery details</a>
+          <p id="availabilityLine">In stock &middot; Estimated delivery: 2&ndash;3 working days</p>
+          <div class="pdp-delivery-links">
+            <a href="policy.html#delivery">Delivery details</a>
+            <a href="contact.html?topic=delivery">Check arrival before paying</a>
+          </div>
         </div>
         <div class="pdp-option-section pdp-quantity-section">
           <div class="pdp-option-label-row">
@@ -122,7 +122,7 @@
         <a href="contact.html"><strong>Customer support</strong><span>Help with your set or order</span></a>
       </div>
       <nav class="pdp-section-nav" aria-label="Product information">
-        <a href="#productDetails">Product details</a><a href="#productRoutine">Use &amp; care</a><a href="#productSpecifications">Specifications</a><a href="#productDelivery">Delivery &amp; returns</a><a href="#productReviews">Reviews</a>
+        <a href="#productDetails">Product details</a><a href="#productRoutine">Use &amp; care</a><a href="#productSpecifications">Specifications</a><a href="#productDelivery">Delivery &amp; payment</a><a href="#productReviews">Reviews</a>
       </nav>
       <div class="pdp-information">
         <details id="productDetails" open>
@@ -163,10 +163,9 @@
           </div>
         </details>
         <details id="productDelivery">
-          <summary><h2>Delivery &amp; returns</h2></summary>
+          <summary><h2>Delivery &amp; payment</h2></summary>
           <div class="pdp-details-body pdp-care-copy">
-            <p><strong>UAE only.</strong> Free delivery with any 2 or more sets; one set has an AED 10 delivery fee. Delivery timing is confirmed for your city.</p>
-            <p><strong>Return requests.</strong> Contact support before sending an item back. <a href="policy.html#returns">Read the return policy</a> for eligibility and the request process.</p>
+            <p><strong>UAE only.</strong> Estimated delivery: 2&ndash;3 working days. Free delivery with any 2 or more sets; one set has an AED 10 delivery fee.</p>
             <p id="productPriceNote">Your price is shown in AED. Card details are handled by the hosted payment gateway.</p>
             <p>Need help? <a href="contact.html">Contact PureForm support</a>.</p>
           </div>
@@ -179,22 +178,9 @@
           <p class="pdp-section-kicker">Customer reviews</p>
           <h2 id="pdpReviewsTitle">Customer photo reviews</h2>
         </div>
-        <p class="pdp-section-copy">Daily-use feedback from the United Arab Emirates.</p>
+        <p class="pdp-section-copy">Photos and daily-use feedback on the PureForm shower set.</p>
       </div>
-      <div class="pdp-review-grid" role="group" aria-label="UAE customer photo reviews">
-        <article class="pdp-review-card">
-          <figure class="pdp-review-photo">
-            <img src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_480/v1780243836/b49922d6-d5cd-4254-b166-be53bd47132e_675x1200_tspgdx.avif" data-pf-fallback="assets/reviews/mariam.jpg" alt="Customer photo for Mariam A. PureForm review" width="675" height="1200" loading="lazy" decoding="async">
-          </figure>
-          <div class="pdp-review-meta">
-            <div><strong>Mariam A.</strong><span>Dubai, UAE</span></div>
-            <div class="pdp-review-rating" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-          </div>
-          <p>The long handle makes the back brush useful every day. It rinses quickly and feels cleaner than my old sponge.</p>
-          <span class="pdp-review-date">March 2026</span>
-        </article>
-
-      </div>
+      <a class="home-text-link" href="reviews.html">Read all customer reviews</a>
     </section>
 
     <section class="pdp-followup-section pdp-related-section" id="otherProducts" aria-labelledby="otherProductsTitle">
@@ -216,7 +202,7 @@
       <div class="retail-footer-grid">
         <div><a class="retail-footer-brand" href="index.html">PureForm</a><p>Soft silicone. Daily clean. Better reach.</p><p>United Arab Emirates &middot; AED<br>Card payments only</p></div>
         <div><h2>Shop &amp; discover</h2><ul><li><a href="products.html">All shower sets</a></li><li><a href="index.html#included">What's included</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="about.html">About PureForm</a></li></ul></div>
-        <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#returns">Returns &amp; refunds</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
+        <div><h2>Customer care</h2><ul><li><a href="policy.html#delivery">Delivery information</a></li><li><a href="policy.html#faq-product">Product care</a></li><li><a href="policy.html#faq">Frequently asked questions</a></li><li><a href="contact.html">Contact support</a></li></ul></div>
         <div><h2>Get in touch</h2><ul><li><a href="mailto:buyx.dxb@gmail.com">buyx.dxb@gmail.com</a></li><li><a href="https://t.me/Pureforbot">Telegram support</a></li><li><a href="policy.html#privacy">Privacy</a></li><li><a href="policy.html#terms">Store terms</a></li></ul></div>
       </div>
       <div class="retail-footer-bottom"><span>&copy; 2026 PureForm. All rights reserved.</span><span>Free UAE delivery with 2+ sets</span></div>
@@ -224,7 +210,7 @@
   </footer>
 
   <script src="assets/pureform-supabase-config.js"></script>
-  <script src="assets/pureform-public-catalog.js"></script>
+  <script src="assets/pureform-public-catalog.js?v=store-review"></script>
   <script src="assets/pureform-cart.js"></script>
   <script src="assets/pureform-combo.js" defer></script>
   <script src="assets/pureform-store-flow.js"></script>
@@ -240,8 +226,6 @@
       var productName = document.getElementById('productName');
       var productLead = document.getElementById('productLead');
       var productPrice = document.getElementById('productPrice');
-      var productCompare = document.getElementById('productCompare');
-      var productSaving = document.getElementById('productSaving');
       var productGallery = document.getElementById('productGallery');
       var productFitList = document.getElementById('productFitList');
       var productCare = document.getElementById('productCare');
@@ -501,10 +485,10 @@
         }
 
         if (product.inventoryStatusText) {
-          return product.inventoryStatusText + ' \u00b7 Delivery timing confirmed by city';
+          return product.inventoryStatusText + ' \u00b7 Estimated delivery: 2\u20133 working days';
         }
 
-        return 'In stock \u00b7 Delivery timing confirmed by city';
+        return 'In stock \u00b7 Estimated delivery: 2\u20133 working days';
       }
 
       function relatedBadgeText(product) {
@@ -512,11 +496,7 @@
           return 'Out of stock';
         }
 
-        if (product && product.discountActive && product.discountLabel) {
-          return product.discountLabel.toUpperCase();
-        }
-
-        return product && product.inventoryStatusText ? product.inventoryStatusText : 'Available';
+        return 'In stock';
       }
 
       function renderRelatedProducts() {
@@ -561,12 +541,6 @@
           price.className = 'pdp-related-price';
           current.textContent = getPriceText(product);
           price.appendChild(current);
-
-          if (product.discountActive && product.regularPrice > product.price) {
-            var compare = document.createElement('del');
-            compare.textContent = product.regularPriceText;
-            price.appendChild(compare);
-          }
 
           meta.className = 'pdp-related-meta';
           meta.textContent = product.meta || product.inventory_note || '4-piece PureForm set';
@@ -706,16 +680,8 @@
       }
 
       function updatePricing(product) {
-        var priceNote = getPriceText(product) + ' includes VAT.';
-        if (product.discountActive && product.regularPriceText) {
-          priceNote += ' Discount applied from ' + product.regularPriceText + '.';
-        }
+        var priceNote = getPriceText(product) + ' per 4-piece set. Delivery is shown separately at checkout.';
         productPrice.textContent = getPriceText(product);
-        var discounted = Boolean(product.discountActive && product.regularPrice > product.price);
-        productCompare.textContent = discounted ? product.regularPriceText : '';
-        productCompare.hidden = !discounted;
-        productSaving.textContent = discounted ? 'Save AED ' + (product.regularPrice - product.price).toFixed(2) + ' (' + product.discountLabel + ')' : '';
-        productSaving.hidden = !discounted;
         productPriceNote.textContent = priceNote + ' Card details are processed by the hosted payment gateway. PureForm never stores your card number or security code.';
       }
 

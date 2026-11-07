@@ -51,23 +51,37 @@ function fixture({ url = 'https://pureform.test/index.html', referrer = '', navi
   return { storage, timers, documentEvents, windowEvents, mediaEvents, children, nodes, document, preference, photos };
 }
 
-test('first external homepage visit shows Grey, Black and Pink with the existing listing photo and disclosed scenes', () => {
+test('first external homepage visit shows the matching Grey, Black and Pink full-set photos', () => {
   const page = fixture();
   assert.equal(page.children.length, 1);
   assert.equal(page.children[0].attributes['aria-hidden'], 'true');
   assert.match(page.children[0].innerHTML, /PureForm/);
   assert.equal((page.children[0].innerHTML.match(/<img /g) || []).length, 3);
-  assert.match(page.children[0].innerHTML, /assets\/lifestyle\/grey-vanity-600.webp/);
-  assert.match(page.children[0].innerHTML, /assets\/lifestyle\/pink-shower-600.webp/);
-  assert.match(page.children[0].innerHTML, /assets\/intro\/black-listing-600.webp/);
+  for (const color of ['grey', 'black', 'pink']) {
+    assert.ok(page.children[0].innerHTML.includes('assets/intro/' + color + '-set-600.webp'));
+  }
   assert.deepEqual([...page.children[0].innerHTML.matchAll(/<figcaption>([^<]+)<\/figcaption>/g)].map(match => match[1]), ['Grey', 'Black', 'Pink']);
-  assert.match(page.children[0].innerHTML, /Grey &amp; Pink: AI-styled scenes/);
+  assert.match(page.children[0].innerHTML, /4-piece silicone shower sets/);
+  assert.doesNotMatch(page.children[0].innerHTML, /AI-styled|assets\/lifestyle\/|black-listing|assets\/reviews\//);
   assert.match(page.children[0].innerHTML, /Soft touch\. Deep clean\. Every day\./);
   assert.equal((page.children[0].innerHTML.match(/fetchpriority="low"/g) || []).length, 3);
   assert.doesNotMatch(source, /<svg|<video|<canvas|fetch\(|document\.fonts|preventDefault|stopPropagation|\.focus\(/);
   assert.equal(page.storage.get('pureform.intro.v4'), '1');
   assert.equal(page.timers.get(1).ms, 4000);
   assert.equal(page.timers.get(2).ms, 350);
+});
+
+test('each opening caption stays paired with its own color-specific full-set asset', () => {
+  const markup = fixture().children[0].innerHTML;
+  const figures = [...markup.matchAll(/<figure class="pf-intro-shot pf-intro-(\w+)"><img src="([^"]+)"[^>]*><figcaption>([^<]+)<\/figcaption><\/figure>/g)];
+  assert.equal(figures.length, 3);
+  for (const [, color, image, caption] of figures) {
+    assert.equal(image, 'assets/intro/' + color + '-set-600.webp');
+    assert.equal(caption.toLowerCase(), color);
+    const bytes = readFileSync(path.join(__dirname, '..', image));
+    assert.equal(bytes.toString('ascii', 0, 4), 'RIFF');
+    assert.equal(bytes.toString('ascii', 8, 12), 'WEBP');
+  }
 });
 
 test('repeat visits, reload, history, internal navigation and already-painted content do not replay', () => {
@@ -165,7 +179,7 @@ test('intro stays lightweight, uses bounded photos and only the homepage loads i
   assert.ok(Buffer.byteLength(source) < 8000);
   assert.ok(Buffer.byteLength(css) < 6000);
   assert.match(css, /object-fit: contain/);
-  assert.ok(['assets/lifestyle/grey-vanity-600.webp', 'assets/intro/black-listing-600.webp', 'assets/lifestyle/pink-shower-600.webp'].reduce((total, file) => total + statSync(path.join(__dirname, '..', file)).size, 0) < 125000);
+  assert.ok(['grey', 'black', 'pink'].reduce((total, color) => total + statSync(path.join(__dirname, '../assets/intro/' + color + '-set-600.webp')).size, 0) < 125000);
   for (const file of ['index.html']) {
     const html = read(file);
     assert.equal((html.match(/src="assets\/pureform-intro\.js" defer>/g) || []).length, 1, file);

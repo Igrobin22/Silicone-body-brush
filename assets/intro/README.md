@@ -2,19 +2,24 @@
 
 The current opening shows all three store colors, in Grey / Black / Pink order:
 
-- Grey: `../lifestyle/grey-vanity-600.webp`, the existing AI-styled vanity scene.
-- Black: `black-listing-600.webp`, a 600px WebP of the existing Black listing's
-  `/assets/pureform-body-brush.png` photograph. It shows the back-brush detail,
-  not a newly generated or recolored full set. The source image is unchanged;
-  only its delivery size and encoding were optimized from the existing WebP.
-- Pink: `../lifestyle/pink-shower-600.webp`, the existing AI-styled shower scene.
+- Grey: `grey-set-600.webp`, resized from `../products/grey-main.webp`.
+- Black: `black-set-600.webp`, resized from `../products/black-main.webp`.
+- Pink: `pink-set-600.webp`, resized from `../products/pink-main.webp`.
 
-The Grey and Pink scenes are disclosed as AI-styled in the opening. All three
-square images remain uncropped and total 101,036 bytes. See
-`../lifestyle/README.md` for the scene provenance. No new photography, video
-player or animation dependency is needed.
+These are the owner's matching full-set catalog photos supplied on 24 October
+2026, not AI-styled lifestyle scenes or customer-review photos. The legacy
+`black-listing-600.webp` is no longer used: it depicted a grey-looking back brush
+under the Black caption. Original sources, in the same order:
 
-The Grey scene starts large, recedes left as Black and Pink enter, then all slide down
+- https://res.cloudinary.com/dqjilscgl/image/upload/v1779553521/Main_with_background_anlah0.png
+- https://res.cloudinary.com/dqjilscgl/image/upload/v1792821805/main_rjtosu.png
+- https://res.cloudinary.com/dqjilscgl/image/upload/v1780227617/main_img_voei63.png
+
+Each image is contained and uncropped at 600 x 600 pixels, encoded as WebP at
+quality 82. No colors or product content were changed. Together they total
+69,646 bytes. No new photography, video player or animation dependency is needed.
+
+The Grey set starts large, recedes left as Black and Pink enter, then all slide down
 to reveal PureForm before the layer lifts into the original hero. This adapts
 the supplied HeroLaunch sequence in the site's existing CSS/vanilla JavaScript.
 Portrait phones show Grey and Black above Pink so every color fits with a

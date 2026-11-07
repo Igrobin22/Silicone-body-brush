@@ -6,29 +6,38 @@ const path = require('node:path');
 const read = file => readFileSync(path.join(__dirname, '..', file), 'utf8');
 const css = read('assets/pureform-home.css');
 const html = read('index.html');
+const floating = read('assets/pureform-floating-scene.css');
 
-test('hero photo, bubbles and pause control share one bounded scene before the copy', () => {
+test('hero floats all four tools with color controls outside the artwork image role', () => {
   const scene = html.slice(html.indexOf('<div class="home-hero-scene">'), html.indexOf('<div class="home-hero-content">'));
-  assert.match(scene, /<picture class="home-hero-media">/);
-  assert.match(scene, /id="heroBubbles" aria-hidden="true"/);
-  assert.match(scene, /class="home-hero-motion-toggle"/);
-  assert.match(css, /\.home-hero-scene\s*\{[^}]*width: min\(100%, 1600px\);[^}]*isolation: isolate;/);
+  assert.match(scene, /data-float-stage role="img"/);
+  for (const part of ['back', 'body', 'scalp', 'face']) assert.ok(scene.includes('data-float-part="' + part + '"'));
+  assert.ok(scene.indexOf('aria-hidden="true"') < scene.indexOf('class="float-controls"'));
+  assert.match(scene, /aria-label="Choose set color"/);
+  assert.match(scene, /data-float-motion/);
+  assert.match(html, /src="assets\/pureform-floating-scene.js" defer/);
 });
 
-test('hero contains the original photograph without stretching or cropping at wide aspect ratios', () => {
-  const image = css.match(/\.home-hero-media img\s*\{[^}]*\}/)[0];
-  for (const rule of ['width: auto;', 'height: auto;', 'max-width: 100%;', 'max-height: 100%;', 'object-fit: contain;']) assert.ok(image.includes(rule), rule);
-  assert.doesNotMatch(css, /object-fit: cover/);
-  assert.match(html, /FOR_MOBILE_dbeja3\.png/);
-  assert.match(html, /ChatGPT_Image_May_14_2026_11_40_44_AM_jzx8xg\.png/);
+test('hero starts with local aligned assets and defers the unselected colors', () => {
+  const scene = html.slice(html.indexOf('<div class="home-hero-scene">'), html.indexOf('<div class="home-hero-content">'));
+  assert.match(scene, /background.webp"[^>]*fetchpriority="high"/);
+  assert.equal((scene.match(/data-color-layer="grey"/g) || []).length, 4);
+  assert.doesNotMatch(scene, /src="[^"]*(?:black-|pink-|cloudinary)/);
+  assert.match(floating, /--hero-scene-height: min\(780px, calc\(100svh - var\(--hero-header-height\)\)/);
+  assert.match(floating, /\.home-hero\[data-floating-scene\] \.float-scene \{[^}]*height: var\(--hero-scene-height\);/);
+  assert.match(html, /data-pf-home-color-label/);
 });
 
-test('compact hero reserves scene space in normal flow without overlapping the headline', () => {
-  assert.match(css, /\.home-hero-scene\s*\{\s*position: relative;\s*height: 300px;/);
-  assert.match(css, /\.home-hero-scene\s*\{\s*height: clamp\(220px, 36svh, 320px\);/);
-  assert.match(css, /\.home-hero-content\s*\{\s*display: block;\s*padding: 12px 24px 20px;/);
-  assert.doesNotMatch(css, /padding(?:-top)?: (?:250|300)px/);
-  assert.doesNotMatch(css, /\.home-hero-bubbles\s*\{[^}]*height:/);
+test('hero uses the full-width artwork with overlaid copy and mobile-safe purchase controls', () => {
+  assert.match(floating, /\.home-hero\[data-floating-scene\] \{[^}]*width: 100%;[^}]*margin: 0 0 24px;/);
+  assert.match(floating, /\.home-hero\[data-floating-scene\] \.float-scene \{[^}]*border: 0; border-radius: 0; box-shadow: none;/);
+  assert.match(floating, /\.home-hero\[data-floating-scene\] \.float-scene::after \{ display: none; \}/);
+  assert.match(floating, /\.home-hero\[data-floating-scene\] \.home-hero-content \{ position: absolute; inset: 0;/);
+  assert.match(floating, /\.home-hero\[data-floating-scene\] h1 \{ position: absolute;/);
+  assert.match(floating, /\.home-hero\[data-floating-scene\] \.home-hero-actions a \{ display: inline-flex;/);
+  assert.match(html, /class="home-hero-variant"><span data-pf-home-color-label>Grey<\/span> <span>4-piece set<\/span>/);
+  assert.doesNotMatch(html, /data-pf-home-price/);
+  assert.match(floating, /\.home-hero-variant \{[^}]*font: 400 clamp\([^}]*var\(--heading\)/);
 });
 
 test('empty copy-overlay space cannot block the scene pause control', () => {
@@ -36,4 +45,5 @@ test('empty copy-overlay space cannot block the scene pause control', () => {
   for (const selector of ['home-hero-copy-block', 'home-hero-specs']) {
     assert.match(css, new RegExp('\\.' + selector + '\\s*\\{[^}]*pointer-events: auto;'));
   }
+  assert.match(floating, /\.home-hero-purchase\s*\{[^}]*pointer-events: auto;/);
 });

@@ -10,23 +10,24 @@ const setup=source.slice(source.indexOf('  function setupReveal()'),source.index
 function element(parent={}){
   const classes=new Set(),attributes=new Map(),styles=new Map();
   return {parentElement:parent,isConnected:true,classes,attributes,styles,
+    getBoundingClientRect(){return {top:1200,bottom:1300};},
     setAttribute(k,v){attributes.set(k,v);},
     classList:{add(...names){names.forEach(n=>classes.add(n));},remove(...names){names.forEach(n=>classes.delete(n));},contains(n){return classes.has(n);}},
     style:{setProperty(k,v){styles.set(k,v);}}
   };
 }
 
-function fixture({reduced=false,observer=true,brokenObserver=false}={}){
+function fixture({reduced=false,observer=true,brokenObserver=false,transitioned=false}={}){
   const selectors=new Map(),events={},mediaEvents={},frames=[],observed=new Set();
   let notify;
   const preference={matches:reduced,addEventListener(type,fn){mediaEvents[type]=fn;}};
-  const window={requestAnimationFrame(fn){frames.push(fn);return frames.length;},addEventListener(type,fn){events[type]=fn;}};
+  const window={innerHeight:900,requestAnimationFrame(fn){frames.push(fn);return frames.length;},addEventListener(type,fn){events[type]=fn;}};
   if(observer)window.IntersectionObserver=true;
   class IO{
     constructor(fn){if(brokenObserver)throw Error('Observer unavailable');notify=fn;}
     observe(el){observed.add(el);} unobserve(el){observed.delete(el);}
   }
-  const document={documentElement:{},querySelectorAll(selector){return [...selectors].filter(([key])=>selector.split(', ').includes(key)).flatMap(([,items])=>items);},addEventListener(type,fn){events[type]=fn;}};
+  const document={documentElement:{classList:{contains(name){return transitioned&&name==='pf-page-transitioned';}}},querySelectorAll(selector){return [...selectors].filter(([key])=>selector.split(', ').includes(key)).flatMap(([,items])=>items);},addEventListener(type,fn){events[type]=fn;}};
   const context=vm.createContext({window,document,motionPreference:preference,refreshReveal(){},Set,WeakSet,IntersectionObserver:IO});
   return {selectors,preference,events,mediaEvents,frames,observed,
     start(){new vm.Script(setup+'setupReveal();').runInContext(context);},
@@ -66,6 +67,18 @@ test('canonical cards marked visible by their renderer still get their first ent
   const f=fixture(),item=element();item.classes.add('is-visible');
   f.selectors.set('.collection-grid > .collection-card',[item]);f.start();
   assert.ok(!item.classes.has('is-visible'));f.enter(item);assert.ok(item.classes.has('is-visible'));
+});
+
+test('late reveal setup preserves a transitioned viewport while offscreen content still animates',()=>{
+  const f=fixture({transitioned:true}),visible=element(),offscreen=element();
+  visible.getBoundingClientRect=()=>({top:100,bottom:400});
+  f.selectors.set('#heroTitle',[visible]);f.selectors.set('.home-review',[offscreen]);f.start();
+  assert.ok(visible.classes.has('is-visible'));
+  assert.ok(visible.classes.has('pf-page-visible'));
+  assert.ok(visible.classes.has('pf-motion-instant'));
+  assert.ok(!f.observed.has(visible));
+  assert.ok(f.observed.has(offscreen));
+  assert.ok(!offscreen.classes.has('is-visible'));
 });
 
 test('catalog updates and filters do not replay an already-seen product row',()=>{

@@ -511,6 +511,7 @@ body > nav.site-header + .hero,
     width: min(86dvw, 318px);
     max-width: calc(100dvw - 1rem);
     height: 100dvh;
+    visibility: hidden;
     flex-direction: column;
     border-right: 1px solid rgba(28, 32, 30, .08);
     background:
@@ -518,12 +519,13 @@ body > nav.site-header + .hero,
       linear-gradient(135deg, rgba(220, 238, 231, .52), rgba(246, 219, 228, .32));
     box-shadow: 28px 0 70px rgba(19, 27, 24, .14);
     transform: translateX(-105%);
-    transition: transform var(--pf-motion-med) cubic-bezier(.32, .72, 0, 1);
+    transition: transform var(--pf-motion-med) cubic-bezier(.32, .72, 0, 1), visibility var(--pf-motion-med);
     -webkit-backdrop-filter: blur(22px) saturate(140%);
     backdrop-filter: blur(22px) saturate(140%);
   }
 
   .pf-mobile-sidebar.is-open {
+    visibility: visible;
     transform: translateX(0);
   }
 

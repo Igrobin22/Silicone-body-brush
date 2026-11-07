@@ -325,25 +325,23 @@
   function appendPrice(parent, item, strongClass) {
     var price = createElement('strong', strongClass || '', item.priceText);
     parent.appendChild(price);
-
-    if (item.discountActive && item.regularPrice > item.price) {
-      var compare = createElement('del', 'pf-catalog-compare-price', item.regularPriceText);
-      parent.appendChild(compare);
-    }
   }
 
   function inventoryBadgeText(item) {
     if (item.inventory_quantity <= 0 || item.inventory_status === 'out_of_stock') return 'Out of stock';
-    if (item.discountActive) return item.discountLabel.toUpperCase();
-    return item.inventoryStatusText;
+    return 'In stock';
   }
 
   function liveStatusText(item) {
     if (state.source !== 'supabase') return '';
-    var stock = item.inventory_quantity > 0 && item.inventory_status !== 'out_of_stock'
-      ? item.inventory_quantity + ' available' : 'Out of stock';
+    var parts = [];
+    if (item.inventory_quantity > 0 && item.inventory_quantity <= 4 && item.inventory_status !== 'out_of_stock') {
+      parts.push('Only ' + item.inventory_quantity + ' left');
+    }
     var sales = state.sales && state.sales[item.id];
-    return stock + (sales ? ' / ' + sales.total_sold + ' sold / ' + sales.sold_this_week + ' this week' : '');
+    if (sales && sales.total_sold > 0) parts.push(sales.total_sold + ' sold');
+    if (sales && sales.sold_this_week > 0) parts.push(sales.sold_this_week + ' this week');
+    return parts.join(' / ');
   }
 
   function appendLiveStatus(parent, item) {
@@ -361,67 +359,25 @@
     });
     document.querySelectorAll('[data-pf-product]').forEach(function (node) {
       var item = state.listings.find(function (listing) { return listing.id === node.getAttribute('data-pf-product'); });
-      var badge = node.querySelector('.pcard-sale, .collection-badge');
+      var badge = node.querySelector('.pf-reveal-badge');
       if (item && badge) badge.textContent = inventoryBadgeText(item);
     });
   }
 
-  function renderHomeCards(root, listings) {
-    if (!root) return;
-
-    root.replaceChildren();
-
-    listings.forEach(function (item) {
-      var card = createElement('a', 'pcard reveal in-view visible is-visible');
-      var sale = createElement('span', 'pcard-sale', inventoryBadgeText(item));
-      var imageWrap = createElement('div', 'pcard-imgwrap');
-      var picture = createElement('picture', 'pcard-picture');
-      var img = createElement('img', 'pcard-img');
-      var name = createElement('h3', 'pcard-name', item.name);
-      var price = createElement('p', 'pcard-desc', item.priceText);
-      var tag = createElement('span', 'pcard-tag', 'View ' + item.color + ' set');
-
-      card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
-      card.setAttribute('data-pf-product', item.id);
-      card.setAttribute('aria-label', 'View ' + item.name + ' details');
-      img.dataset.pfFallback = item.imageFallback;
-      img.src = item.image;
-      img.width = 700;
-      img.height = 700;
-      img.alt = item.name;
-      img.loading = 'lazy';
-      img.decoding = 'async';
-
-      if (item.discountActive && item.regularPrice > item.price) {
-        price.appendChild(document.createTextNode(' '));
-        price.appendChild(createElement('del', 'pf-catalog-compare-price', item.regularPriceText));
-      }
-
-      picture.appendChild(img);
-      imageWrap.appendChild(picture);
-      card.appendChild(sale);
-      card.appendChild(imageWrap);
-      card.appendChild(name);
-      card.appendChild(price);
-      card.appendChild(tag);
-      appendLiveStatus(card, item);
-      root.appendChild(card);
-    });
-  }
-
-  function renderCollectionCards(root, listings) {
+  function renderListingCards(root, listings, home) {
     if (!root) return;
 
     root.replaceChildren();
 
     listings.forEach(function (item, index) {
-      var card = createElement('a', 'collection-card is-visible');
-      var media = createElement('div', 'collection-card-media');
-      var badge = createElement('span', 'collection-badge', inventoryBadgeText(item));
+      var card = createElement('a', 'pf-product-card ' + (home ? 'pcard reveal in-view visible is-visible' : 'collection-card is-visible'));
+      var media = createElement('div', 'pf-reveal-media');
+      var badge = createElement('span', 'pf-reveal-badge', inventoryBadgeText(item));
       var img = document.createElement('img');
-      var info = createElement('div', 'collection-card-info');
-      var title = createElement('h2', 'collection-card-title', item.name);
-      var meta = createElement('div', 'collection-card-meta', item.meta);
+      var info = createElement('div', 'pf-reveal-info');
+      var title = createElement(home ? 'h3' : 'h2', 'pf-reveal-name', item.name);
+      var price = createElement('p', 'pf-reveal-price');
+      var panel = createElement('span', 'pf-reveal-panel');
 
       card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
       card.setAttribute('data-pf-product', item.id);
@@ -431,16 +387,20 @@
       img.height = 700;
       img.alt = item.name;
       img.decoding = 'async';
-      if (index) img.loading = 'lazy';
+      if (home || index) img.loading = 'lazy';
 
-      media.appendChild(badge);
       media.appendChild(img);
+      media.appendChild(badge);
       info.appendChild(title);
-      appendPrice(info, item);
+      appendPrice(price, item);
+      info.appendChild(price);
+      appendLiveStatus(info, item);
+      panel.setAttribute('aria-hidden', 'true');
+      panel.appendChild(createElement('span', 'pf-reveal-shade', item.color + ' · 4 tools'));
+      panel.appendChild(createElement('span', 'pf-reveal-action', 'View set'));
       card.appendChild(media);
       card.appendChild(info);
-      card.appendChild(meta);
-      appendLiveStatus(card, item);
+      card.appendChild(panel);
       root.appendChild(card);
     });
   }
@@ -448,9 +408,13 @@
   function renderRecommendationCards(root, listings) {
     if (!root) return;
 
+    var cart = window.PureFormCart;
+    var cartIds = cart ? cart.getCart().map(function (item) { return item.id; }) : [];
+    var recommendations = listings.filter(function (item) { return !cartIds.includes(item.id); });
     root.replaceChildren();
+    root.closest('section').hidden = !recommendations.length;
 
-    listings.forEach(function (item) {
+    recommendations.forEach(function (item) {
       var card = createElement('a', 'product-card cart-product-card product-card-' + item.color.toLowerCase() + ' is-visible');
       var img = document.createElement('img');
       var colorRow = createElement('div', 'color-row');
@@ -546,15 +510,15 @@
     var listings = getListingsSync();
     var collectionRoot = document.querySelector('[data-pf-catalog-grid="collection"]');
     var collectionListings = getCollectionListings(listings);
-    renderHomeCards(document.querySelector('[data-pf-catalog-grid="home"]'), listings);
-    renderCollectionCards(collectionRoot, collectionListings);
+    renderListingCards(document.querySelector('[data-pf-catalog-grid="home"]'), listings, true);
+    renderListingCards(collectionRoot, collectionListings, false);
     renderRecommendationCards(document.querySelector('[data-pf-catalog-grid="recommendations"]'), listings);
     renderShadeCards(document.querySelector('[data-pf-catalog-grid="shade"]'), listings);
     renderOfferCards(document.querySelector('[data-pf-catalog-grid="offers"]'), listings);
     updateCount(collectionRoot ? collectionListings : listings);
     var emptyState = document.querySelector('[data-pf-catalog-empty]');
     if (emptyState) emptyState.hidden = collectionListings.length > 0;
-    updateHomePrice(listings);
+    updateHomeSelection(listings);
   }
 
   function getCollectionListings(listings) {
@@ -574,28 +538,32 @@
     return filtered;
   }
 
-  function updateHomePrice(listings) {
-    var node = document.querySelector('[data-pf-home-price]');
-    if (!node) return;
-    var featuredId = node.getAttribute('data-pf-home-price');
-    if (featuredId) {
-      var featured = listings.find(function (item) { return item.id === featuredId; });
-      var inStock = featured && featured.inventory_quantity > 0 && featured.inventory_status !== 'out_of_stock';
-      node.textContent = inStock ? formatAED(featured.price) : 'Currently unavailable';
-      var orderLink = document.querySelector('[data-pf-home-order]');
-      if (orderLink) {
-        orderLink.href = inStock ? 'pureform-product-detail.html?product=' + encodeURIComponent(featured.id) : 'products.html';
-        orderLink.textContent = inStock ? 'Start Order' : 'Choose a Set';
-      }
-      return;
+  function updateHomeSelection(listings) {
+    var hero = document.querySelector('.home-hero[data-floating-scene]');
+    if (!hero) return;
+    var color = hero.dataset.color || 'grey';
+    var featuredId = 'pureform-4pc-set-' + color;
+    var featured = listings.find(function (item) { return item.id === featuredId; });
+    var inStock = featured && featured.inventory_quantity > 0 && featured.inventory_status !== 'out_of_stock';
+    var label = hero.querySelector('[data-pf-home-color-label]');
+    var unavailable = hero.querySelector('[data-pf-home-unavailable]');
+    var orderLink = hero.querySelector('[data-pf-home-order]');
+    if (label) label.textContent = color.charAt(0).toUpperCase() + color.slice(1);
+    if (unavailable) unavailable.hidden = Boolean(inStock);
+    if (orderLink) {
+      orderLink.href = inStock ? 'pureform-product-detail.html?product=' + encodeURIComponent(featured.id) : 'products.html';
+      orderLink.textContent = inStock ? 'Shop the Set' : 'Choose a Set';
     }
-    var available = listings.filter(function (item) {
-      return item.inventory_quantity > 0 && item.inventory_status !== 'out_of_stock';
-    });
-    node.textContent = available.length
-      ? 'From ' + formatAED(Math.min.apply(null, available.map(function (item) { return item.price; })))
-      : 'Currently unavailable';
   }
+
+  document.addEventListener('pureform:scene-color-change', function (event) {
+    var hero = document.querySelector('.home-hero[data-floating-scene]');
+    if (event.target === hero) updateHomeSelection(getListingsSync());
+  });
+
+  window.addEventListener('pureform:cart-change', function () {
+    renderRecommendationCards(document.querySelector('[data-pf-catalog-grid="recommendations"]'), getListingsSync());
+  });
 
   function setupCollectionControls() {
     document.querySelectorAll('[data-pf-color]').forEach(function (button) {
@@ -732,7 +700,7 @@
         announceReady();
       } else {
         updateLiveStatus();
-        updateHomePrice(listings);
+        updateHomeSelection(listings);
         window.dispatchEvent(new CustomEvent('pureform:catalog-refresh', { detail: { catalog: getCatalogSync(), listings: getListingsSync() } }));
       }
     }).catch(function () {

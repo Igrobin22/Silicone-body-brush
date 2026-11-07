@@ -37,12 +37,12 @@
   screen.setAttribute('aria-hidden', 'true');
   screen.innerHTML = '<p class="pf-intro-label">PureForm &middot; The daily ritual</p>' +
     '<div class="pf-intro-stage">' +
-    '<figure class="pf-intro-shot pf-intro-grey"><img src="assets/lifestyle/grey-vanity-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Grey</figcaption></figure>' +
-    '<figure class="pf-intro-shot pf-intro-black"><img src="assets/intro/black-listing-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Black</figcaption></figure>' +
-    '<figure class="pf-intro-shot pf-intro-pink"><img src="assets/lifestyle/pink-shower-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Pink</figcaption></figure>' +
+    '<figure class="pf-intro-shot pf-intro-grey"><img src="assets/intro/grey-set-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Grey</figcaption></figure>' +
+    '<figure class="pf-intro-shot pf-intro-black"><img src="assets/intro/black-set-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Black</figcaption></figure>' +
+    '<figure class="pf-intro-shot pf-intro-pink"><img src="assets/intro/pink-set-600.webp" alt="" width="600" height="600" loading="eager" decoding="async" fetchpriority="low"><figcaption>Pink</figcaption></figure>' +
     '</div><div class="pf-intro-title"><div class="pf-intro-wordmark">PureForm</div>' +
     '<p class="pf-intro-tagline">Soft touch. Deep clean. Every day.</p></div>' +
-    '<p class="pf-intro-note">Grey &amp; Pink: AI-styled scenes</p>';
+    '<p class="pf-intro-note">4-piece silicone shower sets</p>';
 
   var photos = Array.from(screen.querySelectorAll('img'));
   var timer = window.setTimeout(dismiss, 4000);
