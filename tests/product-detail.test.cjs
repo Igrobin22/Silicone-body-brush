@@ -31,9 +31,9 @@ function fixture() {
     setQuantity() {}, updateStructuredData() {},
   });
   const pricing = html.match(/      function updatePricing\(product\) \{[\s\S]*?\n      \}/)[0];
-  const render = html.match(/      function renderProduct\(id, pushState\) \{[\s\S]*?\n      \}/)[0];
+  const render = html.match(/      function renderProduct\(id\) \{[\s\S]*?\n      \}/)[0];
   new vm.Script(pricing + '\n' + render).runInContext(context);
-  return { context, product, element, render: () => context.renderProduct('pink', false) };
+  return { context, product, element, render: () => context.renderProduct('pink') };
 }
 
 test('purchase header, price, color and specifications use the same catalog record', () => {

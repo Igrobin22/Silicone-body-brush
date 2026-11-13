@@ -230,6 +230,7 @@
       var productFitList = document.getElementById('productFitList');
       var productCare = document.getElementById('productCare');
       var productPriceNote = document.getElementById('productPriceNote');
+      var productSetLinks = document.getElementById('productSetLinks');
       var productQuantityInput = document.getElementById('productQuantity');
       var productQuantityNote = document.getElementById('productQuantityNote');
       var productOrderLink = document.getElementById('productOrderLink');
@@ -404,6 +405,7 @@
 
           productGalleryDots.appendChild(dot);
         }
+        productGalleryDots.scrollLeft = 0;
       }
 
       function renderFitList(items) {
@@ -685,9 +687,13 @@
         productPriceNote.textContent = priceNote + ' Card details are processed by the hosted payment gateway. PureForm never stores your card number or security code.';
       }
 
-      function renderProduct(id, pushState) {
+      function renderProduct(id) {
+        var previousProductId = activeProductId;
         activeProductId = products[id] ? id : fallbackId;
         var product = products[activeProductId];
+        if (activeProductId !== previousProductId) {
+          document.getElementById('productAddStatus').textContent = '';
+        }
         productName.textContent = product.name;
         document.getElementById('productSalesStatus').setAttribute('data-pf-live-status', activeProductId);
         var status = document.querySelector('.pdp-status');
@@ -710,21 +716,19 @@
         updateStructuredData(activeProductId, product);
         document.title = product.name + ' | PureForm';
         if (publicCatalog) publicCatalog.updateLiveStatus();
-
-        if (pushState) {
-          history.pushState({ product: activeProductId }, '', 'pureform-product-detail.html?product=' + encodeURIComponent(activeProductId));
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
       }
 
       function renderSetLinks() {
-        var root = document.getElementById('productSetLinks');
-        root.replaceChildren();
+        var focusedId = productSetLinks.contains(document.activeElement)
+          ? document.activeElement.dataset.pfVariant : null;
+        var focusTarget;
+        productSetLinks.replaceChildren();
         Object.keys(products).forEach(function (id) {
           var product = products[id];
           if (product.visible === false) return;
           var link = document.createElement('a');
           link.href = 'pureform-product-detail.html?product=' + encodeURIComponent(id);
+          link.dataset.pfVariant = id;
           var swatch = document.createElement('span');
           swatch.className = 'pdp-set-swatch';
           swatch.style.background = product.swatch;
@@ -733,8 +737,38 @@
           link.appendChild(document.createTextNode(product.color || product.tag));
           link.setAttribute('aria-label', 'View ' + product.name);
           if (id === activeProductId) link.setAttribute('aria-current', 'page');
-          root.appendChild(link);
+          productSetLinks.appendChild(link);
+          if (id === focusedId) focusTarget = link;
         });
+        if (focusTarget) focusTarget.focus({ preventScroll: true });
+      }
+
+      function selectSetColor(event) {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        var link = event.target.closest('[data-pf-variant]');
+        if (!link) return;
+        var id = link.dataset.pfVariant;
+        if (!products[id] || products[id].visible === false) {
+          event.preventDefault();
+          renderSetLinks();
+          return;
+        }
+
+        if (id !== activeProductId) {
+          var url = new URL(window.location.href);
+          url.searchParams.delete('bundle');
+          url.searchParams.set('product', id);
+          try {
+            history.pushState(null, '', url);
+          } catch (_) {
+            return; // Let the browser follow the link if it cannot update history.
+          }
+          var pickerTop = productSetLinks.getBoundingClientRect().top;
+          renderProduct(id);
+          var shift = productSetLinks.getBoundingClientRect().top - pickerTop;
+          if (Math.abs(shift) > 1) window.scrollBy(0, shift);
+        }
+        event.preventDefault();
       }
 
       function syncCatalog(nextCatalog) {
@@ -742,7 +776,7 @@
           return;
         }
         products = withCurrentProduct(nextCatalog);
-        renderProduct(getRequestedProduct(), false);
+        renderProduct(getRequestedProduct());
       }
 
       function withCurrentProduct(nextCatalog) {
@@ -775,8 +809,10 @@
         });
       }
 
+      productSetLinks.addEventListener('click', selectSetColor);
       window.addEventListener('popstate', function () {
-        renderProduct(getRequestedProduct(), false);
+        var id = getRequestedProduct();
+        if (id !== activeProductId) renderProduct(id);
       });
 
       productGallery.addEventListener('scroll', handleGalleryScroll, { passive: true });
@@ -804,7 +840,7 @@
       setupQuantityControl();
       setupCartButton();
       setQuantity(1);
-      renderProduct(getRequestedProduct(), false);
+      renderProduct(getRequestedProduct());
     })();
   </script>
   <script src="assets/pureform-motion.js" defer></script>

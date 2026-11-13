@@ -71,7 +71,10 @@
 .retail-page .btn-p, .retail-page .btn-s { min-height: 44px; box-shadow: none; }
 .retail-page .btn-p:hover, .retail-page .btn-s:hover { transform: none; }
 .retail-page .btn-p { background: #111; }
-.retail-page .collection-listing { max-width: 1360px; padding: 4px 40px 40px; }
+.retail-page.collection-page { --collection-content-width: 960px; }
+.retail-page.collection-page main nav.retail-breadcrumb,
+.retail-page .collection-listing { max-width: calc(var(--collection-content-width) + 80px); }
+.retail-page .collection-listing { padding: 4px 40px 40px; }
 .retail-page .collection-heading { max-width: 720px; margin-bottom: 24px; }
 .retail-page .collection-heading .eyebrow { display: none; }
 .retail-page .collection-toolbar { gap: 16px; padding-block: 14px; margin-bottom: 24px; }
@@ -342,6 +345,8 @@
     scroll-snap-type: x proximity;
     scrollbar-width: thin;
   }
+  .home-page .pgrid,
+  .retail-page .collection-grid { grid-auto-columns: min(190px, calc((100% - 12px) / 2)); }
   :is(.pgrid, .collection-grid, .cart-recommendations .grid-3) > a { scroll-snap-align: start; }
   .home-lifestyle-scroll-hint { display: block; margin: 0 0 8px; color: #666660; font-size: 12px; }
   .retail-page .cart-product-card { padding: 12px; }

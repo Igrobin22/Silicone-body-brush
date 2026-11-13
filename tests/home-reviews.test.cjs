@@ -9,9 +9,9 @@ const css = readFileSync(path.join(root, 'assets/pureform-home.css'), 'utf8');
 const product = readFileSync(path.join(root, 'pureform-product-detail.html'), 'utf8');
 const reviewPage = readFileSync(path.join(root, 'reviews.html'), 'utf8');
 
-test('reviews stay available through the homepage shortcut and footer', () => {
+test('reviews stay available through the homepage reviews section and footer', () => {
   assert.match(html, /href="reviews.html">Customer reviews<\/a>/);
-  assert.match(html, /class="home-hero-reviews home-text-link" href="#reviews">Customer reviews<\/a>/);
+  assert.doesNotMatch(html, /class="home-hero-reviews\b/);
   assert.match(html, /id="reviews" aria-labelledby="reviewsTitle" tabindex="-1"/);
   assert.equal((html.match(/id="reviews"/g) || []).length, 1);
 });
@@ -41,10 +41,9 @@ test('homepage photo reviews keep the review-page image, quote and rating pairin
   });
 });
 
-test('mobile review shortcut is touch-sized and the four cards wrap into two columns', () => {
-  assert.match(css, /\.home-hero-reviews\s*\{\s*display: none;/);
+test('mobile review section link is touch-sized and the four cards wrap into two columns', () => {
   const mobile = css.slice(css.indexOf('@media (max-width: 760px)'));
-  assert.match(mobile, /\.home-hero-reviews\s*\{[\s\S]*?display: flex;[\s\S]*?min-height: 44px;/);
+  assert.match(mobile, /\.home-reviews \.home-section-head \.home-text-link\s*\{[^}]*min-height: 44px;/);
   assert.match(css, /\.home-review-grid\s*\{[^}]*display: grid;[^}]*repeat\(4, minmax\(0, 1fr\)\)/);
   assert.match(css, /@media \(max-width: 1000px\)\s*\{\s*\.home-review-grid\s*\{[^}]*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(html, /class="home-review-grid" role="group" aria-label="Featured customer photo reviews">/);

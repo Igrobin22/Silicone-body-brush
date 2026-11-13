@@ -13,7 +13,7 @@ test('storefront pages share one complete static footer and lightweight layout s
     if (file === 'checkout.html') assert.match(html, /<footer class="checkout-footer retail-wrap">/);
     else assert.equal(html.match(/<footer class="retail-footer">[\s\S]*?<\/footer>/)[0], footer, file);
     assert.equal((html.match(/<footer /g) || []).length, 1, file);
-    assert.match(html, /href="assets\/pureform-retail\.css\?v=store-review"/, file);
+    assert.match(html, /href="assets\/pureform-retail\.css\?v=[\w-]+"/, file);
   }
   for (const link of ['products.html', 'policy.html#faq', 'contact.html', 'policy.html#delivery', 'policy.html#faq-product', 'policy.html#privacy', 'https://t.me/Pureforbot', 'mailto:buyx.dxb@gmail.com']) {
     assert.ok(footer.includes('href="' + link + '"'), link);

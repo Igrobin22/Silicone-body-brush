@@ -256,10 +256,6 @@ body.home-page {
   text-underline-offset: 5px;
 }
 
-.home-hero-reviews {
-  display: none;
-}
-
 .home-hero-note {
   margin-top: 18px;
 }
@@ -785,14 +781,6 @@ body.home-page {
     font-size: 13px;
   }
 
-  .home-hero-reviews {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-    margin-top: 4px;
-  }
-
   .home-reviews .home-section-head .home-text-link {
     display: inline-flex;
     align-items: center;
@@ -805,13 +793,17 @@ body.home-page {
   }
 
   .home-promises {
-    padding-inline: 4px;
+    padding-inline: 12px;
+    border-top: 1px solid var(--border);
+    background: #f8f8f6;
   }
 
   .home-promises a {
-    min-height: 48px;
-    padding: 8px;
-    font-size: 11px;
+    min-height: 52px;
+    padding: 8px 5px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    text-wrap: balance;
   }
 
   .home-section {
