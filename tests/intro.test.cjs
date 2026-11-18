@@ -55,7 +55,7 @@ test('intro respects motion preference, direct links and unavailable browser sto
 
 function readTimeline() {
   const instrumented = source.replace("  document.addEventListener('keydown', onKeydown);",
-    "  globalThis.timeline = { INTRO, distanceAt, travelFrames, layerFrames };\n  document.addEventListener('keydown', onKeydown);");
+    "  globalThis.timeline = { INTRO, travelFrames };\n  document.addEventListener('keydown', onKeydown);");
   const context = {
     document: { documentElement: { classList: { contains: () => true } }, addEventListener() {} },
     window: { addEventListener() {} },
@@ -76,40 +76,43 @@ test('all four studio entrances follow separate paths at their measured hero siz
       starts.add(frames[0].transform);
       assert.equal(frames.at(-1).offset, 1);
       assert.equal(frames.at(-1).transform, 'translate3d(162px,207px,0) rotate(-0.4deg)');
-      assert.ok(frames.every(frame => /^translate3d\(.+\) rotate\(-0\.4deg\)$/.test(frame.transform)));
+      assert.ok(frames.every(frame => /^translate3d\(.+\) rotate\([\d.e-]+deg\)$/.test(frame.transform)));
       assert.ok(frames.slice(1).every((frame, i) => frame.offset > frames[i].offset));
     }
     assert.equal(starts.size, INTRO.order.length);
   }
 });
 
-test('the studio entrance timing slows between bursts and brakes at the handoff', () => {
-  const { distanceAt } = readTimeline();
-  const speedAt = time => distanceAt(time) - distanceAt(time - .01);
-  const turning = speedAt(.53);
-  assert.ok(turning > 0);
-  assert.ok(speedAt(.18) > turning * 3);
-  assert.ok(speedAt(.82) > turning * 3);
-  assert.ok(speedAt(1) < turning * .15);
+test('rising paths never reverse or change speed at bends and tilt settles without overshoot', () => {
+  const { INTRO, travelFrames } = readTimeline();
+  const target = { x: 500, y: 350, width: 100, height: 160, halfBounds: [51, 81], rotation: -.4 };
+  for (const part of INTRO.order) {
+    const frames = travelFrames(target, part, { width: 1366, height: 800 });
+    const points = frames.map(frame => frame.transform.match(/translate3d\(([^p]+)px,([^p]+)px,0\) rotate\(([^d]+)deg/).slice(1).map(Number));
+    const steps = points.slice(1).map((point, index) => {
+      const previous = points[index];
+      assert.ok(Math.abs(point[0] - 450) <= Math.abs(previous[0] - 450));
+      assert.ok(point[1] <= previous[1], part + ' must rise continuously');
+      assert.ok(Math.abs(point[2] - target.rotation) <= Math.abs(previous[2] - target.rotation));
+      return Math.hypot(point[0] - previous[0], point[1] - previous[1]);
+    });
+    assert.ok(Math.max(...steps) / Math.min(...steps) < 1.01, part + ' must have uniform spatial samples');
+    assert.ok(Math.abs(points[0][2] - target.rotation) <= 7);
+  }
 });
 
-test('the color wave uses existing assets, staggers, and finishes in Pink', () => {
-  const { INTRO, layerFrames } = readTimeline();
-  assert.equal(INTRO.colors.join(','), 'black,pink,grey');
+test('the intro keeps the existing Grey artwork through its hero handoff', () => {
+  const { INTRO } = readTimeline();
+  assert.equal(INTRO.color, 'grey');
   assert.equal(INTRO.loadTimeout, 2500);
   assert.ok(INTRO.revealAt < INTRO.whiteStart + INTRO.flightDuration);
   const handoff = INTRO.whiteStart + INTRO.flightDuration + (INTRO.order.length - 1) * INTRO.stagger;
   assert.ok(INTRO.revealAt + INTRO.backdropFade < handoff);
-  assert.ok(INTRO.titleOut + INTRO.titleFadeOut < handoff);
-  for (const color of INTRO.colors) {
-    for (const part of INTRO.order) {
-      assert.ok(existsSync(path.join(__dirname, '../assets/floating-scene', color + '-' + part + '.webp')));
-    }
-    const first = layerFrames(color, 0);
-    const last = layerFrames(color, 3);
-    assert.equal(first[0].opacity, Number(color === 'black'));
-    assert.equal(last.at(-1).opacity, Number(color === 'pink'));
-    assert.ok(last[1].offset > first[1].offset);
+  for (const part of INTRO.order) {
+    assert.ok(existsSync(path.join(__dirname, '../assets/floating-scene', INTRO.color + '-' + part + '.webp')));
   }
+  assert.match(source, /scene\.prepareColor\(INTRO\.color\)/);
+  assert.match(source, /image\.src = original\.currentSrc \|\| original\.src/);
+  assert.doesNotMatch(source, /pink|black|layerFrames|colorFade|maskImage/i);
   assert.doesNotMatch(source, /hue-rotate|style\.filter/);
 });

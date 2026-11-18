@@ -194,7 +194,9 @@ Avoid mixing sharp boxes with highly rounded controls in the same cluster. Keep 
 
 ### Opening Intro
 
-On the first eligible homepage visit in a tab, open with a short blush studio sequence using the PureForm wordmark, a four-tool title and one diagonal wash of light. Give each tool a distinct, staggered entrance at its measured hero size and angle. Keep the copy beside the set on desktop and below it on portrait screens. Crossfade the existing Black, Pink and Grey WebP layers in that order, then land in Pink while dissolving the opening title and lighting into the hero. Keep the page width stable while scrolling is locked. Keep the hero's motion paused during the handoff and resume its existing floating loop on Pink. The hero has manual color selection. Preload and decode the layers before motion, allow 2.5 seconds for readiness, and release the page if the artwork is unavailable. Use transform and opacity tracks through the Web Animations API. Recompute the targets on resize. Skip is a keyboard-accessible control outside the decorative layer. Respect reduced motion, use the pf_intro_seen session marker, and allow ?intro=1 to replay the intro. The intro applies only to the homepage and preserves direct section links.
+On the first eligible homepage visit in a tab, show the four Grey tools over a pure white (#FFFFFF) background. Fill the surrounding space with two thin elliptical rings, two pale sage discs, curved contour lines and three small drifting dots. Keep this decoration behind the tools, animate it with restrained transform and opacity tracks, and fade it away before the hero handoff. Adapt the composition to portrait screens; all shapes remain decorative and leave with the overlay. Omit intro copy, wordmarks, tinted gradients, decorative arches and light effects. Keep all four tools Grey throughout the intro, using the same decoded layers as the hero. Lead with the back brush, then the body pad, scalp massager and face pad at 90ms intervals. Each follows its own shallow rising arc into the set, at its measured hero size, with only 5–7 degrees of starting tilt. Keep both axes progressing towards the target, without loops, reversals or intersecting routes. Sample paths by distance so bends do not cause changes in speed. Use one cubic-bezier(0.22, 1, 0.36, 1) ease-out over 1720ms; do not add repeated speed ramps, pauses, overshoot or a second launch before landing. End at the exact measured hero position and angle. Begin fading the white backdrop during the flight to reveal the existing hero and its text without changing product colors. Keep the page width stable while scrolling is locked. Keep the hero's motion paused during the handoff and resume its existing floating loop on Grey. The hero has manual color selection. Preload and decode the layers before motion, allow 2.5 seconds for readiness, and release the page if the artwork is unavailable. Use transform and opacity tracks through the Web Animations API. Recompute the targets on resize. Skip is a keyboard-accessible control outside the decorative layer. Respect reduced motion, use the pf_intro_seen session marker, and allow ?intro=1 to replay the intro. The intro applies only to the homepage and preserves direct section links.
+
+Motion references reviewed on 18 November 2026: [Material choreography](https://m1.material.io/motion/choreography.html) for a clear focal direction and continuity, [duration and easing](https://m1.material.io/motion/duration-easing.html) for decelerating entrances, and [Codrops' product-grid reveal](https://tympanus.net/codrops/2025/09/01/recreating-palmers-draggable-product-grid-with-gsap/) for staggered product staging. Adapt the principles to the existing Web Animations API; retain the product scale and current hero layout.
 
 ### Page Transitions
 
@@ -204,13 +206,42 @@ Use native same-origin cross-document view transitions for storefront navigation
 
 Use the existing store-flow Intersection Observer for six restrained entrance styles: fade, rise, drop, left/right slide and soft zoom. Page titles drop in; product rows rise with short staggered delays; tool images gently scale in; customer reviews slide in; FAQ headings, question rows and policy sections use complementary directions. Preserve the hero's artwork, layout and controls; only its headline and supporting paragraph receive a light text entrance. Never animate whole sticky containers, live cart rows, prices, quantity controls, checkout fields or payment actions. Keep entrance movement within 24px, scale at 0.96 or above, duration around 520ms and stagger delays capped at 165ms. Use independent translate/scale properties so hover transforms remain stable. Avoid permanent will-change layers, blur, bouncing and continuous motion outside the restored hero soap bubbles.
 
-The approved floating studio replaces the former hero photograph and bubble layer. Animate product transforms and leaf rigs only; the background/pedestal stay still. Controls sit outside the artwork's image role, never inside an aria-hidden layer. A 44px pause/resume icon sits in the image's upper-right corner. Pause motion while offscreen, in a background tab or during page exit; disable it for reduced motion and when observers are unavailable. On mobile, crop decorative side space rather than clipping a product. Keep the scene and copy in normal flow, without fixed top-padding offsets or text overlap. Keep the original headline, fonts and shopping behavior. Do not load both old and new animation controllers.
+The approved floating studio replaces the former hero photograph and bubble layer. Keep floating and swaying within the product and leaf layers; the backdrop receives only the scroll depth described below. Controls sit outside the artwork's image role, never inside an aria-hidden layer. A 44px pause/resume icon sits in the image's upper-right corner. Pause motion while offscreen, in a background tab or during page exit; disable it for reduced motion and when observers are unavailable. On mobile, crop decorative side space rather than clipping a product. Keep the scene and copy in normal flow, without fixed top-padding offsets or text overlap. Keep the original headline, fonts and shopping behavior. Do not load both old and new animation controllers.
+
+Use clearly visible homepage parallax with native CSS scroll timelines. Keep
+the opening hero composition exact at scroll zero, then separate the layers
+from the first scroll. Across one image-height of root scrolling, the backdrop
+counters the scroll by 72px, the product plane moves 100px faster than the
+page, and the canopy moves 220px faster. Retain the existing float and sway on their
+child layers. Keep the three pedestal shadows outside the moving product plane.
+Their artboard follows the backdrop exactly, so shadows remain fixed on the
+pedestal; disable their scale and opacity breathing animation. Product movement
+is relative to that ground plane. The backdrop stays proportionally sized; its exposed top lies
+above the sticky header, and its lower edge stays clipped within the scene.
+Keep text and buying controls on their normal page plane. Use 24–36px of depth
+on included-tool photos and 36–64px on desktop lifestyle photos. Preserve
+every image's proportions and complete crop. Phones use 48px / -48px / -120px
+for background / tools / leaves, 12–20px on tool photos, and retain the normal
+horizontal lifestyle strip. The hero motion control pauses the scroll effects
+too. Disable parallax during the intro and for reduced motion; browsers without
+both scroll timelines and animation ranges retain the normal layout. Do not
+add scroll listeners, fixed backgrounds, image zoom, extra dependencies, or
+movement to catalog prices, reviews, forms or checkout.
 
 Catalog changes register with the same observer, but already-seen product rows update instantly instead of replaying. Keyboard focus reveals content immediately and cancels its entrance. A reduced-motion change and back/forward-cache restore show all pending content instantly. Missing observers fail open; JavaScript-disabled pages remain readable. Keep admin, recovery and redirect pages outside this decorative motion.
 
 When a native page transition starts before deferred section setup has finished, settle any later-registered first-viewport targets immediately. Never hide already-painted headings or copy to replay an entrance after the page dissolve. Keep below-fold section motion intact.
 
-Keep document scroll behavior automatic so reloads, fragment destinations and browser history restore without a smooth-scroll journey that consumes section entrances. Do not force reloads to the top or replace native history restoration. Exclude animated targets and replaceable catalog grids from scroll anchoring, without turning anchoring off for the entire document. Lay out this small storefront's sections normally; do not apply generic content-visibility placeholders with guessed section heights, which shift restored positions as content renders. Keep below-fold photos lazy-loaded. Tool-photo frames use shrinkable grid tracks and bounded images, so their fixed responsive height never lets a photo overlap its label.
+Use the Atelier North reference's eased wheel scrolling on public storefront
+pages, with the locally served Lenis 1.3.26 distribution, a 1.2-second duration
+and cubic ease-out. Keep touch input native and skip smoothing for reduced
+motion. Pause page scrolling for the opening intro, mobile navigation and
+modal dialogs. Nested scroll areas, forms and keyboard navigation remain
+usable. Keep CSS scroll behavior automatic so reloads, fragment destinations
+and browser history restore directly. Never force a reload to the top or
+replace browser history restoration. Admin keeps its normal scrolling.
+
+Exclude animated targets and replaceable catalog grids from scroll anchoring, without turning anchoring off for the entire document. Lay out this small storefront's sections normally; do not apply generic content-visibility placeholders with guessed section heights, which shift restored positions as content renders. Keep below-fold photos lazy-loaded. Tool-photo frames use shrinkable grid tracks and bounded images, so their fixed responsive height never lets a photo overlap its label.
 
 ### Admin Orders
 

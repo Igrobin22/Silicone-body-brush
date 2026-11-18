@@ -18,8 +18,8 @@
       }
     } catch (_) { /* A browser without storage can go directly to the hero. */ }
   </script>
-  <script src="assets/pureform-intro.js?v=studio-film" onerror="document.documentElement.classList.remove('pf-intro-active')"></script>
-  <link rel="stylesheet" href="assets/pureform-intro.css?v=studio-film">
+  <script src="assets/pureform-intro.js?v=motion-shapes" onerror="document.documentElement.classList.remove('pf-intro-active')"></script>
+  <link rel="stylesheet" href="assets/pureform-intro.css?v=motion-shapes">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,6 +37,7 @@
   <link rel="stylesheet" href="assets/pureform-home.css?v=neutral-studio">
   <link rel="stylesheet" href="assets/pureform-floating-scene.css?v=mobile-type">
   <link rel="stylesheet" href="assets/pureform-retail.css?v=studio-backdrop">
+  <link rel="stylesheet" href="assets/pureform-parallax.css?v=grounded-shadows">
 </head>
 <body class="home-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -73,10 +74,12 @@
           </picture>
           <div class="float-scene-artboard" aria-hidden="true">
             <div class="float-shadow float-shadow-body"></div><div class="float-shadow float-shadow-back"></div><div class="float-shadow float-shadow-face"></div>
+            <div class="float-product-plane">
             <div class="float-part float-part-back" data-float-part="back"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-back.webp" alt="" width="341" height="613" decoding="async" data-pf-image="hero-grey-back"></div>
             <div class="float-part float-part-body" data-float-part="body"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-body.webp" alt="" width="180" height="238" decoding="async" data-pf-image="hero-grey-body"></div>
             <div class="float-part float-part-scalp" data-float-part="scalp"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-scalp.webp" alt="" width="212" height="177" decoding="async" data-pf-image="hero-grey-scalp"></div>
             <div class="float-part float-part-face" data-float-part="face"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-face.webp" alt="" width="144" height="132" decoding="async" data-pf-image="hero-grey-face"></div>
+            </div>
           </div>
           <div class="home-hero-leaf-anchor" aria-hidden="true">
             <div class="float-leaf-rig float-leaf-canopy"><div class="float-leaf-tip">
@@ -255,6 +258,7 @@
   <script src="assets/pureform-cart.js"></script>
   <script src="assets/pureform-combo.js" defer></script>
   <script src="assets/pureform-store-flow.js" defer></script>
+  <script src="assets/pureform-scroll.js" defer></script>
   <script src="assets/pureform-floating-scene.js?v=neutral-studio" defer></script>
 </body>
 </html>

@@ -1,0 +1,75 @@
+/* Decorative depth uses native scroll timelines; unsupported browsers stay still. */
+.home-hero .float-product-plane { position: absolute; inset: 0; }
+.home-hero .float-shadow { animation: none; scale: 1; opacity: .18; }
+
+@supports ((animation-timeline: scroll(root block)) and (animation-timeline: view()) and (animation-range: exit 0% exit 100%)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .home-page {
+      --pf-depth-backdrop: 72px;
+      --pf-depth-tools: -100px;
+      --pf-depth-leaves: -220px;
+      --pf-depth-photo: -48px;
+    }
+
+    .home-hero .home-hero-backdrop,
+    .home-hero .float-scene-artboard,
+    .home-hero .float-product-plane,
+    .home-hero .home-hero-leaf-anchor {
+      animation: pf-hero-depth 1ms linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0px var(--hero-scene-height);
+    }
+
+    .home-hero .home-hero-backdrop { --pf-depth: var(--pf-depth-backdrop); }
+    .home-hero .float-scene-artboard { --pf-depth: var(--pf-depth-backdrop); }
+    .home-hero .float-product-plane { --pf-depth: calc(var(--pf-depth-tools) - var(--pf-depth-backdrop)); }
+    .home-hero .home-hero-leaf-anchor { --pf-depth: var(--pf-depth-leaves); }
+
+    .home-tools { view-timeline: --pf-tools-depth block; }
+    .home-tools .home-tool-media img {
+      --pf-depth: -24px;
+      animation: pf-photo-depth 1ms linear both;
+      animation-timeline: --pf-tools-depth;
+      animation-range: entry 0% exit 100%;
+    }
+    .home-tools > :nth-child(even) .home-tool-media img { --pf-depth: -36px; }
+
+    /* The phone's horizontal photo strip keeps its complete, uncropped images. */
+    @media (min-width: 1001px) {
+      .home-lifestyle { view-timeline: --pf-ritual-depth block; }
+      .home-lifestyle-shot img {
+        --pf-depth: var(--pf-depth-photo);
+        animation: pf-photo-depth 1ms linear both;
+        animation-timeline: --pf-ritual-depth;
+        animation-range: entry 0% exit 100%;
+      }
+      .home-lifestyle-shot:nth-child(2) img { --pf-depth: -64px; }
+      .home-lifestyle-shot:nth-child(3) img { --pf-depth: -36px; }
+    }
+
+    @media (max-width: 1000px) {
+      .home-page { --pf-depth-backdrop: 48px; --pf-depth-tools: -48px; --pf-depth-leaves: -120px; }
+      .home-tools .home-tool-media img { --pf-depth: -12px; }
+      .home-tools > :nth-child(even) .home-tool-media img { --pf-depth: -20px; }
+    }
+
+    .pf-intro-active .home-hero :is(.home-hero-backdrop, .float-scene-artboard, .float-product-plane, .home-hero-leaf-anchor) {
+      animation: none;
+    }
+
+    .home-page:has([data-float-motion][aria-pressed="true"])
+    :is(.home-hero-backdrop, .float-scene-artboard, .float-product-plane, .home-hero-leaf-anchor, .home-tool-media img, .home-lifestyle-shot img) {
+      animation-play-state: paused;
+    }
+  }
+}
+
+@keyframes pf-hero-depth {
+  from { translate: 0 0; }
+  to { translate: 0 var(--pf-depth); }
+}
+
+@keyframes pf-photo-depth {
+  from { translate: 0 0; }
+  to { translate: 0 var(--pf-depth); }
+}
