@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="assets/pureform-page-transitions.css">
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
-  <link rel="stylesheet" href="assets/pureform-retail.css?v=store-review">
+  <link rel="stylesheet" href="assets/pureform-retail.css?v=storefront-audit">
 </head>
 
 <body class="retail-page">
@@ -30,12 +30,19 @@
 
   <main id="main-content" class="checkout-page">
     <nav class="retail-breadcrumb" aria-label="Breadcrumb"><ol><li><a href="index.html">Home</a></li><li><a href="cart.html">Cart</a></li><li aria-current="page">Checkout</li></ol></nav>
-    <header class="retail-heading retail-wrap"><h1 id="checkoutTitle">Checkout</h1><p>Enter your UAE delivery details. Card payment is completed securely with Stripe.</p></header>
-    <ol class="retail-steps retail-wrap" aria-label="Order progress"><li><a href="cart.html"><span class="retail-step-number" aria-hidden="true">1</span>Cart</a></li><li aria-current="step"><span class="retail-step-number" aria-hidden="true">2</span>Delivery</li><li><span class="retail-step-number" aria-hidden="true">3</span>Card payment</li></ol>
-    <div class="checkout-shell">
+    <header class="retail-heading retail-wrap"><h1 id="checkoutTitle">Checkout</h1><p id="checkoutInstructions" hidden>Enter your UAE delivery details. Card payment is completed securely with Stripe.</p></header>
+    <section class="checkout-unavailable retail-wrap" id="checkoutEmpty" aria-labelledby="checkoutEmptyTitle" hidden>
+      <h2 id="checkoutEmptyTitle">Your cart is empty.</h2>
+      <p>Choose a shower set to start checkout.</p>
+      <a class="btn-p" href="products.html#set-colors">Browse sets</a>
+    </section>
+    <div class="checkout-unavailable retail-wrap" id="checkoutPaymentFeedback" hidden></div>
+    <noscript><p class="checkout-unavailable retail-wrap">Enable JavaScript to use checkout, or <a href="contact.html">contact PureForm</a> for help.</p></noscript>
+    <ol class="retail-steps retail-wrap" id="checkoutSteps" aria-label="Order progress" hidden><li><a href="cart.html"><span class="retail-step-number" aria-hidden="true">1</span>Cart</a></li><li aria-current="step"><span class="retail-step-number" aria-hidden="true">2</span>Delivery</li><li><span class="retail-step-number" aria-hidden="true">3</span>Card payment</li></ol>
+    <div class="checkout-shell" id="checkoutShell" hidden>
       <section class="checkout-panel" aria-labelledby="checkoutTitle">
 
-        <form class="checkout-form" id="checkoutForm">
+        <form class="checkout-form" id="checkoutForm" method="post">
           <section class="checkout-step" aria-labelledby="contactTitle">
             <div class="checkout-step-title">
               <h2 id="contactTitle">Contact</h2>
@@ -132,12 +139,12 @@
             </div>
             <div class="checkout-field">
               <label for="checkout-notes">Notes</label>
-              <textarea id="checkout-notes" name="notes" placeholder="Delivery timing, landmark, color preference, or any special note"></textarea>
+              <textarea id="checkout-notes" name="notes" placeholder="Delivery timing, landmark, or other delivery instructions"></textarea>
             </div>
           </section>
 
           <div class="checkout-actions">
-            <button class="btn-p Btn buy-pay-button" type="submit" id="checkoutSubmit"><span>Continue to secure card payment</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
+            <button class="btn-p Btn buy-pay-button" type="submit" id="checkoutSubmit" disabled><span>Continue to secure card payment</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
             <p class="checkout-status" id="checkoutStatus" aria-live="polite"></p>
             <button class="btn-s" type="button" id="checkoutVerifyPayment" hidden>Check payment again</button>
           </div>
@@ -201,6 +208,11 @@
       var paymentReturnPending = new URLSearchParams(window.location.search).get('payment') === 'success';
       var checkoutBusy = false;
       var verificationBusy = false;
+      var paymentConfirmed = false;
+      var checkoutEmpty = document.getElementById('checkoutEmpty');
+      var checkoutInstructions = document.getElementById('checkoutInstructions');
+      var checkoutSteps = document.getElementById('checkoutSteps');
+      var checkoutShell = document.getElementById('checkoutShell');
       var stockWarning = 'Some quantities are no longer available. Update your cart before checkout.';
       var pendingCheckoutKey = 'pureform.checkout.v1';
 
@@ -249,16 +261,18 @@
         var items = cart.getLineItems();
         var subtotal = cart.getSubtotal();
         var total = cart.getTotal();
+        var showPaymentFeedback = paymentReturnPending || paymentConfirmed;
+        var showCheckout = items.length > 0 && !showPaymentFeedback;
+        checkoutInstructions.hidden = !showCheckout;
+        checkoutSteps.hidden = !showCheckout;
+        checkoutShell.hidden = !showCheckout;
+        checkoutEmpty.hidden = showCheckout || showPaymentFeedback;
         shippingNode.textContent = cart.getCount() >= 2 ? 'Free' : cart.formatAED(cart.getShippingTotal());
         updateShippingCopy();
 
         summaryList.replaceChildren();
 
         if (!items.length) {
-          var empty = document.createElement('p');
-          empty.className = 'checkout-empty';
-          empty.textContent = 'Your cart is empty. Add a PureForm set before checkout.';
-          summaryList.appendChild(empty);
           submitButton.disabled = true;
           submitButton.setAttribute('aria-disabled', 'true');
           subtotalNode.textContent = cart.formatAED(0);
@@ -306,9 +320,9 @@
         });
 
         var unavailable = hasUnavailableItems();
-        submitButton.disabled = paymentReturnPending || checkoutBusy || unavailable;
+        submitButton.disabled = !showCheckout || checkoutBusy || unavailable;
         submitButton.setAttribute('aria-disabled', String(submitButton.disabled));
-        if (!paymentReturnPending && !checkoutBusy) {
+        if (showCheckout && !checkoutBusy) {
           if (unavailable && (!status.textContent || status.textContent === stockWarning)) setStatus(stockWarning, 'error');
           else if (status.textContent === stockWarning) setStatus('');
         }
@@ -463,7 +477,7 @@
       form.addEventListener('submit', async function (event) {
         var data;
         var payload;
-        if (paymentReturnPending || checkoutBusy) {
+        if (paymentReturnPending || paymentConfirmed || checkoutBusy) {
           event.preventDefault();
           return;
         }
@@ -516,6 +530,10 @@
         if (paymentState === 'success') {
           if (verificationBusy || !paymentReturnPending) return;
           verificationBusy = true;
+          var paymentFeedback = document.getElementById('checkoutPaymentFeedback');
+          paymentFeedback.appendChild(status);
+          paymentFeedback.appendChild(verifyButton);
+          paymentFeedback.hidden = false;
           verifyButton.hidden = true;
           verifyButton.disabled = true;
           setStatus('Verifying your card payment...', 'neutral');
@@ -538,6 +556,7 @@
             if (cartCleared) form.reset();
             updateShippingCopy();
             paymentReturnPending = false;
+            paymentConfirmed = true;
             setStatus('Payment confirmed for ' + result.order_number + '. Keep this order number for delivery updates.' + (!cartCleared && cart.getCount() ? ' Your current cart was kept.' : ''), 'success');
             window.history.replaceState({}, document.title, window.location.pathname);
           } catch (_error) {
@@ -551,7 +570,12 @@
         }
 
         if (paymentState === 'cancelled') {
-          setStatus('Secure card payment was cancelled. Your cart is still here when you are ready.', 'error');
+          if (!cart.getCount()) {
+            var cancelledFeedback = document.getElementById('checkoutPaymentFeedback');
+            cancelledFeedback.appendChild(status);
+            cancelledFeedback.hidden = false;
+          }
+          setStatus('Secure card payment was cancelled.' + (cart.getCount() ? ' Your cart is still here when you are ready.' : ''), 'error');
           window.history.replaceState({}, document.title, window.location.pathname);
         }
       }

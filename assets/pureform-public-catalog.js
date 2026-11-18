@@ -385,7 +385,7 @@
       img.src = item.image;
       img.width = 700;
       img.height = 700;
-      img.alt = item.name;
+      img.alt = '';
       img.decoding = 'async';
       if (home || index) img.loading = 'lazy';
 

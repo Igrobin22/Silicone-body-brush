@@ -519,7 +519,7 @@ body > nav.site-header + .hero,
       linear-gradient(135deg, rgba(220, 238, 231, .52), rgba(246, 219, 228, .32));
     box-shadow: 28px 0 70px rgba(19, 27, 24, .14);
     transform: translateX(-105%);
-    transition: transform var(--pf-motion-med) cubic-bezier(.32, .72, 0, 1), visibility var(--pf-motion-med);
+    transition: transform var(--pf-motion-med) cubic-bezier(.32, .72, 0, 1), visibility 0s linear var(--pf-motion-med);
     -webkit-backdrop-filter: blur(22px) saturate(140%);
     backdrop-filter: blur(22px) saturate(140%);
   }
@@ -527,6 +527,7 @@ body > nav.site-header + .hero,
   .pf-mobile-sidebar.is-open {
     visibility: visible;
     transform: translateX(0);
+    transition-delay: 0s;
   }
 
   .pf-mobile-sidebar-header {
@@ -562,8 +563,8 @@ body > nav.site-header + .hero,
 
   .pf-mobile-sidebar-close {
     display: inline-flex;
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
@@ -858,4 +859,5 @@ body > nav.site-header + .hero,
 }
 @media (prefers-reduced-motion: reduce) {
   .site-header .pf-nav-tabs > .pf-nav-decoration { transition: none !important; animation: none !important; }
+  .pf-mobile-sidebar, .pf-mobile-menu-overlay { transition: none; }
 }

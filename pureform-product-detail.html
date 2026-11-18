@@ -210,6 +210,8 @@
   </footer>
 
   <script src="assets/pureform-supabase-config.js"></script>
+  <script src="assets/pureform-site-images.js"></script>
+  <script src="assets/pureform-image-overrides.js" defer></script>
   <script src="assets/pureform-public-catalog.js?v=store-review"></script>
   <script src="assets/pureform-cart.js"></script>
   <script src="assets/pureform-combo.js" defer></script>
@@ -443,7 +445,9 @@
 
       function renderToolPhotos(product) {
         var labels = ['back scrubber', 'body brush', 'scalp massager', 'face brush'];
+        var parts = ['back', 'body', 'scalp', 'face'];
         document.querySelectorAll('.pdp-tool-grid img').forEach(function (image, index) {
+          image.dataset.pfImage = product.color.toLowerCase() + '-tool-' + parts[index];
           image.src = product.toolImages && product.toolImages[index] || getPhotoFallback(product);
           image.alt = product.color + ' silicone ' + labels[index];
           image.dataset.pfFallback = getPhotoFallback(product);

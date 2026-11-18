@@ -120,13 +120,21 @@ Use normal letter spacing (0) throughout. Labels and eyebrows may be uppercase, 
 
 Load the same Montserrat and Open Sans Google Fonts request on every storefront and admin page, with `display=swap` and preconnections to the font hosts. Use Arial and the browser sans-serif as fallbacks. Normalize fallback size with `font-size-adjust: from-font` where supported; older browsers retain the normal fallback stack.
 
-On tall phone screens, give each phrase in the homepage headline its own line. Set “Deep clean.” in a larger, semibold italic with a muted plum tone. Keep the headline in the upper left so the tools and canopy have room, and use the compact heading layout on short screens.
+On tall phone screens, give each phrase in the homepage headline its own line.
+Use Montserrat for “Soft touch.”, a larger Instrument Serif italic for “Deep
+clean.”, and a quiet Open Sans closing line for “Every day.” Keep all three in
+charcoal. The serif accent is limited to the mobile hero. Keep the headline in
+the upper left so the tools and canopy have room, and use the compact heading
+layout on short screens. Set the selected color in Montserrat beside smaller
+set details, above the primary action and a restrained row of product facts.
 
 ## Layout
 
 Lead with product imagery. The homepage hero uses the owner's floating colour studio edge to edge, with no outer spacing, border, rounded frame, white wash, gradient overlay or background mask. Fit its height to the opening viewport beneath the actual 106px desktop or 72px mobile header, so all four tools and the colour buttons are visible immediately. Preserve the 1620:971 product artboard and every brush's natural proportions; never stretch a photo to fill the hero. Desktop uses a horizontally outpainted panoramic version of the empty background, with proportional cover sizing. Phones retain the original background with proportional cropping. Keep the arch and pedestal stationary, brushes gently floating and leaves swaying. On desktop, place the original "Soft touch. Deep clean. Every day." headline and description near the middle left. Constrain the copy and purchase group to the outer desktop columns so the centre stays open for the products. Limit the desktop scene height relative to its width to preserve space beside the arch on tall windows. Put the selected set label and shopping buttons in the right column, with set facts below on taller screens. Use the display font for the label and show prices in the collection and product pages. Stack the buttons within that column on narrower desktops. Compact windows simplify supporting copy and facts. Move the desktop canopy to the top-right to keep text clear without obscuring the photograph. Place Grey / Black / Pink buttons over the bottom of the scene and a quiet pause control in its upper-right corner. The selected colour supplies the label and the admin-backed Shop the Set destination; unavailable or hidden colours link to the collection instead. Phones place the headline over the top of the scene, all four tools below it, colour buttons inside the bottom edge, and a compact purchase panel below the image. Center the selected set label and Shop the Set button above one divided row of four facts. Omit the studio caption on mobile and the hero review shortcut. Keep delivery, card payment and support links in a quiet strip beneath the facts. Colour switching preserves scale, position and the motion timeline. Keep the neutral, mint and rose brand system.
 
 Use one homepage collection, followed by the four included tools, a compact lifestyle photo row, customer notes, and practical delivery/payment/support questions. Avoid repeating the same three products or displaying unconfigured promotion codes. Section layouts are unframed, with restrained borders and shared horizontal gutters.
+
+Continue the studio backdrop below the hero through the service links and the three homepage product cards. Render the proportional hero photo and its floor extension in soft grey, and blend the extension into a neutral surface. Keep the tools and foliage in their original colors and the product cards white. End the backdrop before the combo offer.
 
 Public storefront copy omits return and refund terms at the owner's request. Remove those references from product buying areas, FAQs, policy sections, footer links, support topics and metadata. Use general order support and product-care links instead; do not replace removed wording with an all-sales-final or no-returns claim. Keep internal gateway payment and refund accounting intact. Show the current selling price on cards and product pages. Leave crossed-out prices, percentage badges and sale announcements off the storefront until the former prices and applicable promotion licence are confirmed. Keep admin pricing, expiry and checkout calculation authoritative. The header message identifies UAE delivery and card-only payment. Keep the existing header dimensions, typography, mobile visibility and quiet motion unchanged.
 
@@ -186,9 +194,7 @@ Avoid mixing sharp boxes with highly rounded controls in the same cluster. Keep 
 
 ### Opening Intro
 
-On the first external homepage entry per tab, show a short photographic launch adapted from the supplied HeroLaunch reference. Include all three colors in Grey / Black / Pink order, using 600px copies of the owner's matching full-set catalog photos from assets/products/. Never pair the legacy grey-looking back-brush detail with the Black caption, use customer-review photos or recolor product photography. All three opening images show actual catalog sets rather than AI-styled lifestyle scenes. Grey starts large and centered, recedes left while Black and Pink glide in, then all three leave downward to reveal the PureForm wordmark and original tagline. At 2900ms, the white opening layer lifts away over 700ms to uncover the unchanged, already-settled homepage hero. Keep all square photographs complete, with 8px photo corners and quiet color captions, and scale their fixed framing for narrow/landscape screens. Use finite CSS transforms and opacity, not looping media, 3D, dark vignettes or a new framework. Keep Montserrat/Open Sans and the white palette. Reuse optimized 600px WebPs totaling under 125KB at low priority; provenance is documented in assets/intro/README.md. If any image is broken or still unavailable after 350ms, skip the decoration. CSS auto-hides the layer and a 4000ms JavaScript fallback removes it independently. Never wait for fonts, catalog data or payment services, or simulate progress. The document stays readable to assistive technology, scrollable and interactive; any pointer, keyboard, touch, wheel or focus interaction dismisses immediately. Do not move focus, intercept navigation, lock scrolling, scroll to the hero or insert layout space. Skip reduced motion, missing styles/scripts/storage, already-painted content, same-site navigation, reload/history, fragments and payment callbacks. Product, collection, information, cart, checkout, admin, recovery and redirect pages do not load the intro. A loopback-only `?preview=intro` homepage link can replay it for review while still honoring reduced motion and image failures. Use the versioned per-tab marker pureform.intro.v4 so this replaces rather than follows the earlier openings.
-
-Portrait phones through 600px arrange Grey and Black in the first row with Pink centered below. Keep photos up to 220px wide and leave room for each caption, the opening label and the product note; landscape/tablet/desktop show one evenly spaced row of all three colors. Short landscape screens reduce the initial zoom to keep the opening photograph complete.
+On the first eligible homepage visit in a tab, open with a short blush studio sequence using the PureForm wordmark, a four-tool title and one diagonal wash of light. Give each tool a distinct, staggered entrance at its measured hero size and angle. Keep the copy beside the set on desktop and below it on portrait screens. Crossfade the existing Black, Pink and Grey WebP layers in that order, then land in Pink while dissolving the opening title and lighting into the hero. Keep the page width stable while scrolling is locked. Keep the hero's motion paused during the handoff and resume its existing floating loop on Pink. The hero has manual color selection. Preload and decode the layers before motion, allow 2.5 seconds for readiness, and release the page if the artwork is unavailable. Use transform and opacity tracks through the Web Animations API. Recompute the targets on resize. Skip is a keyboard-accessible control outside the decorative layer. Respect reduced motion, use the pf_intro_seen session marker, and allow ?intro=1 to replay the intro. The intro applies only to the homepage and preserves direct section links.
 
 ### Page Transitions
 
@@ -234,6 +240,19 @@ Hide these controls gracefully when the separate shipping backend is unavailable
 
 ### Product Photos
 
+Provide a Photos workspace in admin. Group saved listing photos in
+display order, starting with the main photo. List earlier Cloudinary photos
+separately when their links are not already shown in a listing. Use small,
+contained previews with readable full URLs and a Copy link button. Keep URLs
+wrapping within the content column on phones.
+
+Use a native dialog with thumbnails and search to choose an existing photo for
+a listing or website image position. Keep selections as an unsaved draft until
+Save listing or Save content succeeds. Keep Photos dedicated to photo previews
+and links. List website positions on the separate Image editor admin page.
+Preserve separate desktop/mobile backgrounds
+and each hero color layer. Native dialog dismissal restores keyboard focus.
+
 Keep each product gallery in its selected color, including tool-detail photos and failed-image fallbacks. Static homepage, collection and cart recommendation cards and cart fallbacks use the existing matching assets/products/{color}-main.webp full sets with explicit dimensions; never start a large original PNG download or show a differently colored tool while the catalog loads. The owner-supplied galleries dated 24 October 2026 contain Grey 5, Black 7 and Pink 9 photos. Preserve original URLs and their order in admin; the first photo supplies the main product image. Optimize public Cloudinary delivery without cropping or changing the products. Future admin changes remain authoritative.
 
 The admin photo editor uses contained previews, a Main photo label, explicit 44px up/down/remove controls, upload and add-link icons with tooltips, and 16px URL inputs. Keep order stable during uploads; photos publish only when Save listing succeeds. Uploads use authenticated admin-only Supabase storage and are converted to bounded WebP. Removing a listing photo removes its link, not the underlying file. Photo previews load eagerly at thumbnail size so hiding an image until it loads cannot prevent loading. Preserve the existing neutral/mint/rose admin surfaces; no new packages or decorative motion.
@@ -252,6 +271,13 @@ sits below the price so the first tap opens the product. Keep card dimensions
 stable, honor reduced motion, and source price and availability from the catalog.
 On desktop, cap the Home and Shop collections' inner width at 960px so their
 three cards fit comfortably in one centered row. On mobile, show two cards at a time in the scrollable Home and Shop collections, capped at 190px per card. Keep the next card partially visible in the cart recommendations.
+
+Use the visible product title to name linked cards. An image inside the same
+link can have empty alternative text when the title already identifies the set.
+Keep Clear cart available alongside the mobile order summary while the sticky
+bar provides the checkout action. Show a browse link in place of delivery fields
+when checkout opens with an empty cart. Show payment verification and confirmation
+above the fold without the delivery form.
 
 Review cards should be text-forward with small metadata, subtle dividers, and steady grid behavior. They should support trust without overwhelming the product story.
 
@@ -281,7 +307,7 @@ image request during resize does not expose a blank stage.
 The floating colour studio was approved for the homepage hero on 6 November
 2026. Its separate review page remains in the local workspace.
 Use the owner's matched Grey, matte Black and hot Pink Blender
-renders, with a stationary blush arch/pedestal and four independently floating
+renders, with a stationary stone arch and pedestal and four independently floating
 product layers. Every colour shares the exact same crop, position and scale.
 Place Grey / Black / Pink controls over the bottom of the hero scene; dissolve decoded layers over
 an opaque previous colour without restarting the float. Use the supplied leaf

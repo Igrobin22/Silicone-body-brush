@@ -6,14 +6,15 @@ const vm = require('node:vm');
 const source = readFileSync(path.join(__dirname, '../assets/pureform-admin.js'), 'utf8');
 const catalogSource = readFileSync(path.join(__dirname, '../assets/pureform-public-catalog.js'), 'utf8');
 const migration = readFileSync(path.join(__dirname, '../supabase/migrations/20261024000100_product_photos.sql'), 'utf8');
+const archiveSource = readFileSync(path.join(__dirname, '../assets/pureform-photo-archive.js'), 'utf8');
 
 function fixture() {
   const ids = {};
   const document = { addEventListener() {}, getElementById(id) { return ids[id] ||= { value: '', textContent: '', dataset: {} }; } };
-  const window = {};
+  const window = { location: { href: 'https://store.example.test/admin/dashboard.html?view=photos' } };
   const context = vm.createContext({ document, window, URL });
   new vm.Script(source.replace(/\}\)\(\);\s*$/, `
-    globalThis.photosTest = { state, els, getPhotoUrlsFromForm, prepareListingPhoto, onListingPhotoUpload, photoPreviewUrl,
+    globalThis.photosTest = { state, els, getPhotoUrlsFromForm, prepareListingPhoto, onListingPhotoUpload, photoPreviewUrl, getPhotoLibraryGroups,
       stubUploadHooks(prepare, add) { prepareListingPhoto = prepare; addPhotoUrlField = add; syncPhotoUrlsFromFields = function () {}; } };
   })();`)).runInContext(context);
   return { ...context.photosTest, document, window };
@@ -34,10 +35,30 @@ test('owner galleries contain all 21 original links in saved order, matching the
       assert.ok(next > position);
       position = next;
       assert.ok(seed.includes(url));
+      assert.ok(archiveSource.includes(url));
     }
   }
   assert.equal((migration.match(/update public.site_listings set photo_urls/g) || []).length, 3);
   assert.doesNotMatch(migration, /set (?:price|inventory_quantity|discount|visible)/i);
+});
+
+test('photo library keeps active gallery order, includes saved Cloudinary originals and filters by filename', () => {
+  const f = fixture();
+  vm.runInNewContext(archiveSource, { window: f.window });
+  const archive = f.window.PUREFORM_PHOTO_ARCHIVE;
+  const originals = archive.flatMap(group => group.photos);
+  assert.equal(new Set(originals).size, originals.length);
+  const originalMain = originals[0];
+  const listings = [{ name: 'Grey set', photo_urls: [originalMain, 'assets/products/grey-main.webp', 'javascript:alert(1)'] }];
+  const groups = f.getPhotoLibraryGroups(listings, archive, '');
+  assert.deepEqual(Array.from(groups[0].photos, photo => [photo.label, photo.url]), [
+    ['Main photo', originalMain],
+    ['Photo 2', 'https://store.example.test/assets/products/grey-main.webp']
+  ]);
+  assert.equal(groups.flatMap(group => group.photos).filter(photo => photo.url === originalMain).length, 1);
+  const filtered = f.getPhotoLibraryGroups(listings, archive, 'grey-main.webp');
+  assert.equal(filtered.length, 1);
+  assert.equal(filtered[0].photos[0].label, 'Photo 2');
 });
 
 test('photo save retains order, permits old local assets and rejects unsafe URLs or oversized galleries', () => {

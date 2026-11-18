@@ -12,7 +12,7 @@
   var ORDER_STATUS_OPTIONS = ['new', 'confirmed', 'packing', 'shipped', 'completed', 'cancelled'];
   var PAYMENT_STATUS_OPTIONS = ['pending', 'requires_payment', 'paid', 'failed', 'refunded', 'cancelled'];
   var FULFILLMENT_STATUS_OPTIONS = ['unfulfilled', 'reserved', 'packed', 'shipped', 'delivered', 'cancelled'];
-  var VALID_ADMIN_VIEWS = ['overview', 'orders', 'listings', 'content'];
+  var VALID_ADMIN_VIEWS = ['overview', 'orders', 'listings', 'photos', 'images', 'content'];
   var PHOTO_BUCKET = 'product-photos';
   var MAX_PHOTOS = 24;
   var MAX_PHOTO_BYTES = 8 * 1024 * 1024;
@@ -23,6 +23,7 @@
     session: null,
     profile: null,
     listings: [],
+    listingsPhotoLoad: 'loading',
     orders: [],
     shippingJobs: null,
     orderFilter: 'all',
@@ -38,6 +39,7 @@
   };
 
   var els = {};
+  var photoPickerTarget = null;
 
   document.addEventListener('DOMContentLoaded', init);
 
@@ -83,6 +85,8 @@
       overview: document.getElementById('overviewPanel'),
       orders: document.getElementById('ordersPanel'),
       listings: document.getElementById('listingsPanel'),
+      photos: document.getElementById('photosPanel'),
+      images: document.getElementById('imagesPanel'),
       content: document.getElementById('contentPanel')
     };
     els.statsGrid = document.getElementById('statsGrid');
@@ -112,6 +116,12 @@
     els.listingPhotoFiles = document.getElementById('listingPhotoFiles');
     els.uploadListingPhotoButton = document.getElementById('uploadListingPhotoButton');
     els.listingPhotoStatus = document.getElementById('listingPhotoStatus');
+    els.photoSearch = document.getElementById('photoSearch');
+    els.photoResults = document.getElementById('photoResults');
+    els.photoLibrary = document.getElementById('photoLibrary');
+    ['photoPicker', 'photoPickerSearch', 'photoPickerGrid', 'photoPickerResults', 'websiteImages', 'chooseContentPhotoButton', 'contentPhotoPreview'].forEach(function (id) {
+      els[id] = document.getElementById(id);
+    });
     els.newContentButton = document.getElementById('newContentButton');
     els.contentTableBody = document.getElementById('contentTableBody');
     els.contentForm = document.getElementById('contentForm');
@@ -141,6 +151,10 @@
         if (!mayLeaveEditor()) return;
         setView(button.dataset.view, { push: true });
         applyRouteSelection({ view: button.dataset.view });
+        if (button.dataset.view === 'photos' || button.dataset.view === 'images') {
+          document.getElementById(button.dataset.view === 'photos' ? 'photosHeading' : 'imagesHeading').focus({ preventScroll: true });
+          window.scrollTo(0, 0);
+        }
       });
     });
 
@@ -157,6 +171,22 @@
       if (hasUnsavedEditor() || state.photoUploadPending) { event.preventDefault(); event.returnValue = ''; }
     });
     bind(els.dashboardView, 'click', onWorkspaceClick);
+    bind(els.photoSearch, 'input', renderPhotoLibrary);
+    bind(document.getElementById('chooseListingPhotoButton'), 'click', function (event) {
+      openPhotoPicker({ type: 'listing-add', trigger: event.currentTarget });
+    });
+    bind(document.getElementById('closePhotoPicker'), 'click', function () { els.photoPicker.close(); });
+    bind(els.photoPickerSearch, 'input', renderPhotoPicker);
+    bind(els.photoPicker, 'close', function () {
+      var trigger = photoPickerTarget && photoPickerTarget.trigger;
+      photoPickerTarget = null;
+      if (trigger && trigger.isConnected) trigger.focus({ preventScroll: true });
+    });
+    bind(els.chooseContentPhotoButton, 'click', function (event) {
+      openPhotoPicker({ type: 'content', trigger: event.currentTarget });
+    });
+    bind(document.getElementById('contentType'), 'change', updateContentPhotoPreview);
+    bind(document.getElementById('contentValue'), 'input', updateContentPhotoPreview);
     [els.orderForm, els.listingForm, els.contentForm, els.shippingForm].forEach(function (form) {
       bind(form, 'input', function () { updateEditorSaveState(form); });
       bind(form, 'change', function () { updateEditorSaveState(form); });
@@ -234,6 +264,8 @@
       overview: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',
       orders: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z"/><path d="M9 7h6M9 11h6M9 15h3"/>',
       listings: '<path d="m12 3 9 5-9 5-9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/>',
+      photos: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m3 17 5-4 3 3 4-5 6 6"/>',
+      images: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m8 15 7-7 2 2-7 7H8v-2Z"/>',
       content: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 9v11"/>',
       refresh: '<path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/>',
       external: '<path d="M14 3h7v7M21 3l-9 9M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/>'
@@ -517,6 +549,7 @@
     state.session = session;
 
     if (!session || !session.user) {
+      if (els.photoPicker && els.photoPicker.open) els.photoPicker.close();
       state.profile = null;
       state.formBaselines = {};
       state.savingForms = {};
@@ -631,6 +664,8 @@
       overview: 'Overview',
       orders: 'Orders',
       listings: 'Listings',
+      photos: 'Photos',
+      images: 'Website images',
       content: 'Site Content'
     };
 
@@ -652,6 +687,9 @@
         button.removeAttribute('aria-current');
       }
     });
+
+    if (view === 'photos') renderPhotoLibrary();
+    if (view === 'images') renderWebsiteImages();
 
     if (!options.skipRoute) {
       updateAdminRoute(Object.assign({}, options, { view: view }));
@@ -734,6 +772,8 @@
       return;
     }
 
+    if (route.view === 'photos' || route.view === 'images') return;
+
     if (document.getElementById('orderId') && !document.getElementById('orderId').value) {
       fillOrderForm(state.orders[0]);
     }
@@ -778,10 +818,14 @@
       .order('name', { ascending: true });
 
     if (result.error) {
+      state.listingsPhotoLoad = 'error';
+      if (state.activeView === 'photos') renderPhotoLibrary();
       throw result.error;
     }
 
     state.listings = result.data || [];
+    state.listingsPhotoLoad = 'ready';
+    if (state.activeView === 'photos') renderPhotoLibrary();
   }
 
   async function loadContentBlocks() {
@@ -1865,11 +1909,19 @@
       controls.appendChild(move);
     });
     controls.appendChild(removeButton);
+    var choose = document.createElement('button');
+    choose.type = 'button';
+    choose.className = 'btn btn-secondary photo-choose-button';
+    choose.textContent = 'Choose existing photo';
+    choose.addEventListener('click', function () {
+      openPhotoPicker({ type: 'listing-replace', input: input, trigger: choose });
+    });
 
     row.appendChild(preview);
     row.appendChild(position);
     row.appendChild(input);
     row.appendChild(controls);
+    row.appendChild(choose);
     els.listingPhotoPreview.appendChild(row);
 
     updatePhotoRowPreview(row);
@@ -1973,6 +2025,275 @@
     return value;
   }
 
+  function resolvePhotoLink(value) {
+    if (typeof value !== 'string' || !value.trim()) return null;
+    value = value.trim();
+    if (/^\/?assets\/[a-z0-9_./-]+$/i.test(value) && value.indexOf('..') === -1) {
+      return new URL(value, new URL('../', window.location.href));
+    }
+    try {
+      var url = new URL(value);
+      if (url.protocol === 'https:' && !url.username && !url.password) return url;
+    } catch (_error) { /* Ignore malformed links. */ }
+    return null;
+  }
+
+  function getPhotoLibraryGroups(listings, archive, query) {
+    var listedUrls = new Set();
+    var groups = listings.map(function (listing) {
+      return {
+        name: listing.name,
+        archived: false,
+        photos: (Array.isArray(listing.photo_urls) ? listing.photo_urls : []).map(function (value, index) {
+          var url = resolvePhotoLink(value);
+          if (!url) return null;
+          listedUrls.add(url.href);
+          return { url: url.href, label: index === 0 ? 'Main photo' : 'Photo ' + (index + 1) };
+        }).filter(Boolean)
+      };
+    });
+    archive.forEach(function (group) {
+      groups.push({
+        name: group.name,
+        archived: true,
+        photos: group.photos.map(function (value) {
+          var url = resolvePhotoLink(value);
+          if (!url || listedUrls.has(url.href)) return null;
+          return { url: url.href, label: url.pathname.split('/').pop() };
+        }).filter(Boolean)
+      });
+    });
+    return groups.map(function (group) {
+      return Object.assign({}, group, {
+        photos: group.photos.filter(function (photo) {
+          return (group.name + ' ' + photo.label + ' ' + photo.url).toLowerCase().includes(query);
+        })
+      });
+    }).filter(function (group) { return group.photos.length; });
+  }
+
+  function renderPhotoLibrary() {
+    if (!els.photoLibrary || !state.profile) return;
+    if (state.listingsPhotoLoad === 'loading') {
+      els.photoResults.textContent = 'Loading listing photos…';
+      return;
+    }
+    var query = inputValue(els.photoSearch);
+    var groups = getPhotoLibraryGroups(state.listings, window.PUREFORM_PHOTO_ARCHIVE || [], query);
+    var count = groups.reduce(function (total, group) { return total + group.photos.length; }, 0);
+    var message = count === 1 ? '1 photo' : count + ' photos';
+    if (!count && query) message = 'No photos match your search.';
+    if (state.listingsPhotoLoad === 'error') message += ' Listing photos could not be refreshed. Try Refresh.';
+    els.photoResults.textContent = message;
+    els.photoLibrary.replaceChildren();
+
+    groups.forEach(function (group) {
+      var section = document.createElement('section');
+      section.className = 'photo-library-group';
+      var heading = document.createElement('h3');
+      heading.textContent = group.name;
+      if (group.archived) {
+        var source = document.createElement('p');
+        source.className = 'eyebrow';
+        source.textContent = 'Saved Cloudinary links';
+        section.appendChild(source);
+      }
+      var list = document.createElement('ul');
+      list.className = 'photo-library-list';
+      group.photos.forEach(function (photo) {
+        var row = document.createElement('li');
+        var preview = document.createElement('div');
+        preview.className = 'photo-library-preview';
+        var img = document.createElement('img');
+        img.alt = '';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.referrerPolicy = 'no-referrer';
+        img.addEventListener('error', function () { preview.textContent = 'No preview'; }, { once: true });
+        img.src = photoPreviewUrl(photo.url);
+        preview.appendChild(img);
+        var details = document.createElement('div');
+        var label = document.createElement('strong');
+        label.textContent = photo.label;
+        var link = document.createElement('a');
+        link.href = photo.url;
+        link.textContent = photo.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        details.append(label, link);
+        var copy = document.createElement('button');
+        copy.type = 'button';
+        copy.className = 'btn btn-secondary';
+        copy.textContent = 'Copy link';
+        var description = group.name + ', ' + photo.label;
+        copy.setAttribute('aria-label', 'Copy link for ' + description);
+        var status = document.createElement('span');
+        status.setAttribute('role', 'status');
+        status.className = 'visually-hidden';
+        copy.addEventListener('click', async function () {
+          try {
+            await navigator.clipboard.writeText(photo.url);
+            copy.textContent = 'Copied';
+            copy.setAttribute('aria-label', 'Copied link for ' + description);
+            status.textContent = 'Link copied.';
+          } catch (_error) {
+            var selection = window.getSelection();
+            if (selection) {
+              var range = document.createRange();
+              range.selectNodeContents(link);
+              selection.removeAllRanges();
+              selection.addRange(range);
+            }
+            copy.textContent = 'Try copy again';
+            copy.setAttribute('aria-label', 'Try copy again for ' + description);
+            status.textContent = 'Copy was unavailable. Copy the selected link manually or use the link menu.';
+          }
+        });
+        row.append(preview, details, copy, status);
+        list.appendChild(row);
+      });
+      section.append(heading, list);
+      els.photoLibrary.appendChild(section);
+    });
+  }
+
+  function photoPickerArchive() {
+    var groups = (window.PUREFORM_PHOTO_ARCHIVE || []).slice();
+    var slots = window.PUREFORM_SITE_IMAGES || [];
+    groups.push({ name: 'Website images', photos: Array.from(new Set(slots.map(function (slot) { return slot.src; }))) });
+    groups.push({ name: 'Saved website images', photos: state.contentBlocks.filter(function (block) {
+      return block.key.startsWith('image.') && resolvePhotoLink(block.value);
+    }).map(function (block) { return block.value; }) });
+    return groups;
+  }
+
+  function openPhotoPicker(target) {
+    if (!els.photoPicker || !state.profile || state.photoUploadPending || Object.values(state.savingForms).some(Boolean)) return;
+    if (target.type === 'listing-add' && parsePhotoUrls(document.getElementById('listingPhotos').value).length >= MAX_PHOTOS) {
+      setPhotoStatus('A listing can have up to ' + MAX_PHOTOS + ' photos.', 'error');
+      return;
+    }
+    photoPickerTarget = target;
+    els.photoPickerSearch.value = '';
+    renderPhotoPicker();
+    els.photoPicker.showModal();
+  }
+
+  function renderPhotoPicker() {
+    if (!els.photoPickerGrid || !state.profile) return;
+    var groups = getPhotoLibraryGroups(state.listings, photoPickerArchive(), inputValue(els.photoPickerSearch));
+    var seen = new Set();
+    els.photoPickerGrid.replaceChildren();
+    groups.forEach(function (group) {
+      group.photos.forEach(function (photo) {
+        var identity = photo.url.replace(/(\/image\/upload\/).*?(v\d+\/)/, '$1$2');
+        if (seen.has(identity)) return;
+        seen.add(identity);
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'photo-picker-item';
+        var image = document.createElement('img');
+        image.src = photoPreviewUrl(photo.url);
+        image.alt = '';
+        image.width = 144;
+        image.height = 144;
+        image.loading = 'lazy';
+        image.addEventListener('error', function () { image.hidden = true; }, { once: true });
+        var label = document.createElement('span');
+        label.textContent = group.name + ' · ' + photo.label;
+        button.append(image, label);
+        button.addEventListener('click', function () { selectExistingPhoto(photo.url); });
+        els.photoPickerGrid.appendChild(button);
+      });
+    });
+    els.photoPickerResults.textContent = seen.size ? seen.size + ' photos' : 'No photos match your search.';
+  }
+
+  function selectExistingPhoto(url) {
+    var target = photoPickerTarget;
+    if (!target || !state.profile) return;
+    // Keep local asset references portable between localhost and the deployed store.
+    var parsed = new URL(url);
+    var base = new URL('../', window.location.href);
+    var value = parsed.origin === base.origin && parsed.pathname.startsWith(base.pathname + 'assets/')
+      ? parsed.pathname.slice(base.pathname.length) : url;
+    els.photoPicker.close();
+
+    if (target.type === 'site') {
+      var key = 'image.' + target.slot.id;
+      var block = state.contentBlocks.find(function (item) { return item.key === key; });
+      setView('content', { push: true, block: block && block.id, action: block ? '' : 'new' });
+      fillContentForm(block);
+      setEditorVisible('content', true);
+      document.getElementById('contentKey').value = key;
+      document.getElementById('contentLabel').value = target.slot.label;
+      document.getElementById('contentType').value = 'url';
+      document.getElementById('contentValue').value = value;
+      updateContentPhotoPreview();
+      updateEditorSaveState(els.contentForm);
+      focusEditor(els.contentFormTitle);
+      setDashboardStatus('Image selected. Save content to publish the change.', 'neutral');
+      return;
+    }
+    if (target.type === 'content') {
+      document.getElementById('contentValue').value = value;
+      updateContentPhotoPreview();
+      updateEditorSaveState(els.contentForm);
+      return;
+    }
+    var input = target.type === 'listing-replace' ? target.input : addPhotoUrlField(value);
+    if (!input || !input.isConnected) return;
+    input.value = value;
+    updatePhotoRowPreview(input.closest('.photo-url-row'));
+    syncPhotoUrlsFromFields();
+    setPhotoStatus('Photo selected. Save listing to publish the change.', 'neutral');
+  }
+
+  function updateContentPhotoPreview() {
+    if (!els.chooseContentPhotoButton || !els.contentPhotoPreview) return;
+    var isUrl = document.getElementById('contentType').value === 'url';
+    var value = document.getElementById('contentValue').value;
+    var url = isUrl && resolvePhotoLink(value);
+    els.chooseContentPhotoButton.hidden = !isUrl;
+    els.contentPhotoPreview.hidden = !url;
+    els.contentPhotoPreview.onerror = function () { els.contentPhotoPreview.hidden = true; };
+    if (url) els.contentPhotoPreview.src = photoPreviewUrl(url.href);
+    else els.contentPhotoPreview.removeAttribute('src');
+  }
+
+  function renderWebsiteImages() {
+    if (!els.websiteImages || !state.profile) return;
+    els.websiteImages.replaceChildren();
+    var list = document.createElement('ul');
+    list.className = 'photo-library-list';
+    (window.PUREFORM_SITE_IMAGES || []).forEach(function (slot) {
+      var block = state.contentBlocks.find(function (item) { return item.key === 'image.' + slot.id; });
+      var url = resolvePhotoLink(block ? block.value : slot.src);
+      var row = document.createElement('li');
+      var preview = document.createElement('div');
+      preview.className = 'photo-library-preview';
+      var image = document.createElement('img');
+      image.alt = '';
+      image.loading = 'lazy';
+      image.src = url ? photoPreviewUrl(url.href) : '';
+      image.addEventListener('error', function () { preview.textContent = 'No preview'; }, { once: true });
+      preview.appendChild(image);
+      var label = document.createElement('strong');
+      label.textContent = slot.label;
+      var choose = document.createElement('button');
+      choose.type = 'button';
+      choose.className = 'btn btn-secondary';
+      choose.textContent = 'Change photo';
+      choose.setAttribute('aria-label', 'Change ' + slot.label);
+      choose.addEventListener('click', function () {
+        openPhotoPicker({ type: 'site', slot: slot, trigger: choose });
+      });
+      row.append(preview, label, choose);
+      list.appendChild(row);
+    });
+    els.websiteImages.appendChild(list);
+  }
+
   function refreshPhotoRowIndexes() {
     if (!els.listingPhotoPreview) {
       return;
@@ -2008,11 +2329,7 @@
     var urls = parsePhotoUrls(document.getElementById('listingPhotos').value);
     if (urls.length > MAX_PHOTOS) throw new Error('A listing can have up to ' + MAX_PHOTOS + ' photos.');
     urls.forEach(function (value, index) {
-      if (/^\/?assets\/[a-z0-9_./-]+$/i.test(value) && value.indexOf('..') === -1) return;
-      var message = 'Photo ' + (index + 1) + ': use an HTTPS photo link.';
-      var url;
-      try { url = new URL(value); } catch (_error) { throw new Error(message); }
-      if (url.protocol !== 'https:' || url.username || url.password) throw new Error(message);
+      if (!resolvePhotoLink(value)) throw new Error('Photo ' + (index + 1) + ': use an HTTPS photo link.');
     });
     return urls;
   }
@@ -2188,6 +2505,12 @@
       }
     }
 
+    if (payload.key.startsWith('image.') && !resolvePhotoLink(payload.value)) {
+      setDashboardStatus('Choose an existing photo or enter a valid HTTPS photo link.', 'error');
+      return;
+    }
+    if (payload.key.startsWith('image.')) payload.block_type = 'url';
+
     var id = document.getElementById('contentId').value;
 
     try {
@@ -2251,6 +2574,7 @@
     els.contentFormTitle.textContent = isExisting ? 'Edit block' : 'New block';
     els.deleteContentButton.hidden = !isExisting;
     rememberEditor(els.contentForm);
+    updateContentPhotoPreview();
   }
 
   function findListing(id) {

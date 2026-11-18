@@ -15,7 +15,7 @@ test('hero floats all four tools with color controls outside the artwork image r
   assert.ok(scene.indexOf('aria-hidden="true"') < scene.indexOf('class="float-controls"'));
   assert.match(scene, /aria-label="Choose set color"/);
   assert.match(scene, /data-float-motion/);
-  assert.match(html, /src="assets\/pureform-floating-scene.js" defer/);
+  assert.match(html, /src="assets\/pureform-floating-scene\.js(?:\?[^"]+)?" defer/);
 });
 
 test('hero starts with local aligned assets and defers the unselected colors', () => {

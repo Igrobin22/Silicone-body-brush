@@ -19,6 +19,7 @@
   var visible = false;
   var paused = false;
   var observer;
+  var introHolding = root.id === 'hero' && document.documentElement.classList.contains('pf-intro-active');
 
   function setupBackgroundFallback() {
     var background = root.querySelector('[data-float-background-fallback]');
@@ -90,6 +91,7 @@
       image.alt = '';
       image.className = 'float-color-layer';
       image.dataset.colorLayer = color;
+      image.dataset.pfImage = 'hero-' + color + '-' + part.dataset.floatPart;
       image.width = Number(base.getAttribute('width'));
       image.height = Number(base.getAttribute('height'));
       image.decoding = 'async';
@@ -112,6 +114,31 @@
     return assets[color];
   }
 
+  function applyColor(color, images, instant) {
+    clearTimeout(cleanup);
+    level += 1;
+    images.forEach(function (image) {
+      image.style.zIndex = String(level);
+      image.classList.add('is-visible');
+    });
+    root.dataset.color = color;
+    colorName.textContent = colors[color];
+    root.dispatchEvent(new CustomEvent('pureform:scene-color-change', { bubbles: true, detail: { color: color } }));
+    stage.setAttribute('aria-label', colors[color] + ' four-piece shower set floating above a stone pedestal, framed by gently swaying leaves');
+    buttons.forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.floatColor === color)); });
+    options.setAttribute('aria-busy', 'false');
+    announce(instant ? '' : colors[color] + ' selected.');
+    function clearPreviousColor() {
+      parts.forEach(function (part) {
+        part.querySelectorAll('[data-color-layer]').forEach(function (image) {
+          if (image.dataset.colorLayer !== color) image.classList.remove('is-visible');
+        });
+      });
+    }
+    if (instant) clearPreviousColor();
+    else cleanup = setTimeout(clearPreviousColor, preference.matches ? 0 : 460);
+  }
+
   function switchColor(color) {
     if (!Object.prototype.hasOwnProperty.call(colors, color)) return;
     var current = ++revision;
@@ -124,27 +151,8 @@
     announce('Loading ' + colors[color] + '…');
     prepareColor(color).then(function (images) {
       if (current !== revision) return;
-      clearTimeout(cleanup);
       // Leave the previous colour opaque under the incoming one: no blank flash.
-      level += 1;
-      images.forEach(function (image) {
-        image.style.zIndex = String(level);
-        image.classList.add('is-visible');
-      });
-      root.dataset.color = color;
-      colorName.textContent = colors[color];
-      root.dispatchEvent(new CustomEvent('pureform:scene-color-change', { bubbles: true, detail: { color: color } }));
-      stage.setAttribute('aria-label', colors[color] + ' four-piece shower set floating above a blush stone pedestal, framed by gently swaying leaves');
-      buttons.forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.floatColor === color)); });
-      options.setAttribute('aria-busy', 'false');
-      announce(colors[color] + ' selected.');
-      cleanup = setTimeout(function () {
-        parts.forEach(function (part) {
-          part.querySelectorAll('[data-color-layer]').forEach(function (image) {
-            if (image.dataset.colorLayer !== color) image.classList.remove('is-visible');
-          });
-        });
-      }, preference.matches ? 0 : 460);
+      applyColor(color, images, false);
     }).catch(function () {
       if (current !== revision) return;
       options.setAttribute('aria-busy', 'false');
@@ -153,10 +161,23 @@
   }
 
   function updateMotion() {
-    root.dataset.motion = !preference.matches && !paused && visible && !document.hidden ? 'running' : 'paused';
+    root.dataset.motion = !introHolding && !preference.matches && !paused && visible && !document.hidden ? 'running' : 'paused';
     motion.disabled = preference.matches;
     motion.setAttribute('aria-pressed', String(paused));
     motionLabel.textContent = preference.matches ? 'Motion reduced' : paused ? 'Resume motion' : 'Pause motion';
+  }
+
+  if (introHolding) {
+    root.pureformIntro = {
+      prepareColor: prepareColor,
+      showColor: function (color, images) { applyColor(color, images, true); }
+    };
+    document.addEventListener('pureform:intro-end', function () {
+      delete root.pureformIntro;
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { introHolding = false; updateMotion(); });
+      });
+    }, { once: true });
   }
 
   buttons.forEach(function (button) {

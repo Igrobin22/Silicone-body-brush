@@ -34,7 +34,7 @@ function fixture({ reduced = false, observer = true, broken = false, missingHero
 
 test('floating studio replaces the old bubble layer and does not load both animation controllers', () => {
   assert.doesNotMatch(html, /id="heroBubbles"|src="assets\/pureform-hero-bubbles.js"/);
-  assert.match(html, /src="assets\/pureform-floating-scene.js" defer/);
+  assert.match(html, /src="assets\/pureform-floating-scene\.js(?:\?[^"]+)?" defer/);
   assert.match(html, /data-floating-scene data-color="grey" data-motion="paused"/);
 });
 

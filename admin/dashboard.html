@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/pureform-admin.css">
-  <link rel="stylesheet" href="../assets/pureform-admin-workspace.css">
+  <link rel="stylesheet" href="../assets/pureform-admin-workspace.css?v=image-editor-page">
 </head>
 <body class="admin-page" data-admin-page="dashboard">
   <main id="adminApp" class="admin-app">
@@ -33,6 +33,8 @@
           <a class="nav-tab is-active" data-view="overview" href="dashboard.html" aria-current="page">Overview</a>
           <a class="nav-tab" data-view="orders" href="dashboard.html?view=orders">Orders</a>
           <a class="nav-tab" data-view="listings" href="dashboard.html?view=listings">Listings</a>
+          <a class="nav-tab" data-view="photos" href="dashboard.html?view=photos">Photos</a>
+          <a class="nav-tab" data-view="images" href="dashboard.html?view=images">Image editor</a>
           <a class="nav-tab" data-view="content" href="dashboard.html?view=content">Site Content</a>
         </nav>
         <div class="admin-user">
@@ -334,6 +336,7 @@
                       <small>First photo is the main image. Up to 24 photos.</small>
                     </div>
                     <div class="photo-editor-actions">
+                      <button type="button" id="chooseListingPhotoButton" class="photo-add-button">Choose existing photo</button>
                       <button type="button" id="uploadListingPhotoButton" class="photo-add-button photo-upload-button" aria-label="Upload photos" title="Upload photos">&#8593; <span>Upload photos</span></button>
                       <button type="button" id="addListingPhotoButton" class="photo-add-button" aria-label="Add another photo URL" title="Add photo link">+</button>
                     </div>
@@ -348,6 +351,30 @@
               </form>
             </article>
           </div>
+        </section>
+
+        <section id="photosPanel" class="view-panel" aria-labelledby="photosHeading" hidden>
+          <div class="section-head">
+            <div>
+              <h2 id="photosHeading" tabindex="-1">Photo library</h2>
+              <p>Current listing photos and saved Cloudinary links. Select a link to open the full image.</p>
+            </div>
+          </div>
+          <div class="workspace-toolbar">
+            <label class="workspace-search"><span class="visually-hidden">Search photos</span><input id="photoSearch" type="search" placeholder="Search by product, file name or link" autocomplete="off"></label>
+            <p id="photoResults" class="workspace-results" role="status"></p>
+          </div>
+          <div id="photoLibrary"></div>
+        </section>
+
+        <section id="imagesPanel" class="view-panel" aria-labelledby="imagesHeading" hidden>
+          <div class="section-head">
+            <div>
+              <h2 id="imagesHeading" tabindex="-1">Change website images</h2>
+              <p>Choose the image to replace, select an existing photo, then save the change.</p>
+            </div>
+          </div>
+          <div id="websiteImages"></div>
         </section>
 
         <section id="contentPanel" class="view-panel" aria-labelledby="contentHeading" hidden>
@@ -416,6 +443,8 @@
                   <span>Value</span>
                   <textarea id="contentValue" name="value" rows="8"></textarea>
                 </label>
+                <button type="button" id="chooseContentPhotoButton" class="btn btn-secondary" hidden>Choose existing photo</button>
+                <img id="contentPhotoPreview" class="content-photo-preview" alt="Selected image preview" hidden>
                 <div class="editor-footer"><span class="editor-save-state" id="contentSaveState" role="status"></span><div class="editor-footer-actions"><button type="button" class="btn btn-secondary" data-discard-editor="content">Discard</button><button type="submit" class="btn btn-primary">Save content</button></div></div>
               </form>
             </article>
@@ -425,7 +454,16 @@
     </section>
   </main>
 
+  <dialog id="photoPicker" class="photo-picker admin-dashboard" aria-labelledby="photoPickerTitle">
+    <header class="photo-picker-head"><h2 id="photoPickerTitle">Choose an existing photo</h2><button type="button" id="closePhotoPicker" class="btn btn-secondary">Cancel</button></header>
+    <label class="workspace-search"><span>Search photos</span><input id="photoPickerSearch" type="search" placeholder="Search by product or file name" autocomplete="off" autofocus></label>
+    <p id="photoPickerResults" class="workspace-results" role="status"></p>
+    <div id="photoPickerGrid" class="photo-picker-grid"></div>
+  </dialog>
+
   <script src="../assets/pureform-supabase-config.js" defer></script>
-  <script src="../assets/pureform-admin.js" defer></script>
+  <script src="../assets/pureform-photo-archive.js?v=complete-photo-links" defer></script>
+  <script src="../assets/pureform-site-images.js" defer></script>
+  <script src="../assets/pureform-admin.js?v=image-editor-page" defer></script>
 </body>
 </html>

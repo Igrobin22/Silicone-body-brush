@@ -1,192 +1,115 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { readFileSync, statSync } = require('node:fs');
+const { readFileSync, existsSync } = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
 const read = file => readFileSync(path.join(__dirname, '..', file), 'utf8');
+const html = read('index.html');
 const source = read('assets/pureform-intro.js');
-const css = read('assets/pureform-intro.css');
+const gate = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].find(match => match[1].includes('pf_intro_seen'))[1];
 
-function fixture({ url = 'https://pureform.test/index.html', referrer = '', navigation = 'navigate', painted = false,
-  reduced = false, hidden = false, seen = false, blockedStorage = false, styled = true, body = true, photoReady = true } = {}) {
-  const storage = new Map(seen ? [['pureform.intro.v4', '1']] : []);
-  const timers = new Map();
-  let nextTimer = 1;
-  const documentEvents = new Map();
-  const windowEvents = new Map();
-  const mediaEvents = new Map();
-  const children = [];
-  const nodes = [];
-  const photos = Array.from({ length: 3 }, () => ({ complete: photoReady, naturalWidth: photoReady ? 500 : 0, events: {},
-    addEventListener(type, fn) { this.events[type] = fn; }, removeEventListener(type) { delete this.events[type]; } }));
-  const preference = { matches: reduced,
-    addEventListener: (type, fn) => mediaEvents.set(type, fn),
-    removeEventListener: type => mediaEvents.delete(type) };
-  const document = {
-    hidden, referrer, documentElement: {},
-    body: body ? { appendChild(node) { children.push(node); } } : null,
-    addEventListener: (type, fn) => documentEvents.set(type, fn),
-    removeEventListener: type => documentEvents.delete(type),
-    createElement() {
-      const node = { attributes: {}, events: {}, innerHTML: '',
-        setAttribute(name, value) { this.attributes[name] = value; },
-        addEventListener(name, fn) { this.events[name] = fn; },
-        querySelectorAll() { return photos; },
-        remove() { const index = children.indexOf(this); if (index !== -1) children.splice(index, 1); } };
-      nodes.push(node); return node;
+function visit({ address = 'https://pureform.test/index.html', storage = new Map(), type = 'navigate',
+  reduced = false, hidden = false, blockedStorage = false } = {}) {
+  const classes = new Set();
+  vm.runInNewContext(gate, {
+    URLSearchParams,
+    location: new URL(address),
+    Element: { prototype: { animate() {} } },
+    performance: { getEntriesByType: () => [{ type }] },
+    document: { hidden, documentElement: { classList: { add: value => classes.add(value) } } },
+    matchMedia: () => ({ matches: reduced }),
+    sessionStorage: {
+      getItem(key) {
+        if (blockedStorage) throw new Error('Storage unavailable');
+        return storage.get(key);
+      },
+      setItem: (key, value) => storage.set(key, value)
     }
-  };
-  const window = {
-    location: new URL(url),
-    matchMedia: () => preference,
-    getComputedStyle: () => ({ getPropertyValue: () => styled ? '1' : '' }),
-    performance: { getEntriesByType: type => type === 'navigation' ? [{ type: navigation }] : (painted ? [{ name: 'first-contentful-paint' }] : []) },
-    get sessionStorage() { if (blockedStorage) throw Error('Storage unavailable'); return { getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value) }; },
-    setTimeout(fn, ms) { const id = nextTimer++; timers.set(id, { fn, ms }); return id; }, clearTimeout: id => timers.delete(id),
-    addEventListener: (type, fn) => windowEvents.set(type, fn),
-    removeEventListener: type => windowEvents.delete(type)
-  };
-  new vm.Script(source).runInNewContext({ window, document, URL, URLSearchParams });
-  return { storage, timers, documentEvents, windowEvents, mediaEvents, children, nodes, document, preference, photos };
+  });
+  return classes.has('pf-intro-active');
 }
 
-test('first external homepage visit shows the matching Grey, Black and Pink full-set photos', () => {
-  const page = fixture();
-  assert.equal(page.children.length, 1);
-  assert.equal(page.children[0].attributes['aria-hidden'], 'true');
-  assert.match(page.children[0].innerHTML, /PureForm/);
-  assert.equal((page.children[0].innerHTML.match(/<img /g) || []).length, 3);
-  for (const color of ['grey', 'black', 'pink']) {
-    assert.ok(page.children[0].innerHTML.includes('assets/intro/' + color + '-set-600.webp'));
+test('an eligible homepage visit plays once and the explicit preview can replay', () => {
+  const storage = new Map();
+  assert.equal(visit({ storage }), true);
+  assert.equal(storage.get('pf_intro_seen'), '1');
+  assert.equal(visit({ storage }), false);
+  assert.equal(visit({ type: 'reload' }), false);
+  assert.equal(visit({ type: 'back_forward' }), false);
+  assert.equal(visit({ address: 'https://pureform.test/?intro=1', storage, type: 'reload' }), true);
+});
+
+test('intro respects motion preference, direct links and unavailable browser storage', () => {
+  for (const options of [{ reduced: true, address: 'https://pureform.test/?intro=1' },
+    { hidden: true }, { blockedStorage: true }, { address: 'https://pureform.test/#reviews' },
+    { address: 'https://pureform.test/?payment=success' }, { address: 'https://pureform.test/?session_id=example' }]) {
+    assert.equal(visit(options), false);
   }
-  assert.deepEqual([...page.children[0].innerHTML.matchAll(/<figcaption>([^<]+)<\/figcaption>/g)].map(match => match[1]), ['Grey', 'Black', 'Pink']);
-  assert.match(page.children[0].innerHTML, /4-piece silicone shower sets/);
-  assert.doesNotMatch(page.children[0].innerHTML, /AI-styled|assets\/lifestyle\/|black-listing|assets\/reviews\//);
-  assert.match(page.children[0].innerHTML, /Soft touch\. Deep clean\. Every day\./);
-  assert.equal((page.children[0].innerHTML.match(/fetchpriority="low"/g) || []).length, 3);
-  assert.doesNotMatch(source, /<svg|<video|<canvas|fetch\(|document\.fonts|preventDefault|stopPropagation|\.focus\(/);
-  assert.equal(page.storage.get('pureform.intro.v4'), '1');
-  assert.equal(page.timers.get(1).ms, 4000);
-  assert.equal(page.timers.get(2).ms, 350);
-});
-
-test('each opening caption stays paired with its own color-specific full-set asset', () => {
-  const markup = fixture().children[0].innerHTML;
-  const figures = [...markup.matchAll(/<figure class="pf-intro-shot pf-intro-(\w+)"><img src="([^"]+)"[^>]*><figcaption>([^<]+)<\/figcaption><\/figure>/g)];
-  assert.equal(figures.length, 3);
-  for (const [, color, image, caption] of figures) {
-    assert.equal(image, 'assets/intro/' + color + '-set-600.webp');
-    assert.equal(caption.toLowerCase(), color);
-    const bytes = readFileSync(path.join(__dirname, '..', image));
-    assert.equal(bytes.toString('ascii', 0, 4), 'RIFF');
-    assert.equal(bytes.toString('ascii', 8, 12), 'WEBP');
-  }
-});
-
-test('repeat visits, reload, history, internal navigation and already-painted content do not replay', () => {
-  for (const options of [{ seen: true }, { navigation: 'reload' }, { navigation: 'back_forward' },
-    { referrer: 'https://pureform.test/products.html' }, { painted: true }]) {
-    const page = fixture(options);
-    assert.equal(page.children.length, 0, JSON.stringify(options));
-    assert.equal(page.timers.size, 0);
-  }
-});
-
-test('checkout, cart, authentication, callbacks and fragment destinations are excluded defensively', () => {
-  for (const route of ['products.html', 'pureform-product-detail.html', 'about.html', 'reviews.html', 'policy.html', 'contact.html', 'cart.html', 'checkout.html', 'admin/index.html', 'admin/dashboard.html', 'admin/reset-password.html',
-    'faq.html', 'index.html#reviews', 'index.html?payment=success', 'products.html?session_id=fixture']) {
-    assert.equal(fixture({ url: 'https://pureform.test/' + route }).children.length, 0, route);
-  }
-});
-
-test('reduced motion, missing styles, inaccessible storage, hidden tabs and missing body fail open', () => {
-  for (const options of [{ reduced: true }, { styled: false }, { blockedStorage: true }, { hidden: true }, { body: false }]) {
-    const page = fixture(options);
-    assert.equal(page.children.length, 0);
-    assert.equal(page.timers.size, 0);
-  }
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.pf-intro-screen \{ display: none; \}/);
-});
-
-test('CSS exit and JavaScript timeout independently remove the intro and clean up listeners', () => {
-  for (const finish of [page => page.timers.get(1).fn(), page => page.children[0].events.animationend({ target: page.children[0], animationName: 'pf-intro-exit' })]) {
-    const page = fixture();
-    page.children[0].events.animationend({ target: {}, animationName: 'pf-intro-pink' });
-    assert.equal(page.children.length, 1);
-    finish(page);
-    assert.equal(page.children.length, 0);
-    assert.equal(page.timers.size, 0);
-    assert.equal(page.documentEvents.size, 0);
-    assert.equal(page.windowEvents.size, 0);
-    assert.equal(page.mediaEvents.size, 0);
-  }
-  assert.match(css, /animation: pf-intro-exit 700ms cubic-bezier\(\.76, 0, \.24, 1\) 2900ms forwards;/);
-  assert.match(css, /animation: pf-intro-drop 600ms cubic-bezier\(\.5, 0, \.9, \.4\) 2050ms forwards;/);
-  assert.match(css, /animation: pf-intro-title 650ms cubic-bezier\(\.22, 1, \.36, 1\) 2300ms both;/);
-  assert.match(css, /to \{ transform: translateY\(-100%\); visibility: hidden; \}/);
-  assert.doesNotMatch(css, /infinite|will-change|filter:|perspective|rotateY/);
-  assert.doesNotMatch(source, /document\.body\.style|scrollIntoView|scrollTo\(/);
-  assert.match(css, /pointer-events: none;/);
-});
-
-test('broken or slow photos skip the decoration instead of delaying the homepage', () => {
-  const slow = fixture({ photoReady: false });
-  slow.timers.get(2).fn();
-  assert.equal(slow.children.length, 0);
-  assert.equal(slow.timers.size, 0);
-  const broken = fixture();
-  broken.photos[0].events.error();
-  assert.equal(broken.children.length, 0);
-  assert.equal(broken.documentEvents.size, 0);
-  assert.equal(Object.keys(broken.photos[1].events).length, 0);
-  const ready = fixture();
-  ready.timers.get(2).fn();
-  assert.equal(ready.children.length, 1);
-});
-
-test('every color, including Black, participates in image readiness and error cleanup', () => {
-  for (const index of [0, 1, 2]) {
-    const slow = fixture();
-    slow.photos[index].complete = false;
-    slow.timers.get(2).fn();
-    assert.equal(slow.children.length, 0);
-    assert.ok(slow.photos.every(photo => Object.keys(photo.events).length === 0));
-    const broken = fixture();
-    broken.photos[index].events.error();
-    assert.equal(broken.children.length, 0);
-    assert.equal(broken.timers.size, 0);
-  }
-});
-
-test('interaction, tab hiding, page exit and motion preference changes dismiss immediately', () => {
-  const finishes = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'focusin'].map(type => page => page.documentEvents.get(type)());
-  finishes.push(page => { page.document.hidden = true; page.documentEvents.get('visibilitychange')(); });
-  finishes.push(page => page.windowEvents.get('pagehide')());
-  finishes.push(page => page.windowEvents.get('pageswap')());
-  finishes.push(page => { page.preference.matches = true; page.mediaEvents.get('change')(); });
-  finishes.forEach(finish => { const page = fixture(); finish(page); assert.equal(page.children.length, 0); assert.equal(page.timers.size, 0); });
-});
-
-test('only a loopback preview may replay and it still honors reduced motion and storage failure', () => {
-  assert.equal(fixture({ url: 'http://127.0.0.1:8081/index.html?preview=intro', seen: true, navigation: 'reload', painted: true }).children.length, 1);
-  assert.equal(fixture({ url: 'https://pureform.test/index.html?preview=intro', seen: true }).children.length, 0);
-  assert.equal(fixture({ url: 'http://localhost:8081/index.html?preview=intro', reduced: true }).children.length, 0);
-  assert.equal(fixture({ url: 'http://localhost:8081/index.html?preview=intro', blockedStorage: true }).children.length, 0);
-});
-
-test('intro stays lightweight, uses bounded photos and only the homepage loads its non-blocking script', () => {
-  assert.ok(Buffer.byteLength(source) < 8000);
-  assert.ok(Buffer.byteLength(css) < 6000);
-  assert.match(css, /object-fit: contain/);
-  assert.ok(['grey', 'black', 'pink'].reduce((total, color) => total + statSync(path.join(__dirname, '../assets/intro/' + color + '-set-600.webp')).size, 0) < 125000);
-  for (const file of ['index.html']) {
-    const html = read(file);
-    assert.equal((html.match(/src="assets\/pureform-intro\.js" defer>/g) || []).length, 1, file);
-    assert.match(html, /href="assets\/pureform-intro\.css"/);
-    assert.doesNotMatch(html, /pureform-intro\.js"[^>]*blocking=/);
-  }
-  for (const file of ['products.html', 'pureform-product-detail.html', 'about.html', 'reviews.html', 'policy.html', 'contact.html', 'cart.html', 'checkout.html', 'admin/index.html', 'admin/dashboard.html', 'admin/reset-password.html', 'faq.html']) {
+  assert.ok(html.indexOf('pf_intro_seen') < html.indexOf('<body'));
+  for (const file of ['products.html', 'pureform-product-detail.html', 'about.html', 'reviews.html',
+    'policy.html', 'contact.html', 'cart.html', 'checkout.html', 'admin/index.html', 'faq.html']) {
     assert.doesNotMatch(read(file), /pureform-intro/, file);
   }
+});
+
+function readTimeline() {
+  const instrumented = source.replace("  document.addEventListener('keydown', onKeydown);",
+    "  globalThis.timeline = { INTRO, distanceAt, travelFrames, layerFrames };\n  document.addEventListener('keydown', onKeydown);");
+  const context = {
+    document: { documentElement: { classList: { contains: () => true } }, addEventListener() {} },
+    window: { addEventListener() {} },
+    matchMedia: () => ({ addEventListener() {} }),
+    setTimeout() {}
+  };
+  vm.runInNewContext(instrumented, context);
+  return context.timeline;
+}
+
+test('all four studio entrances follow separate paths at their measured hero size and rotation', () => {
+  const { INTRO, travelFrames } = readTimeline();
+  const target = { x: 212, y: 287, width: 100, height: 160, halfBounds: [51, 81], rotation: -.4 };
+  for (const width of [390, 768, 1366, 1920]) {
+    const starts = new Set();
+    for (const part of INTRO.order) {
+      const frames = travelFrames(target, part, { width, height: 800 });
+      starts.add(frames[0].transform);
+      assert.equal(frames.at(-1).offset, 1);
+      assert.equal(frames.at(-1).transform, 'translate3d(162px,207px,0) rotate(-0.4deg)');
+      assert.ok(frames.every(frame => /^translate3d\(.+\) rotate\(-0\.4deg\)$/.test(frame.transform)));
+      assert.ok(frames.slice(1).every((frame, i) => frame.offset > frames[i].offset));
+    }
+    assert.equal(starts.size, INTRO.order.length);
+  }
+});
+
+test('the studio entrance timing slows between bursts and brakes at the handoff', () => {
+  const { distanceAt } = readTimeline();
+  const speedAt = time => distanceAt(time) - distanceAt(time - .01);
+  const turning = speedAt(.53);
+  assert.ok(turning > 0);
+  assert.ok(speedAt(.18) > turning * 3);
+  assert.ok(speedAt(.82) > turning * 3);
+  assert.ok(speedAt(1) < turning * .15);
+});
+
+test('the color wave uses existing assets, staggers, and finishes in Pink', () => {
+  const { INTRO, layerFrames } = readTimeline();
+  assert.equal(INTRO.colors.join(','), 'black,pink,grey');
+  assert.equal(INTRO.loadTimeout, 2500);
+  assert.ok(INTRO.revealAt < INTRO.whiteStart + INTRO.flightDuration);
+  const handoff = INTRO.whiteStart + INTRO.flightDuration + (INTRO.order.length - 1) * INTRO.stagger;
+  assert.ok(INTRO.revealAt + INTRO.backdropFade < handoff);
+  assert.ok(INTRO.titleOut + INTRO.titleFadeOut < handoff);
+  for (const color of INTRO.colors) {
+    for (const part of INTRO.order) {
+      assert.ok(existsSync(path.join(__dirname, '../assets/floating-scene', color + '-' + part + '.webp')));
+    }
+    const first = layerFrames(color, 0);
+    const last = layerFrames(color, 3);
+    assert.equal(first[0].opacity, Number(color === 'black'));
+    assert.equal(last.at(-1).opacity, Number(color === 'pink'));
+    assert.ok(last[1].offset > first[1].offset);
+  }
+  assert.doesNotMatch(source, /hue-rotate|style\.filter/);
 });

@@ -5,11 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Shop PureForm 4-piece silicone shower sets in Grey, Black and Pink. Tools for face, scalp, body and back care, with UAE delivery and secure card checkout in AED.">
   <title>PureForm - Silicone Shower Sets</title>
+  <script>
+    try {
+      const params = new URLSearchParams(location.search);
+      const navigation = performance.getEntriesByType('navigation')[0];
+      const forced = params.get('intro') === '1';
+      if (Element.prototype.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches &&
+          !document.hidden && !location.hash && !params.has('payment') && !params.has('session_id') &&
+          (forced || (!sessionStorage.getItem('pf_intro_seen') && (!navigation || navigation.type === 'navigate')))) {
+        sessionStorage.setItem('pf_intro_seen', '1');
+        document.documentElement.classList.add('pf-intro-active');
+      }
+    } catch (_) { /* A browser without storage can go directly to the hero. */ }
+  </script>
+  <script src="assets/pureform-intro.js?v=studio-film" onerror="document.documentElement.classList.remove('pf-intro-active')"></script>
+  <link rel="stylesheet" href="assets/pureform-intro.css?v=studio-film">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://res.cloudinary.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&display=swap" rel="stylesheet" media="(max-width: 700px)">
   <link rel="stylesheet" href="assets/pureform-pages.css">
   <link rel="stylesheet" href="assets/pureform-mobile-menu.css?v=store-review">
   <link rel="stylesheet" href="assets/pureform-buy-pay-button.css">
@@ -18,11 +34,9 @@
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
-  <link rel="stylesheet" href="assets/pureform-intro.css">
-  <script src="assets/pureform-intro.js" defer></script>
-  <link rel="stylesheet" href="assets/pureform-home.css?v=mobile-hero">
-  <link rel="stylesheet" href="assets/pureform-floating-scene.css?v=mobile-hero">
-  <link rel="stylesheet" href="assets/pureform-retail.css?v=compact-collections">
+  <link rel="stylesheet" href="assets/pureform-home.css?v=neutral-studio">
+  <link rel="stylesheet" href="assets/pureform-floating-scene.css?v=mobile-type">
+  <link rel="stylesheet" href="assets/pureform-retail.css?v=studio-backdrop">
 </head>
 <body class="home-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -49,23 +63,24 @@
     </div>
   </nav>
   <main id="main-content">
+    <div class="home-studio">
     <section class="home-hero" id="hero" aria-labelledby="heroTitle" data-floating-scene data-color="grey" data-motion="paused">
       <div class="home-hero-scene">
-        <div class="float-scene" data-float-stage role="img" aria-label="Grey four-piece shower set floating above a blush stone pedestal, framed by gently swaying leaves">
+        <div class="float-scene" data-float-stage role="img" aria-label="Grey four-piece shower set floating above a stone pedestal, framed by gently swaying leaves">
           <picture class="home-hero-backdrop">
-            <source media="(max-width: 700px)" srcset="assets/floating-scene/background.webp">
-            <img class="float-scene-background" src="assets/floating-scene/wide-background.webp" data-float-background-fallback="assets/floating-scene/wide-background.jpg" data-pf-no-fallback="true" alt="" width="2172" height="724" fetchpriority="high" decoding="async">
+            <source media="(max-width: 700px)" srcset="assets/floating-scene/background.webp" data-pf-image="hero-background-mobile">
+            <img class="float-scene-background" src="assets/floating-scene/wide-background.webp" data-float-background-fallback="assets/floating-scene/wide-background.jpg" data-pf-no-fallback="true" alt="" width="2172" height="724" fetchpriority="high" decoding="async" data-pf-image="hero-background">
           </picture>
           <div class="float-scene-artboard" aria-hidden="true">
             <div class="float-shadow float-shadow-body"></div><div class="float-shadow float-shadow-back"></div><div class="float-shadow float-shadow-face"></div>
-            <div class="float-part float-part-back" data-float-part="back"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-back.webp" alt="" width="341" height="613" decoding="async"></div>
-            <div class="float-part float-part-body" data-float-part="body"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-body.webp" alt="" width="180" height="238" decoding="async"></div>
-            <div class="float-part float-part-scalp" data-float-part="scalp"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-scalp.webp" alt="" width="212" height="177" decoding="async"></div>
-            <div class="float-part float-part-face" data-float-part="face"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-face.webp" alt="" width="144" height="132" decoding="async"></div>
+            <div class="float-part float-part-back" data-float-part="back"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-back.webp" alt="" width="341" height="613" decoding="async" data-pf-image="hero-grey-back"></div>
+            <div class="float-part float-part-body" data-float-part="body"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-body.webp" alt="" width="180" height="238" decoding="async" data-pf-image="hero-grey-body"></div>
+            <div class="float-part float-part-scalp" data-float-part="scalp"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-scalp.webp" alt="" width="212" height="177" decoding="async" data-pf-image="hero-grey-scalp"></div>
+            <div class="float-part float-part-face" data-float-part="face"><img class="float-color-layer is-visible" data-color-layer="grey" src="assets/floating-scene/grey-face.webp" alt="" width="144" height="132" decoding="async" data-pf-image="hero-grey-face"></div>
           </div>
           <div class="home-hero-leaf-anchor" aria-hidden="true">
             <div class="float-leaf-rig float-leaf-canopy"><div class="float-leaf-tip">
-              <svg class="home-hero-leaf-art" viewBox="0 0 620 380" focusable="false" aria-hidden="true"><image href="assets/floating-scene/leaves.webp" width="1620" height="971" transform="translate(620 0) scale(-1 1)"/></svg>
+              <svg class="home-hero-leaf-art" viewBox="0 0 620 380" focusable="false" aria-hidden="true"><image href="assets/floating-scene/leaves.webp" width="1620" height="971" transform="translate(620 0) scale(-1 1)" data-pf-image="hero-leaves"/></svg>
             </div></div>
           </div>
         </div>
@@ -114,45 +129,48 @@
     </section>
     <div class="home-promises" aria-label="Shopping essentials">
       <a href="policy.html#delivery">UAE delivery in 2&ndash;&#8288;3 working days</a>
-      <a href="checkout.html">Secure card checkout</a>
+      <a href="policy.html#faq-orders">Secure card checkout</a>
       <a href="contact.html">Customer support</a>
     </div>
-    <section class="home-section" id="products" aria-labelledby="productsTitle">
+    <section class="home-section home-collection-layout" id="products" aria-labelledby="productsTitle">
       <div class="home-section-head">
         <div><p class="eyebrow">The collection</p><h2 id="productsTitle">Choose your set.</h2></div>
         <p class="home-section-copy">The same four essentials in three colors. Each set has its own price and availability.</p>
       </div>
       <div class="pgrid" data-pf-catalog-grid="home" role="region" aria-label="Set colors" tabindex="0">
         <a class="pf-product-card pcard" href="pureform-product-detail.html?product=pureform-4pc-set-grey">
-          <div class="pf-reveal-media"><img src="assets/products/grey-main.webp" alt="Grey 4-piece silicone brush set" loading="lazy" width="700" height="700"></div>
+          <div class="pf-reveal-media"><img src="assets/products/grey-main.webp" alt="" loading="lazy" width="700" height="700"></div>
           <div class="pf-reveal-info"><h3 class="pf-reveal-name">Grey 4-Piece Silicone Brush Set</h3><p class="pf-reveal-price"><strong>AED 43.89</strong></p></div>
           <span class="pf-reveal-panel" aria-hidden="true"><span class="pf-reveal-shade">Grey · 4 tools</span><span class="pf-reveal-action">View set</span></span>
         </a>
         <a class="pf-product-card pcard" href="pureform-product-detail.html?product=pureform-4pc-set-black">
-          <div class="pf-reveal-media"><img src="assets/products/black-main.webp" alt="Black 4-piece silicone brush set" loading="lazy" width="700" height="700"></div>
+          <div class="pf-reveal-media"><img src="assets/products/black-main.webp" alt="" loading="lazy" width="700" height="700"></div>
           <div class="pf-reveal-info"><h3 class="pf-reveal-name">Black 4-Piece Silicone Brush Set</h3><p class="pf-reveal-price"><strong>AED 43.89</strong></p></div>
           <span class="pf-reveal-panel" aria-hidden="true"><span class="pf-reveal-shade">Black · 4 tools</span><span class="pf-reveal-action">View set</span></span>
         </a>
         <a class="pf-product-card pcard" href="pureform-product-detail.html?product=pureform-4pc-set-pink">
-          <div class="pf-reveal-media"><img src="assets/products/pink-main.webp" alt="Pink 4-piece silicone brush set" loading="lazy" width="700" height="700"></div>
+          <div class="pf-reveal-media"><img src="assets/products/pink-main.webp" alt="" loading="lazy" width="700" height="700"></div>
           <div class="pf-reveal-info"><h3 class="pf-reveal-name">Pink 4-Piece Silicone Brush Set</h3><p class="pf-reveal-price"><strong>AED 37.80</strong></p></div>
           <span class="pf-reveal-panel" aria-hidden="true"><span class="pf-reveal-shade">Pink · 4 tools</span><span class="pf-reveal-action">View set</span></span>
         </a>
       </div>
-      <aside class="pf-combo-card" data-pf-combo aria-label="Two-set combo" hidden></aside>
-      <p id="offers" class="home-hero-note">Current set offers are included in the prices shown.</p>
       <span id="colors"></span>
     </section>
+    </div>
+    <div class="home-section home-collection-layout home-collection-offer" id="offers">
+      <aside class="pf-combo-card" data-pf-combo aria-label="Two-set combo" hidden></aside>
+      <p class="home-hero-note">Current set offers are included in the prices shown.</p>
+    </div>
     <section class="home-section home-included" id="included" aria-labelledby="includedTitle">
       <div class="home-section-head">
         <div><p class="eyebrow">Inside every box</p><h2 id="includedTitle">A tool for every part of your routine.</h2></div>
         <p class="home-section-copy">Every color includes all four pieces. Keep delicate face care separate from your body routine.</p>
       </div>
       <div class="home-tools">
-        <div><div class="home-tool-media"><img src="assets/pureform-body-brush.webp" alt="Long-handled Grey silicone back scrubber" loading="lazy" decoding="async" width="400" height="400"></div><h3>Back scrubber</h3><p>A long handle for the places that are harder to reach.</p></div>
-        <div><div class="home-tool-media"><img src="assets/pureform-scalp-massager.webp" alt="Grey silicone body brush with hand strap" loading="lazy" decoding="async" width="400" height="400"></div><h3>Body brush</h3><p>Flexible bristles and a hand strap for everyday cleansing.</p></div>
-        <div><div class="home-tool-media"><img src="assets/pureform-face-brush.webp" alt="Grey silicone scalp massager" loading="lazy" decoding="async" width="400" height="400"></div><h3>Scalp massager</h3><p>A comfortable massage as you work in your shampoo.</p></div>
-        <div><div class="home-tool-media"><img src="assets/floating-scene/grey-face.webp" alt="Small hexagonal Grey silicone face brush" loading="lazy" decoding="async" width="144" height="132"></div><h3>Face brush</h3><p>A dedicated piece for your face-cleansing routine.</p></div>
+        <div><div class="home-tool-media"><img src="assets/pureform-body-brush.webp" alt="Long-handled Grey silicone back scrubber" loading="lazy" decoding="async" width="400" height="400" data-pf-image="home-tool-back"></div><h3>Back scrubber</h3><p>A long handle for the places that are harder to reach.</p></div>
+        <div><div class="home-tool-media"><img src="assets/pureform-scalp-massager.webp" alt="Grey silicone body brush with hand strap" loading="lazy" decoding="async" width="400" height="400" data-pf-image="home-tool-body"></div><h3>Body brush</h3><p>Flexible bristles and a hand strap for everyday cleansing.</p></div>
+        <div><div class="home-tool-media"><img src="assets/pureform-face-brush.webp" alt="Grey silicone scalp massager" loading="lazy" decoding="async" width="400" height="400" data-pf-image="home-tool-scalp"></div><h3>Scalp massager</h3><p>A comfortable massage as you work in your shampoo.</p></div>
+        <div><div class="home-tool-media"><img src="assets/floating-scene/grey-face.webp" alt="Small hexagonal Grey silicone face brush" loading="lazy" decoding="async" width="144" height="132" data-pf-image="home-tool-face"></div><h3>Face brush</h3><p>A dedicated piece for your face-cleansing routine.</p></div>
       </div>
       <p class="home-tools-note">Tools shown in Grey. Every set includes all four pieces in one color. <a href="pureform-product-detail.html?product=pureform-4pc-set-grey#productRoutine">Use &amp; care</a></p>
       <div class="home-benefits" id="features">
@@ -166,15 +184,15 @@
       <p class="home-lifestyle-scroll-hint">Swipe to see more photos</p>
       <div class="home-lifestyle-grid" role="group" aria-label="PureForm lifestyle images" tabindex="0">
         <figure class="home-lifestyle-shot">
-          <img src="assets/lifestyle/grey-vanity.webp" srcset="assets/lifestyle/grey-vanity-600.webp 600w, assets/lifestyle/grey-vanity.webp 1200w" sizes="(max-width: 760px) calc(100vw - 68px), (max-width: 1360px) calc((100vw - 128px) / 3), 411px" alt="Grey four-piece silicone brush set arranged beside a white bathroom basin" width="1200" height="1200" loading="lazy" decoding="async">
+          <img src="assets/lifestyle/grey-vanity.webp" srcset="assets/lifestyle/grey-vanity-600.webp 600w, assets/lifestyle/grey-vanity.webp 1200w" sizes="(max-width: 760px) calc(100vw - 68px), (max-width: 1360px) calc((100vw - 128px) / 3), 411px" alt="Grey four-piece silicone brush set arranged beside a white bathroom basin" width="1200" height="1200" loading="lazy" decoding="async" data-pf-image="lifestyle-vanity">
           <figcaption><a href="pureform-product-detail.html?product=pureform-4pc-set-grey">Four essentials. One set.</a></figcaption>
         </figure>
         <figure class="home-lifestyle-shot">
-          <img src="assets/lifestyle/grey-rinse.webp" srcset="assets/lifestyle/grey-rinse-600.webp 600w, assets/lifestyle/grey-rinse.webp 1200w" sizes="(max-width: 760px) calc(100vw - 68px), (max-width: 1360px) calc((100vw - 128px) / 3), 411px" alt="A hand rinsing the grey silicone body brush under a bathroom tap" width="1200" height="1200" loading="lazy" decoding="async">
+          <img src="assets/lifestyle/grey-rinse.webp" srcset="assets/lifestyle/grey-rinse-600.webp 600w, assets/lifestyle/grey-rinse.webp 1200w" sizes="(max-width: 760px) calc(100vw - 68px), (max-width: 1360px) calc((100vw - 128px) / 3), 411px" alt="A hand rinsing the grey silicone body brush under a bathroom tap" width="1200" height="1200" loading="lazy" decoding="async" data-pf-image="lifestyle-rinse">
           <figcaption><a href="pureform-product-detail.html?product=pureform-4pc-set-grey">A fresh start, every day.</a></figcaption>
         </figure>
         <figure class="home-lifestyle-shot">
-          <img src="assets/lifestyle/pink-shower.webp" srcset="assets/lifestyle/pink-shower-600.webp 600w, assets/lifestyle/pink-shower.webp 1200w" sizes="(max-width: 760px) calc(100vw - 68px), (max-width: 1360px) calc((100vw - 128px) / 3), 411px" alt="Pink four-piece silicone brush set resting on a white tiled shower shelf" width="1200" height="1200" loading="lazy" decoding="async">
+          <img src="assets/lifestyle/pink-shower.webp" srcset="assets/lifestyle/pink-shower-600.webp 600w, assets/lifestyle/pink-shower.webp 1200w" sizes="(max-width: 760px) calc(100vw - 68px), (max-width: 1360px) calc((100vw - 128px) / 3), 411px" alt="Pink four-piece silicone brush set resting on a white tiled shower shelf" width="1200" height="1200" loading="lazy" decoding="async" data-pf-image="lifestyle-pink">
           <figcaption><a href="pureform-product-detail.html?product=pureform-4pc-set-pink">Your shower, in Pink.</a></figcaption>
         </figure>
       </div>
@@ -184,25 +202,25 @@
       <div class="home-section-head"><div><p class="eyebrow">Customer notes</p><h2 id="reviewsTitle">Customer reviews</h2></div><a class="home-text-link" href="reviews.html">Read all reviews</a></div>
       <div class="home-review-grid" role="group" aria-label="Featured customer photo reviews">
         <figure class="home-review">
-          <img class="home-review-photo" src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_480/v1780243836/b49922d6-d5cd-4254-b166-be53bd47132e_675x1200_tspgdx.avif" data-pf-fallback="assets/reviews/mariam.jpg" alt="Customer photo for Mariam A. PureForm review" width="675" height="1200" loading="lazy" decoding="async">
+          <img class="home-review-photo" src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_480/v1780243836/b49922d6-d5cd-4254-b166-be53bd47132e_675x1200_tspgdx.avif" data-pf-fallback="assets/reviews/mariam.jpg" alt="Customer photo for Mariam A. PureForm review" width="675" height="1200" loading="lazy" decoding="async" data-pf-image="review-1">
           <div class="home-review-rating" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
           <blockquote>The long handle makes the back brush useful every day. It rinses quickly and feels cleaner than my old sponge.</blockquote>
           <figcaption><cite>Mariam A. &middot; Dubai, UAE</cite></figcaption>
         </figure>
         <figure class="home-review">
-          <img class="home-review-photo" src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_480/v1780243837/8bee4d53-eb50-45e4-902f-f91f232f7588_svrxkv.avif" data-pf-fallback="assets/reviews/sara.jpg" alt="Customer photo for Sara J. PureForm review" width="675" height="1200" loading="lazy" decoding="async">
+          <img class="home-review-photo" src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_480/v1780243837/8bee4d53-eb50-45e4-902f-f91f232f7588_svrxkv.avif" data-pf-fallback="assets/reviews/sara.jpg" alt="Customer photo for Sara J. PureForm review" width="675" height="1200" loading="lazy" decoding="async" data-pf-image="review-2">
           <div class="home-review-rating" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
           <blockquote>The silicone bristles are gentle but still effective. The face brush and body brush are the pieces I use most.</blockquote>
           <figcaption><cite>Sara J. &middot; London, UK</cite></figcaption>
         </figure>
         <figure class="home-review">
-          <img class="home-review-photo" src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_480/v1780243837/4925d2f8-b8b1-43c6-9189-79b093734edc_675x1200_lltijt.avif" data-pf-fallback="assets/reviews/priya.jpg" alt="Customer photo for Priya S. PureForm review" width="675" height="1200" loading="lazy" decoding="async">
+          <img class="home-review-photo" src="https://res.cloudinary.com/dqjilscgl/image/upload/f_auto,q_auto,w_480/v1780243837/4925d2f8-b8b1-43c6-9189-79b093734edc_675x1200_lltijt.avif" data-pf-fallback="assets/reviews/priya.jpg" alt="Customer photo for Priya S. PureForm review" width="675" height="1200" loading="lazy" decoding="async" data-pf-image="review-3">
           <div class="home-review-rating" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
           <blockquote>I like that each brush has a clear job. The scalp massager is relaxing and the set dries fast after use.</blockquote>
           <figcaption><cite>Priya S. &middot; Mumbai, India</cite></figcaption>
         </figure>
         <figure class="home-review">
-          <img class="home-review-photo" src="assets/reviews/gift-set.webp" alt="Customer photo for the PureForm gift set review" width="480" height="640" loading="lazy" decoding="async">
+          <img class="home-review-photo" src="assets/reviews/gift-set.webp" alt="Customer photo for the PureForm gift set review" width="480" height="640" loading="lazy" decoding="async" data-pf-image="review-4">
           <div class="home-review-rating" role="img" aria-label="4 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span></div>
           <blockquote>The pieces look premium together, so I ordered a second set as a practical gift.</blockquote>
           <figcaption>&ldquo;Good gift set.&rdquo;</figcaption>
@@ -231,10 +249,12 @@
     </div>
   </footer>
   <script src="assets/pureform-supabase-config.js"></script>
-  <script src="assets/pureform-public-catalog.js?v=store-review"></script>
+  <script src="assets/pureform-site-images.js"></script>
+  <script src="assets/pureform-image-overrides.js" defer></script>
+  <script src="assets/pureform-public-catalog.js?v=storefront-audit"></script>
   <script src="assets/pureform-cart.js"></script>
   <script src="assets/pureform-combo.js" defer></script>
   <script src="assets/pureform-store-flow.js" defer></script>
-  <script src="assets/pureform-floating-scene.js" defer></script>
+  <script src="assets/pureform-floating-scene.js?v=neutral-studio" defer></script>
 </body>
 </html>

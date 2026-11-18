@@ -6,6 +6,41 @@ body.home-page {
   padding-top: 0;
 }
 
+.home-studio {
+  isolation: isolate;
+  background: linear-gradient(160deg, #e1e1e1 0%, #f0f0f0 60%, #f7f7f7 100%);
+}
+
+.home-studio .home-hero,
+.home-studio .home-promises {
+  background: transparent;
+}
+
+.home-studio .home-promises {
+  position: relative;
+  border-color: rgba(0, 0, 0, .12);
+}
+
+.home-studio .home-promises a + a {
+  border-color: rgba(0, 0, 0, .12);
+}
+
+.home-studio .home-collection-layout {
+  padding-block-end: clamp(20px, 3vw, 36px);
+}
+
+.home-page .home-collection-offer {
+  padding-block: 24px;
+}
+
+.home-collection-offer > .pf-combo-card {
+  margin-top: 0;
+}
+
+.home-collection-offer > .pf-combo-card[hidden] + .home-hero-note {
+  margin-top: 0;
+}
+
 .home-page :is(h1, h2, h3, p, a, button) {
   letter-spacing: 0;
 }
@@ -808,6 +843,10 @@ body.home-page {
 
   .home-section {
     padding: 36px 20px;
+  }
+
+  .home-page .home-collection-offer:has(> .pf-combo-card[hidden]) {
+    display: none;
   }
 
   .home-section-head {

@@ -1,162 +1,181 @@
 :root { --pf-intro-ready: 1; }
 
-.pf-intro-screen {
-  --pf-intro-photo: min(28vw, 340px, calc((100svh - 144px) / var(--pf-intro-zoom)));
-  --pf-intro-gap: 24px;
-  --pf-intro-zoom: 2.1;
-  --pf-intro-grey-x: calc(-150% - var(--pf-intro-gap));
-  --pf-intro-grey-y: -50%;
-  --pf-intro-black-x: -50%;
-  --pf-intro-black-y: -50%;
-  --pf-intro-pink-x: calc(50% + var(--pf-intro-gap));
-  --pf-intro-pink-y: -50%;
+html.pf-intro-active {
+  overflow: hidden;
+  overscroll-behavior: none;
+  scrollbar-gutter: stable;
+}
+
+html.pf-intro-active:not(.pf-intro-mounted)::before,
+.pf-intro-overlay {
   position: fixed;
   inset: 0;
-  z-index: 10000;
-  display: none;
-  overflow: hidden;
+  width: 100vw;
+  z-index: 2147483647;
+}
+
+html.pf-intro-active:not(.pf-intro-mounted)::before {
   background: #fff;
-  color: #111;
+  content: '';
+}
+
+.pf-intro-active #hero .float-part { visibility: hidden; }
+.pf-intro-active #hero .float-color-layer { transition: none; }
+
+.pf-intro-active .site-header,
+.pf-intro-active #hero :is(.home-hero-content .eyebrow, h1, .home-hero-copy, .home-hero-purchase, .float-controls, .float-motion-button) {
+  opacity: 0;
+}
+
+.pf-intro-overlay {
+  overflow: clip;
+  touch-action: none;
+}
+
+.pf-intro-stage,
+.pf-intro-backdrop {
+  position: absolute;
+  inset: 0;
   pointer-events: none;
 }
 
-.pf-intro-label,
-.pf-intro-note {
-  position: absolute;
-  left: 20px;
-  right: 20px;
-  margin: 0;
-  color: #666660;
-  text-align: center;
-  font: 400 13px/1.6 var(--sans, 'Open Sans', Arial, sans-serif);
-  letter-spacing: 0;
+.pf-intro-backdrop {
+  overflow: clip;
+  background: radial-gradient(ellipse at 57% 38%, #fcf6f2 6%, transparent 68%),
+    linear-gradient(115deg, #faf7f4 0%, #f1e4e4 58%, #e1ced1 100%);
+  will-change: opacity;
 }
 
-.pf-intro-label { top: 28px; }
-.pf-intro-note { bottom: 24px; font-size: 12px; }
-.pf-intro-stage { position: absolute; inset: 0; }
-
-.pf-intro-shot {
+.pf-intro-backdrop::before {
+  content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: var(--pf-intro-photo);
-  margin: 0;
-  transform: translate(-50%, -50%);
+  inset: 7% 17% 9% 32%;
+  border: 1px solid #fff9;
+  border-radius: 50% 50% 8% 8% / 58% 58% 8% 8%;
+  background: linear-gradient(155deg, #fff5, #fff0 70%);
+  box-shadow: 0 18px 75px #92646f12;
 }
 
-.pf-intro-shot img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1;
-  object-fit: contain;
-  border: 1px solid #e8e9e6;
-  border-radius: 8px;
-}
-
-.pf-intro-shot figcaption {
+.pf-intro-light {
   position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: 14px;
-  color: #666660;
-  text-align: center;
-  font: 400 13px/1.6 var(--sans, 'Open Sans', Arial, sans-serif);
+  inset: -16%;
+  background: linear-gradient(110deg, transparent 34%, #fffbf1a8 47%, #fff9ee7a 51%, transparent 64%);
+  opacity: 0;
+  will-change: transform, opacity;
 }
 
 .pf-intro-title {
   position: absolute;
-  inset: 0;
+  z-index: 1;
+  top: 48%;
+  left: clamp(24px, 6.4vw, 128px);
   display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 16px;
-  padding: 24px;
-  text-align: center;
+  justify-items: start;
+  translate: 0 -50%;
+  color: #211a1c;
+  opacity: 0;
+  will-change: transform, opacity;
 }
 
 .pf-intro-wordmark {
-  font: 400 56px/1.2 var(--heading, 'Montserrat', Arial, sans-serif);
-  letter-spacing: 0;
+  margin-bottom: clamp(24px, 4vw, 52px);
+  font: 500 clamp(18px, 2vw, 27px)/1.1 var(--heading, Montserrat, sans-serif);
 }
 
-.pf-intro-tagline {
-  margin: 0;
-  color: #666660;
-  font: 400 15px/1.6 var(--sans, 'Open Sans', Arial, sans-serif);
+.pf-intro-kicker,
+.pf-intro-index {
+  font: 600 10px/1.4 var(--sans, 'Open Sans', sans-serif);
+  letter-spacing: .16em;
+  text-transform: uppercase;
 }
 
-@keyframes pf-intro-exit {
-  from { transform: translateY(0); visibility: visible; }
-  to { transform: translateY(-100%); visibility: hidden; }
+.pf-intro-kicker { color: #644954; }
+
+.pf-intro-title strong {
+  margin: 14px 0 20px;
+  font: 500 clamp(34px, 4.2vw, 66px)/1.02 var(--heading, Montserrat, sans-serif);
+  letter-spacing: -.055em;
 }
 
-@keyframes pf-intro-caption {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+.pf-intro-title em { color: #644954; }
+
+.pf-intro-index {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #92646f50;
+  color: #51454a;
 }
 
-@keyframes pf-intro-grey {
-  0%, 24% { transform: translate(-50%, -50%) scale(var(--pf-intro-zoom)); }
-  100% { transform: translate(var(--pf-intro-grey-x), var(--pf-intro-grey-y)) scale(1); }
+.pf-intro-index i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #977985;
 }
 
-@keyframes pf-intro-pink {
-  from { opacity: 0; transform: translate(100vw, var(--pf-intro-pink-y)); }
-  to { opacity: 1; transform: translate(var(--pf-intro-pink-x), var(--pf-intro-pink-y)); }
+@media (max-width: 1000px) {
+  .pf-intro-backdrop::before { inset: 7% 5% 26%; }
+  .pf-intro-title { top: auto; bottom: max(68px, 9svh); translate: none; }
+  .pf-intro-title strong { font-size: clamp(32px, 6vw, 52px); }
+  .pf-intro-wordmark { margin-bottom: 17px; }
 }
 
-@keyframes pf-intro-black {
-  from { opacity: 0; transform: translate(100vw, var(--pf-intro-black-y)); }
-  to { opacity: 1; transform: translate(var(--pf-intro-black-x), var(--pf-intro-black-y)); }
+@media (max-width: 1000px) and (max-height: 700px) {
+  .pf-intro-title { bottom: 20px; }
+  .pf-intro-wordmark, .pf-intro-index { display: none; }
+  .pf-intro-title strong { margin: 8px 0 0; }
 }
 
-@keyframes pf-intro-drop {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(100vh); }
+@media (max-width: 1000px) and (max-height: 700px) and (orientation: landscape) {
+  .pf-intro-title { top: 24px; bottom: auto; }
+  .pf-intro-title strong { font-size: clamp(24px, 4vw, 40px); }
 }
 
-@keyframes pf-intro-title {
-  from { opacity: 0; transform: translateY(28px) scale(.94); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+.pf-intro-piece {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  isolation: isolate;
+  will-change: transform, opacity;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .pf-intro-screen { display: block; animation: pf-intro-exit 700ms cubic-bezier(.76, 0, .24, 1) 2900ms forwards; }
-  .pf-intro-grey { animation: pf-intro-grey 1250ms cubic-bezier(.22, 1, .36, 1) both; }
-  .pf-intro-black { animation: pf-intro-black 750ms cubic-bezier(.22, 1, .36, 1) 500ms both; }
-  .pf-intro-pink { animation: pf-intro-pink 750ms cubic-bezier(.22, 1, .36, 1) 750ms both; }
-  .pf-intro-stage { animation: pf-intro-drop 600ms cubic-bezier(.5, 0, .9, .4) 2050ms forwards; }
-  .pf-intro-shot figcaption { animation: pf-intro-caption 300ms ease-out 1050ms both; }
-  .pf-intro-title { animation: pf-intro-title 650ms cubic-bezier(.22, 1, .36, 1) 2300ms both; }
+.pf-intro-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  mix-blend-mode: plus-lighter;
+  will-change: opacity;
 }
 
-@media (max-width: 480px) {
-  .pf-intro-screen { --pf-intro-gap: 16px; }
-  .pf-intro-wordmark { font-size: 38px; }
-  .pf-intro-shot figcaption { font-size: 12px; }
-  .pf-intro-tagline { max-width: 240px; font-size: 14px; }
+.pf-intro-mask {
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
 }
 
-@media (max-width: 600px) and (orientation: portrait) {
-  .pf-intro-screen {
-    --pf-intro-photo: min(42vw, 220px, calc((100svh - 240px) / 2));
-    --pf-intro-zoom: 2;
-    --pf-intro-grey-x: calc(-100% - 8px);
-    --pf-intro-grey-y: calc(-100% - 24px);
-    --pf-intro-black-x: 8px;
-    --pf-intro-black-y: calc(-100% - 24px);
-    --pf-intro-pink-x: -50%;
-    --pf-intro-pink-y: 24px;
-  }
+.pf-intro-skip {
+  position: absolute;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  min-width: 54px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid #dddcd7;
+  border-radius: 999px;
+  background: #fff;
+  color: #333;
+  font: 500 13px/1.2 var(--sans, Arial, sans-serif);
+  cursor: pointer;
 }
 
-@media (max-height: 500px) and (orientation: landscape) {
-  .pf-intro-screen { --pf-intro-zoom: 1.45; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pf-intro-screen { display: none; }
+.pf-intro-skip:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
 }
