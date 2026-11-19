@@ -36,7 +36,7 @@
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
   <link rel="stylesheet" href="assets/pureform-home.css?v=neutral-studio">
   <link rel="stylesheet" href="assets/pureform-floating-scene.css?v=mobile-type">
-  <link rel="stylesheet" href="assets/pureform-retail.css?v=studio-backdrop">
+  <link rel="stylesheet" href="assets/pureform-retail.css?v=mobile-card-grid">
   <link rel="stylesheet" href="assets/pureform-parallax.css?v=grounded-shadows">
 </head>
 <body class="home-page">
@@ -141,21 +141,21 @@
         <p class="home-section-copy">The same four essentials in three colors. Each set has its own price and availability.</p>
       </div>
       <div class="pgrid" data-pf-catalog-grid="home" role="region" aria-label="Set colors" tabindex="0">
-        <a class="pf-product-card pcard" href="pureform-product-detail.html?product=pureform-4pc-set-grey">
-          <div class="pf-reveal-media"><img src="assets/products/grey-main.webp" alt="" loading="lazy" width="700" height="700"></div>
-          <div class="pf-reveal-info"><h3 class="pf-reveal-name">Grey 4-Piece Silicone Brush Set</h3><p class="pf-reveal-price"><strong>AED 43.89</strong></p></div>
-          <span class="pf-reveal-panel" aria-hidden="true"><span class="pf-reveal-shade">Grey · 4 tools</span><span class="pf-reveal-action">View set</span></span>
-        </a>
-        <a class="pf-product-card pcard" href="pureform-product-detail.html?product=pureform-4pc-set-black">
-          <div class="pf-reveal-media"><img src="assets/products/black-main.webp" alt="" loading="lazy" width="700" height="700"></div>
-          <div class="pf-reveal-info"><h3 class="pf-reveal-name">Black 4-Piece Silicone Brush Set</h3><p class="pf-reveal-price"><strong>AED 43.89</strong></p></div>
-          <span class="pf-reveal-panel" aria-hidden="true"><span class="pf-reveal-shade">Black · 4 tools</span><span class="pf-reveal-action">View set</span></span>
-        </a>
-        <a class="pf-product-card pcard" href="pureform-product-detail.html?product=pureform-4pc-set-pink">
-          <div class="pf-reveal-media"><img src="assets/products/pink-main.webp" alt="" loading="lazy" width="700" height="700"></div>
-          <div class="pf-reveal-info"><h3 class="pf-reveal-name">Pink 4-Piece Silicone Brush Set</h3><p class="pf-reveal-price"><strong>AED 37.80</strong></p></div>
-          <span class="pf-reveal-panel" aria-hidden="true"><span class="pf-reveal-shade">Pink · 4 tools</span><span class="pf-reveal-action">View set</span></span>
-        </a>
+        <article class="pf-product-card pcard" aria-labelledby="listing-home-pureform-4pc-set-grey">
+          <div class="pf-listing-media"><img src="assets/products/grey-main.webp" alt="" loading="lazy" width="700" height="700"></div>
+          <div class="pf-listing-info"><h3 class="pf-listing-name" id="listing-home-pureform-4pc-set-grey"><a class="pf-listing-link" href="pureform-product-detail.html?product=pureform-4pc-set-grey">Grey 4-Piece Silicone Brush Set</a></h3><p class="pf-listing-price"><strong>AED 43.89</strong></p></div>
+          <footer class="pf-listing-footer"><a class="pf-listing-view" href="pureform-product-detail.html?product=pureform-4pc-set-grey" aria-label="View set: Grey 4-Piece Silicone Brush Set">View set</a></footer>
+        </article>
+        <article class="pf-product-card pcard" aria-labelledby="listing-home-pureform-4pc-set-black">
+          <div class="pf-listing-media"><img src="assets/products/black-main.webp" alt="" loading="lazy" width="700" height="700"></div>
+          <div class="pf-listing-info"><h3 class="pf-listing-name" id="listing-home-pureform-4pc-set-black"><a class="pf-listing-link" href="pureform-product-detail.html?product=pureform-4pc-set-black">Black 4-Piece Silicone Brush Set</a></h3><p class="pf-listing-price"><strong>AED 43.89</strong></p></div>
+          <footer class="pf-listing-footer"><a class="pf-listing-view" href="pureform-product-detail.html?product=pureform-4pc-set-black" aria-label="View set: Black 4-Piece Silicone Brush Set">View set</a></footer>
+        </article>
+        <article class="pf-product-card pcard" aria-labelledby="listing-home-pureform-4pc-set-pink">
+          <div class="pf-listing-media"><img src="assets/products/pink-main.webp" alt="" loading="lazy" width="700" height="700"></div>
+          <div class="pf-listing-info"><h3 class="pf-listing-name" id="listing-home-pureform-4pc-set-pink"><a class="pf-listing-link" href="pureform-product-detail.html?product=pureform-4pc-set-pink">Pink 4-Piece Silicone Brush Set</a></h3><p class="pf-listing-price"><strong>AED 37.80</strong></p></div>
+          <footer class="pf-listing-footer"><a class="pf-listing-view" href="pureform-product-detail.html?product=pureform-4pc-set-pink" aria-label="View set: Pink 4-Piece Silicone Brush Set">View set</a></footer>
+        </article>
       </div>
       <span id="colors"></span>
     </section>
@@ -254,7 +254,7 @@
   <script src="assets/pureform-supabase-config.js"></script>
   <script src="assets/pureform-site-images.js"></script>
   <script src="assets/pureform-image-overrides.js" defer></script>
-  <script src="assets/pureform-public-catalog.js?v=storefront-audit"></script>
+  <script src="assets/pureform-public-catalog.js?v=listing-cards"></script>
   <script src="assets/pureform-cart.js"></script>
   <script src="assets/pureform-combo.js" defer></script>
   <script src="assets/pureform-store-flow.js" defer></script>

@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="assets/pureform-page-transitions.css">
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
-  <link rel="stylesheet" href="assets/pureform-retail.css?v=storefront-audit">
+  <link rel="stylesheet" href="assets/pureform-retail.css?v=checkout-review">
 </head>
 
 <body class="retail-page">
@@ -30,7 +30,7 @@
 
   <main id="main-content" class="checkout-page">
     <nav class="retail-breadcrumb" aria-label="Breadcrumb"><ol><li><a href="index.html">Home</a></li><li><a href="cart.html">Cart</a></li><li aria-current="page">Checkout</li></ol></nav>
-    <header class="retail-heading retail-wrap"><h1 id="checkoutTitle">Checkout</h1><p id="checkoutInstructions" hidden>Enter your UAE delivery details. Card payment is completed securely with Stripe.</p></header>
+    <header class="retail-heading retail-wrap"><h1 id="checkoutTitle">Checkout</h1><p id="checkoutInstructions" hidden>No account needed. Add your delivery details, then review before secure card payment.</p></header>
     <section class="checkout-unavailable retail-wrap" id="checkoutEmpty" aria-labelledby="checkoutEmptyTitle" hidden>
       <h2 id="checkoutEmptyTitle">Your cart is empty.</h2>
       <p>Choose a shower set to start checkout.</p>
@@ -38,11 +38,12 @@
     </section>
     <div class="checkout-unavailable retail-wrap" id="checkoutPaymentFeedback" hidden></div>
     <noscript><p class="checkout-unavailable retail-wrap">Enable JavaScript to use checkout, or <a href="contact.html">contact PureForm</a> for help.</p></noscript>
-    <ol class="retail-steps retail-wrap" id="checkoutSteps" aria-label="Order progress" hidden><li><a href="cart.html"><span class="retail-step-number" aria-hidden="true">1</span>Cart</a></li><li aria-current="step"><span class="retail-step-number" aria-hidden="true">2</span>Delivery</li><li><span class="retail-step-number" aria-hidden="true">3</span>Card payment</li></ol>
+    <ol class="retail-steps retail-wrap" id="checkoutSteps" aria-label="Order progress" hidden><li><a href="cart.html"><span class="retail-step-number" aria-hidden="true">1</span>Cart</a></li><li id="checkoutDeliveryProgress" aria-current="step"><span class="retail-step-number" aria-hidden="true">2</span>Delivery</li><li id="checkoutPaymentProgress"><span class="retail-step-number" aria-hidden="true">3</span>Card payment</li></ol>
     <div class="checkout-shell" id="checkoutShell" hidden>
       <section class="checkout-panel" aria-labelledby="checkoutTitle">
 
         <form class="checkout-form" id="checkoutForm" method="post">
+          <div class="checkout-stage" id="checkoutDelivery">
           <section class="checkout-step" aria-labelledby="contactTitle">
             <div class="checkout-step-title">
               <h2 id="contactTitle">Contact</h2>
@@ -86,7 +87,7 @@
                 <input id="checkout-address" name="address" type="text" autocomplete="street-address" placeholder="Street, building, villa, or landmark" required>
               </div>
               <div class="checkout-field">
-                <label for="checkout-apartment">Apartment, suite, etc.</label>
+                <label for="checkout-apartment">Apartment or villa number (optional)</label>
                 <input id="checkout-apartment" name="apartment" type="text" autocomplete="address-line2" placeholder="Optional">
               </div>
               <div class="checkout-form-row">
@@ -118,6 +119,28 @@
             <div class="checkout-shipping-method" id="shippingMethod">Estimated UAE delivery: 2&ndash;3 working days. Free delivery with 2+ sets. One set: AED 10.</div>
           </section>
 
+          <details class="checkout-notes">
+            <summary>Add delivery instructions (optional)</summary>
+            <div class="checkout-field">
+              <label for="checkout-notes">Delivery instructions</label>
+              <textarea id="checkout-notes" name="notes" placeholder="Landmark, delivery timing, or directions for the courier"></textarea>
+            </div>
+          </details>
+          </div>
+
+          <div class="checkout-stage" id="checkoutReview" hidden>
+          <section class="checkout-step" aria-labelledby="checkoutReviewTitle">
+            <div class="checkout-step-title">
+              <h2 id="checkoutReviewTitle" tabindex="-1">Review your delivery</h2>
+              <button class="checkout-edit" id="checkoutEditDelivery" type="button">Edit details</button>
+            </div>
+            <dl class="checkout-delivery-review">
+              <div><dt>Contact</dt><dd id="checkoutReviewContact"></dd></div>
+              <div><dt>Deliver to</dt><dd id="checkoutReviewAddress"></dd></div>
+              <div><dt>Delivery</dt><dd id="checkoutReviewShipping"></dd></div>
+              <div id="checkoutReviewNotesRow" hidden><dt>Instructions</dt><dd id="checkoutReviewNotes"></dd></div>
+            </dl>
+          </section>
           <section class="checkout-step" aria-labelledby="paymentTitle">
             <div class="checkout-step-title">
               <h2 id="paymentTitle">Payment</h2>
@@ -126,25 +149,18 @@
               <div class="checkout-payment-option is-selected">
                 <span class="checkout-payment-mark" aria-hidden="true"></span>
                 <div class="checkout-payment-copy">
-                  <strong>Secure card checkout</strong>
-                  <span>Cards are processed by the hosted payment gateway. PureForm never stores card numbers or security codes.</span>
+                  <strong>Credit or debit card</strong>
+                  <span>Enter your card details securely on Stripe in the next step. PureForm never stores your card number or security code.</span>
                 </div>
               </div>
             </div>
           </section>
-
-          <section class="checkout-step" aria-labelledby="notesTitle">
-            <div class="checkout-step-title">
-              <h2 id="notesTitle">Order notes</h2>
-            </div>
-            <div class="checkout-field">
-              <label for="checkout-notes">Notes</label>
-              <textarea id="checkout-notes" name="notes" placeholder="Delivery timing, landmark, or other delivery instructions"></textarea>
-            </div>
-          </section>
+          <div class="checkout-review-total"><span>Total including delivery</span><strong id="checkoutReviewTotal">AED 0.00</strong></div>
+          <p class="checkout-review-note">Discount codes are checked before opening payment. Review the final amount on Stripe before you pay.</p>
+          </div>
 
           <div class="checkout-actions">
-            <button class="btn-p Btn buy-pay-button" type="submit" id="checkoutSubmit" disabled><span>Continue to secure card payment</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
+            <button class="btn-p Btn buy-pay-button" type="submit" id="checkoutSubmit" disabled><span id="checkoutSubmitLabel">Continue to payment</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></button>
             <p class="checkout-status" id="checkoutStatus" aria-live="polite"></p>
             <button class="btn-s" type="button" id="checkoutVerifyPayment" hidden>Check payment again</button>
           </div>
@@ -213,6 +229,12 @@
       var checkoutInstructions = document.getElementById('checkoutInstructions');
       var checkoutSteps = document.getElementById('checkoutSteps');
       var checkoutShell = document.getElementById('checkoutShell');
+      var deliveryStage = document.getElementById('checkoutDelivery');
+      var reviewStage = document.getElementById('checkoutReview');
+      var editDelivery = document.getElementById('checkoutEditDelivery');
+      var submitLabel = document.getElementById('checkoutSubmitLabel');
+      var reviewing = false;
+      var reviewedFingerprint = '';
       var stockWarning = 'Some quantities are no longer available. Update your cart before checkout.';
       var pendingCheckoutKey = 'pureform.checkout.v1';
 
@@ -256,6 +278,44 @@
       function hasUnavailableItems() {
         return cart.getLineItems().some(isItemUnavailable);
       }
+
+      function checkoutFingerprint() {
+        return JSON.stringify({ order: buildOrderPayload(new FormData(form)), total: cart.getTotal() });
+      }
+
+      function setReview(show, moveFocus) {
+        reviewing = show;
+        deliveryStage.hidden = show;
+        reviewStage.hidden = !show;
+        submitLabel.textContent = show ? 'Continue to secure card payment' : 'Continue to payment';
+        var deliveryProgress = document.getElementById('checkoutDeliveryProgress');
+        var paymentProgress = document.getElementById('checkoutPaymentProgress');
+        (show ? deliveryProgress : paymentProgress).removeAttribute('aria-current');
+        (show ? paymentProgress : deliveryProgress).setAttribute('aria-current', 'step');
+        if (show) {
+          var payload = buildOrderPayload(new FormData(form));
+          document.getElementById('checkoutReviewContact').textContent = [payload.first_name + ' ' + payload.last_name, payload.contact, payload.phone].join('\n');
+          document.getElementById('checkoutReviewAddress').textContent = [payload.address, payload.apartment, payload.city, payload.emirate, payload.country].filter(Boolean).join(', ');
+          document.getElementById('checkoutReviewShipping').textContent = shippingMethod.textContent;
+          document.getElementById('checkoutReviewNotesRow').hidden = !payload.customer_notes;
+          document.getElementById('checkoutReviewNotes').textContent = payload.customer_notes;
+          reviewedFingerprint = checkoutFingerprint();
+        } else {
+          reviewedFingerprint = '';
+        }
+        if (moveFocus) {
+          document.getElementById(show ? 'checkoutReviewTitle' : 'checkout-contact').focus();
+        }
+      }
+
+      editDelivery.addEventListener('click', function () {
+        if (checkoutBusy) return;
+        setReview(false, true);
+        setStatus('');
+      });
+      form.addEventListener('invalid', function () {
+        if (reviewing) setReview(false, false);
+      }, true);
 
       function renderSummary() {
         var items = cart.getLineItems();
@@ -329,6 +389,11 @@
         subtotalNode.textContent = cart.formatAED(subtotal);
         totalNode.textContent = cart.formatAED(total);
         mobileTotalNode.textContent = cart.formatAED(total);
+        document.getElementById('checkoutReviewTotal').textContent = cart.formatAED(total);
+        if (reviewing && !checkoutBusy && reviewedFingerprint !== checkoutFingerprint()) {
+          setReview(false, true);
+          setStatus('Your order changed. Review the updated details before payment.');
+        }
       }
 
       function updateShippingCopy() {
@@ -504,10 +569,17 @@
           return;
         }
 
+        if (!reviewing || reviewedFingerprint !== checkoutFingerprint()) {
+          setReview(true, true);
+          setStatus('');
+          return;
+        }
+
         data = new FormData(form);
         payload = buildOrderPayload(data);
         checkoutBusy = true;
         submitButton.disabled = true;
+        editDelivery.disabled = true;
         submitButton.setAttribute('aria-disabled', 'true');
         setStatus('Opening secure card checkout...', 'neutral');
 
@@ -517,6 +589,7 @@
           window.location.assign(session.checkout_url);
         } catch (error) {
           checkoutBusy = false;
+          editDelivery.disabled = false;
           renderSummary();
           setStatus((error && error.message ? error.message : 'Secure card checkout could not be started.') + ' No card details were collected.', 'error');
         }
@@ -583,12 +656,13 @@
       window.addEventListener('pureform:cart-change', renderSummary);
       window.addEventListener('pureform:catalog-ready', renderSummary);
       verifyButton.addEventListener('click', handlePaymentReturn);
+      setReview(false, false);
       handlePaymentReturn();
       updateShippingCopy();
       renderSummary();
     })();
   </script>
-  <script src="assets/pureform-store-flow.js" defer></script>
+  <script src="assets/pureform-store-flow.js?v=checkout-review" defer></script>
   <script src="assets/pureform-scroll.js" defer></script>
 </body>
 

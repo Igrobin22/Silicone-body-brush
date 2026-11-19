@@ -40,6 +40,7 @@ function element(tagName = 'div') {
       }) || null;
     },
     checkValidity() { return true; },
+    focus() { this.focused = true; },
     reset() { this.resets = (this.resets || 0) + 1; }
   };
 }
@@ -54,6 +55,7 @@ function fixture({ search = '', fetch = async () => ({ ok: true, json: async () 
   const setupCalls = [];
   const redirects = [];
   const history = [];
+  const formValues = { contact: 'shopper@example.test', phone: '+971500000000', first_name: 'Test', last_name: 'Shopper', country: 'United Arab Emirates', address: 'Test building', city: 'Business Bay', emirate: 'Dubai' };
   const storage = new Map([['pureform.cart.v1', JSON.stringify([{ id: grey, quantity: 2 }])]]);
   const checkoutStorage = new Map(pendingCheckout ? [['pureform.checkout.v1', JSON.stringify(pendingCheckout)]] : []);
   const catalog = {
@@ -81,7 +83,7 @@ function fixture({ search = '', fetch = async () => ({ ok: true, json: async () 
       removeItem(key) { if (unavailableSessionStorage) throw Error('Storage unavailable'); checkoutStorage.delete(key); }
     },
     CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } },
-    FormData: class { get(name) { return name === 'country' ? 'United Arab Emirates' : name === 'emirate' ? 'Dubai' : 'Fixture'; } },
+    FormData: class { get(name) { return formValues[name] || ''; } },
     fetch: async (...args) => {
       if (args[1]?.method === 'GET') {
         setupCalls.push(args);
@@ -96,7 +98,7 @@ function fixture({ search = '', fetch = async () => ({ ok: true, json: async () 
   document.getElementById('checkoutVerifyPayment').hidden = true;
   new vm.Script(cartSource).runInContext(context);
   new vm.Script(checkoutSource).runInContext(context);
-  return { ids, calls, setupCalls, redirects, history, window, checkoutStorage, storage, cart: window.PureFormCart,
+  return { ids, calls, setupCalls, redirects, history, window, checkoutStorage, storage, formValues, cart: window.PureFormCart,
     submit: () => ids.checkoutForm.listeners.submit({ preventDefault() {} }),
     retry: () => ids.checkoutVerifyPayment.listeners.click(),
     runCart: () => new vm.Script(cartPageSource).runInContext(context) };
@@ -232,10 +234,102 @@ test('cancelled payment leaves cart intact without verifying or claiming success
   assert.equal(page.history[0][2], '/checkout.html');
 });
 
+test('delivery continues to an accurate review without creating an order or payment session', async () => {
+  const page = fixture();
+  page.formValues.notes = 'Call at the building entrance.';
+  assert.equal(page.ids.checkoutReview.hidden, true);
+  await page.submit();
+  assert.equal(page.ids.checkoutDelivery.hidden, true);
+  assert.equal(page.ids.checkoutReview.hidden, false);
+  assert.equal(page.ids.checkoutReviewTitle.focused, true);
+  assert.match(page.ids.checkoutReviewContact.textContent, /Test Shopper\nshopper@example.test\n\+971500000000/);
+  assert.equal(page.ids.checkoutReviewAddress.textContent, 'Test building, Business Bay, Dubai, United Arab Emirates');
+  assert.match(page.ids.checkoutReviewShipping.textContent, /Free UAE delivery/);
+  assert.equal(page.ids.checkoutReviewTotal.textContent, 'AED 87.78');
+  assert.equal(page.ids.checkoutReviewNotesRow.hidden, false);
+  assert.equal(page.ids.checkoutReviewNotes.textContent, page.formValues.notes);
+  assert.equal(page.ids.checkoutPaymentProgress.getAttribute('aria-current'), 'step');
+  assert.equal(page.ids.checkoutDeliveryProgress.getAttribute('aria-current'), undefined);
+  assert.equal(page.calls.length, 0);
+  assert.equal(page.setupCalls.length, 0);
+  assert.equal(page.checkoutStorage.size, 0);
+  assert.deepEqual(page.redirects, []);
+});
+
+test('editing retains delivery details and requires another review before payment', async () => {
+  const page = fixture();
+  await page.submit();
+  page.ids.checkoutEditDelivery.listeners.click();
+  assert.equal(page.ids.checkoutDelivery.hidden, false);
+  assert.equal(page.ids.checkoutReview.hidden, true);
+  assert.equal(page.formValues.address, 'Test building');
+  page.formValues.address = 'Updated building';
+  await page.submit();
+  assert.match(page.ids.checkoutReviewAddress.textContent, /^Updated building/);
+  assert.equal(page.ids.checkoutReviewNotesRow.hidden, true);
+  assert.equal(page.calls.length, 0);
+});
+
+test('a changed cart or price invalidates its review and refreshes the total', async () => {
+  const page = fixture();
+  await page.submit();
+  page.cart.setQuantity(grey, 1);
+  assert.equal(page.ids.checkoutReview.hidden, true);
+  assert.equal(page.ids.checkoutReviewTotal.textContent, 'AED 53.89');
+  assert.match(page.ids.checkoutStatus.textContent, /order changed/);
+  await page.submit();
+  assert.match(page.ids.checkoutReviewShipping.textContent, /AED 10 UAE delivery/);
+  page.cart.setCatalog({ [grey]: { ...page.cart.catalog[grey], price: 30 } });
+  assert.equal(page.ids.checkoutReview.hidden, true);
+  assert.equal(page.ids.checkoutReviewTotal.textContent, 'AED 40.00');
+  await page.submit();
+  assert.equal(page.ids.checkoutReview.hidden, false);
+  assert.equal(page.calls.length, 0);
+});
+
+test('changed contact data or discount codes must be reviewed again before a session starts', async () => {
+  const page = fixture();
+  await page.submit();
+  page.formValues.phone = '+971500000001';
+  await page.submit();
+  assert.match(page.ids.checkoutReviewContact.textContent, /\+971500000001/);
+  page.ids.discountCode.value = 'EXAMPLE';
+  await page.submit();
+  assert.equal(page.calls.length, 0);
+  assert.equal(page.setupCalls.length, 0);
+});
+
+test('invalid delivery fields remain editable and cannot start a payment session', async () => {
+  const page = fixture();
+  page.ids.checkoutForm.checkValidity = () => false;
+  await page.submit();
+  assert.equal(page.ids.checkoutReview.hidden, true);
+  assert.equal(page.calls.length, 0);
+  page.ids.checkoutForm.checkValidity = () => true;
+  await page.submit();
+  page.ids.checkoutForm.listeners.invalid();
+  assert.equal(page.ids.checkoutDelivery.hidden, false);
+  assert.equal(page.ids.checkoutReview.hidden, true);
+});
+
+test('the mobile cart keeps its total and checkout available while choosing a second set', () => {
+  const page = fixture();
+  page.runCart();
+  page.ids.cartDeliveryChoices = element('details');
+  page.ids.cartDeliveryChoices.hidden = false;
+  page.ids.cartDeliveryChoices.open = true;
+  page.cart.setQuantity(grey, 1);
+  assert.equal(page.ids.cartStickyCheckout.hidden, false);
+  assert.equal(page.ids.cartStickyTotal.textContent, 'AED 53.89');
+  page.cart.clearCart();
+  assert.equal(page.ids.cartStickyCheckout.hidden, true);
+});
+
 test('checkout sends only canonical quantities and blocks duplicate submissions', async () => {
   let resolve;
   const response = new Promise(done => { resolve = done; });
   const page = fixture({ fetch: () => response });
+  await page.submit(); // Delivery review never starts a session.
   const pending = page.submit();
   await page.submit();
   await settle();
@@ -257,6 +351,7 @@ test('checkout sends only canonical quantities and blocks duplicate submissions'
 test('blocked tab storage does not prevent redirect to a valid checkout', async () => {
   const page = fixture({ unavailableSessionStorage: true, fetch: async () => ({ ok: true, json: async () => ({ checkout_url: 'https://checkout.stripe.com/c/pay/fixture', order_number: order }) }) });
   await page.submit();
+  await page.submit();
   assert.deepEqual(page.redirects, ['https://checkout.stripe.com/c/pay/fixture']);
   assert.equal(page.cart.getCount(), 2);
 });
@@ -264,6 +359,7 @@ test('blocked tab storage does not prevent redirect to a valid checkout', async 
 for (const url of ['http://checkout.stripe.com/pay', 'https://checkout.stripe.com.attacker.test/pay', 'https://checkout.stripe.com@attacker.test/pay', 'javascript:alert(1)', 'https://checkout.stripe.com:8443/pay']) {
   test(`rejects an untrusted gateway redirect: ${url}`, async () => {
     const page = fixture({ fetch: async () => ({ ok: true, json: async () => ({ checkout_url: url }) }) });
+    await page.submit();
     await page.submit();
     assert.equal(page.redirects.length, 0);
     assert.equal(page.cart.getCount(), 2);
@@ -379,6 +475,7 @@ test('two or more sets waive AED 10 delivery in both checkout totals; one set st
 test('checkout fails closed when deployed delivery configuration is missing or different', async () => {
   for (const setup of [{ configured: true }, { configured:true,currency:'AED',shipping_total:10 }, { configured:true,currency:'AED',shipping_total:10,free_shipping_min_sets:3 }, { configured: true, currency: 'AED', shipping_total: 0 }, { configured: false, currency: 'AED', shipping_total: 10 }]) {
     const page = fixture({ setup });
+    await page.submit();
     await page.submit();
     assert.equal(page.calls.length, 0);
     assert.equal(page.redirects.length, 0);

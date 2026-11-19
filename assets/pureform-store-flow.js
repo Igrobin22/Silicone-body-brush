@@ -179,8 +179,7 @@
       ['.pdp-routine-steps > li', 'rise'],
       ['.pdp-specs > div, .pdp-related-card', 'right'],
       ['.cart-empty-state > div:first-child', 'fade'],
-      ['.cart-summary > h2, .checkout-summary > h2', 'right'],
-      ['.checkout-step-title', 'fade'],
+      ['.cart-summary > h2', 'right'],
       ['.retail-footer-grid > div', 'rise']
     ];
     var targets = new Set();

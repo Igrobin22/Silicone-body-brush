@@ -178,6 +178,12 @@ Reserve large display typography for the homepage hero. Information-page titles 
 
 Use section padding around 5rem on desktop and reduce gradually on mobile. Keep repeated product and review cards on predictable grids with stable dimensions so hover states do not shift the layout.
 
+The product-detail gallery's main image is bounded by the opening viewport,
+reserving space beneath the header and breadcrumb for the thumbnail row and
+caption. Show the complete photo with contained sizing, and keep enlargement
+available. On phones, reserve space for the smaller thumbnail row without a
+caption. Resizing the window must preserve the visible gallery controls.
+
 ## Elevation & Depth
 
 Depth should be quiet. Use thin borders, translucent white surfaces, soft shadows, and occasional backdrop blur for glass-like panels. Shadows should be broad and low-opacity, never harsh.
@@ -294,14 +300,24 @@ Navigation is fixed, white or glass-white, and restrained. The PureForm wordmark
 
 Product cards should emphasize image, product name, shade/material details, and a clear CTA. Keep them more editorial than marketplace-like: fewer badges, cleaner spacing, and no loud sale treatments.
 
-Homepage and Shop cards adapt Isaiah's Product Reveal Card from 21st.dev using
-the existing storefront stack. Use one square, contained product image, a quiet
-stock or sale badge, and a visible name and AED price below. The sage details
-panel slides up over the image on hover or keyboard focus. On touch screens it
-sits below the price so the first tap opens the product. Keep card dimensions
-stable, honor reduced motion, and source price and availability from the catalog.
-On desktop, cap the Home and Shop collections' inner width at 960px so their
-three cards fit comfortably in one centered row. On mobile, show two cards at a time in the scrollable Home and Shop collections, capped at 190px per card. Keep the next card partially visible in the cart recommendations.
+Homepage and Shop cards adapt [ShadcnStore's Product Listing Card](https://dev.21st.dev/@shadcnstore/components/product-card-1)
+using the existing storefront stack. Use a white, thin-bordered card with 12px
+corners, an inset square contained photo with 8px corners, a quiet stock badge,
+a compact product title and AED price, and an always-visible outlined Add to
+cart button. Image and title clicks open the product; the independent button
+adds one set with the existing stock checks and opens the cart. Keep card sizes
+stable, with subtle sage button hover and no hidden panel or image zoom. Use a
+single title link stretched over each article and keep the button above it.
+Without JavaScript, a visible View set link opens the product instead. Prices,
+photos and availability remain catalog-backed. Honor reduced motion.
+Keep the Home and Shop section headings within the existing 960px content
+column, but cap their centered product grids at 696px, with 18px gaps and
+220px-wide desktop cards. Use 12px card padding, 15px titles and 16px prices.
+On mobile, use a centered two-column grid capped at 300px including 4px edge
+padding and a 12px column gap. Keep cards at most 140px wide, with 8px padding
+and gaps inside each card. Wrap the third color onto a second row, with no
+sideways card scrolling. Retain 44px shopping buttons and full, contained photos.
+Keep the next card partially visible in the cart recommendations.
 
 Use the visible product title to name linked cards. An image inside the same
 link can have empty alternative text when the title already identifies the set.
@@ -309,6 +325,25 @@ Keep Clear cart available alongside the mobile order summary while the sticky
 bar provides the checkout action. Show a browse link in place of delivery fields
 when checkout opens with an empty cart. Show payment verification and confirmation
 above the fold without the delivery form.
+
+Cart and checkout use the visible-total and clear-next-action hierarchy reviewed
+on noon UAE and Amazon UAE on 19 November 2026. Keep PureForm's neutral surfaces,
+sage selection, fonts and dark buttons. The cart's second-set chooser is an
+optional, initially collapsed native disclosure. A nonempty mobile cart always
+shows a bottom bar with the total including delivery and Checkout, even while
+that offer is open. Keep the desktop summary beside the items.
+
+Checkout has a delivery stage followed by an editable delivery/payment review.
+Continue to payment validates the existing UAE fields and opens the review
+locally, without creating an order or payment session. Show contact, address,
+delivery instructions when present, the actual delivery charge and total, and
+one selected Credit or debit card method. The final action opens the existing
+Stripe hosted checkout. Changes to the cart or price require another review;
+editing keeps entered details. Keep optional delivery instructions collapsed,
+mobile order details expandable and guest checkout available. Preserve server
+price/stock checks, payment verification and gateway-controlled fulfillment.
+Do not imitate marketplace branding or add unsupported wallets, installments,
+cash on delivery, account requirements or local card-number fields.
 
 Review cards should be text-forward with small metadata, subtle dividers, and steady grid behavior. They should support trust without overwhelming the product story.
 

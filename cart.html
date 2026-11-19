@@ -20,7 +20,7 @@
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
-  <link rel="stylesheet" href="assets/pureform-retail.css?v=storefront-audit">
+  <link rel="stylesheet" href="assets/pureform-retail.css?v=checkout-review">
 </head>
 
 <body class="retail-page">
@@ -76,11 +76,12 @@
             <h2 id="cartDeliveryTitle" tabindex="-1">One more set. Free UAE delivery.</h2>
             <p id="cartDeliveryMessage"></p>
             <progress id="cartDeliveryProgress" max="2" value="1" aria-label="Sets toward free UAE delivery"></progress>
-            <div id="cartDeliveryChoices">
+            <details id="cartDeliveryChoices">
+              <summary>Choose a second set</summary>
               <fieldset class="cart-delivery-colors"><legend>Choose your second set</legend><div id="cartDeliveryOptions"></div></fieldset>
               <p class="cart-delivery-preview" id="cartDeliveryPreview"></p>
               <button class="btn-s" id="cartDeliveryAdd" type="button">Add a second set</button>
-            </div>
+            </details>
             <p class="cart-delivery-status" id="cartDeliveryStatus" role="status"></p>
           </section>
         </article>
@@ -91,11 +92,12 @@
           <div class="cart-summary-line"><span>Subtotal</span><strong id="cartSubtotal">AED 0.00</strong></div>
           <div class="cart-summary-line"><span>UAE delivery</span><strong id="cartShipping">AED 0.00</strong></div>
           <div class="cart-summary-line cart-summary-total"><span>Total</span><strong id="cartTotal">AED 0.00</strong></div>
-          <p class="cart-summary-note">Estimated UAE delivery: 2&ndash;3 working days. Free delivery with any 2 or more sets. One set: AED 10 delivery. Pay securely by card at checkout.</p>
+          <p class="cart-summary-note">Delivery in 2&ndash;3 working days. AED 10 for one set; free with 2+ sets.</p>
           <div class="cart-summary-actions">
             <a class="btn-p Btn buy-pay-button is-empty-cart" id="cartCheckoutLink" href="products.html#set-colors"><span>Choose a set first</span><svg class="svgIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2zm0 3v2h18V8H3zm3 7h5v-2H6v2z"/></svg></a>
             <button class="btn-s" id="cartClearButton" type="button" disabled>Clear cart</button>
           </div>
+          <p class="cart-payment-note">Secure card payment with Stripe. No account needed.</p>
           <p class="cart-summary-status" id="cartStatus" aria-live="polite"></p>
         </aside>
       </div>
@@ -129,7 +131,7 @@
 
   <aside class="cart-sticky-checkout" id="cartStickyCheckout" aria-label="Sticky checkout summary" hidden>
     <div class="cart-sticky-total">
-      <span>Total</span>
+      <span>Total including delivery</span>
       <strong id="cartStickyTotal">AED 0.00</strong>
     </div>
     <a class="cart-sticky-button" id="cartStickyCheckoutLink" href="checkout.html">Checkout</a>
@@ -168,18 +170,9 @@
       var stickyCheckout = document.getElementById('cartStickyCheckout');
       var stickyTotal = document.getElementById('cartStickyTotal');
       var stickyCheckoutLink = document.getElementById('cartStickyCheckoutLink');
-      var deliveryChoices = document.getElementById('cartDeliveryChoices');
-      var choosingSecondSet = false;
 
       if (!cart || !itemsList) {
         return;
-      }
-
-      if (deliveryChoices && 'IntersectionObserver' in window) {
-        new IntersectionObserver(function (entries) {
-          choosingSecondSet = entries[0].isIntersecting && !deliveryChoices.hidden;
-          updateStickyCheckout(cart.getCount() > 0);
-        }).observe(deliveryChoices);
       }
 
       function setStatus(message) {
@@ -196,7 +189,7 @@
           return;
         }
 
-        stickyCheckout.hidden = !hasItems || choosingSecondSet;
+        stickyCheckout.hidden = !hasItems;
         document.body.classList.toggle('has-cart-sticky', !stickyCheckout.hidden);
 
         if (!hasItems) {

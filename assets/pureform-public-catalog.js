@@ -359,8 +359,14 @@
     });
     document.querySelectorAll('[data-pf-product]').forEach(function (node) {
       var item = state.listings.find(function (listing) { return listing.id === node.getAttribute('data-pf-product'); });
-      var badge = node.querySelector('.pf-reveal-badge');
+      var badge = node.querySelector('.pf-listing-badge');
+      var button = node.querySelector('.pf-listing-add');
       if (item && badge) badge.textContent = inventoryBadgeText(item);
+      if (item && button) {
+        button.disabled = item.inventory_quantity <= 0 || item.inventory_status === 'out_of_stock';
+        button.textContent = button.disabled ? 'Out of stock' : 'Add to cart';
+        button.setAttribute('aria-label', button.textContent + ': ' + item.name);
+      }
     });
   }
 
@@ -370,16 +376,21 @@
     root.replaceChildren();
 
     listings.forEach(function (item, index) {
-      var card = createElement('a', 'pf-product-card ' + (home ? 'pcard reveal in-view visible is-visible' : 'collection-card is-visible'));
-      var media = createElement('div', 'pf-reveal-media');
-      var badge = createElement('span', 'pf-reveal-badge', inventoryBadgeText(item));
+      var card = createElement('article', 'pf-product-card ' + (home ? 'pcard reveal in-view visible is-visible' : 'collection-card is-visible'));
+      var media = createElement('div', 'pf-listing-media');
+      var badge = createElement('span', 'pf-listing-badge', inventoryBadgeText(item));
       var img = document.createElement('img');
-      var info = createElement('div', 'pf-reveal-info');
-      var title = createElement(home ? 'h3' : 'h2', 'pf-reveal-name', item.name);
-      var price = createElement('p', 'pf-reveal-price');
-      var panel = createElement('span', 'pf-reveal-panel');
+      var info = createElement('div', 'pf-listing-info');
+      var title = createElement(home ? 'h3' : 'h2', 'pf-listing-name');
+      var link = createElement('a', 'pf-listing-link', item.name);
+      var price = createElement('p', 'pf-listing-price');
+      var footer = createElement('footer', 'pf-listing-footer');
+      var button = createElement('button', 'pf-listing-add', 'Add to cart');
+      var status = createElement('p', 'pf-listing-status');
 
-      card.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
+      link.href = 'pureform-product-detail.html?product=' + encodeURIComponent(item.id);
+      title.id = 'listing-' + (home ? 'home-' : 'shop-') + item.id;
+      card.setAttribute('aria-labelledby', title.id);
       card.setAttribute('data-pf-product', item.id);
       img.dataset.pfFallback = item.imageFallback;
       img.src = item.image;
@@ -391,16 +402,36 @@
 
       media.appendChild(img);
       media.appendChild(badge);
+      title.appendChild(link);
       info.appendChild(title);
       appendPrice(price, item);
       info.appendChild(price);
       appendLiveStatus(info, item);
-      panel.setAttribute('aria-hidden', 'true');
-      panel.appendChild(createElement('span', 'pf-reveal-shade', item.color + ' · 4 tools'));
-      panel.appendChild(createElement('span', 'pf-reveal-action', 'View set'));
+      button.type = 'button';
+      button.disabled = item.inventory_quantity <= 0 || item.inventory_status === 'out_of_stock';
+      if (button.disabled) button.textContent = 'Out of stock';
+      button.setAttribute('aria-label', button.textContent + ': ' + item.name);
+      status.id = title.id + '-status';
+      status.setAttribute('role', 'status');
+      button.setAttribute('aria-describedby', status.id);
+      button.addEventListener('click', function () {
+        var cart = window.PureFormCart;
+        if (!cart || typeof cart.addItems !== 'function') {
+          window.location.href = link.href;
+          return;
+        }
+        if (!cart.addItems([{ id: item.id, quantity: 1 }])) {
+          status.textContent = 'No more stock available. Check your cart.';
+          return;
+        }
+        button.disabled = true;
+        window.location.href = 'cart.html';
+      });
+      footer.appendChild(button);
+      footer.appendChild(status);
       card.appendChild(media);
       card.appendChild(info);
-      card.appendChild(panel);
+      card.appendChild(footer);
       root.appendChild(card);
     });
   }

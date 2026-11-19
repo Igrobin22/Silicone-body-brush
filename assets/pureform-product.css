@@ -33,9 +33,9 @@ main { padding: 0; }
 .pdp-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; gap: 48px; padding-bottom: 40px; }
 .pdp-grid > *, .pdp-summary > * { min-width: 0; }
 .pdp-gallery-shell { position: sticky; top: calc(var(--pdp-header-height) + 20px); }
-.pdp-gallery { position: relative; display: flex; width: 100%; aspect-ratio: 1; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; border: 1px solid var(--border); border-radius: 8px; background: var(--white); }
+.pdp-gallery { position: relative; display: flex; width: 100%; aspect-ratio: 1; max-height: max(160px, calc(100dvh - var(--pdp-header-height) - 210px)); overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; border: 1px solid var(--border); border-radius: 8px; background: var(--white); }
 .pdp-gallery::-webkit-scrollbar { display: none; }
-.pdp-gallery-frame { position: relative; display: grid; place-items: center; flex: 0 0 100%; min-width: 100%; height: 100%; scroll-snap-align: start; }
+.pdp-gallery-frame { position: relative; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; flex: 0 0 100%; min-width: 100%; min-height: 0; height: 100%; scroll-snap-align: start; }
 .pdp-gallery-frame img { width: 94%; height: 94%; object-fit: contain; }
 .pdp-gallery-zoom { position: absolute; right: 12px; bottom: 12px; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 50%; background: rgba(255,255,255,.95); color: var(--dark); -webkit-tap-highlight-color: transparent; }
 .pdp-gallery-zoom:hover { background: var(--off); }
@@ -171,6 +171,7 @@ body:has(.pdp-zoom-dialog[open]) { overflow: hidden; }
   :root { --pdp-header-height: 72px; --pdp-gutter: 20px; }
   .pdp-breadcrumb { padding-block: 16px; font-size: 11px; }
   .pdp-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-bottom: 28px; }
+  .pdp-gallery { max-height: max(160px, calc(100dvh - var(--pdp-header-height) - 146px)); }
   .pdp-gallery-dot { flex-basis: 60px; width: 60px; height: 60px; }
   .pdp-gallery-caption { display: none; }
   .pdp-copy h1 { font-size: 24px; }
