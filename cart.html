@@ -20,7 +20,7 @@
   <link rel="expect" href="#main-content" blocking="render">
   <script src="assets/pureform-page-transitions.js" defer blocking="render"></script>
   <script src="assets/pureform-mobile-menu.js" defer blocking="render"></script>
-  <link rel="stylesheet" href="assets/pureform-retail.css?v=checkout-review">
+  <link rel="stylesheet" href="assets/pureform-retail.css?v=desktop-cart-summary">
 </head>
 
 <body class="retail-page">
@@ -54,11 +54,12 @@
 
   <main id="main-content">
     <nav class="retail-breadcrumb" aria-label="Breadcrumb"><ol><li><a href="index.html">Home</a></li><li><a href="products.html">Shower sets</a></li><li aria-current="page">Cart</li></ol></nav>
-    <header class="retail-heading retail-wrap"><h1 id="cartTitle">Your cart</h1><p>Review your sets and quantities before continuing to checkout.</p></header>
-    <ol class="retail-steps retail-wrap" aria-label="Order progress"><li aria-current="step"><span class="retail-step-number" aria-hidden="true">1</span>Cart</li><li><span class="retail-step-number" aria-hidden="true">2</span>Delivery</li><li><span class="retail-step-number" aria-hidden="true">3</span>Card payment</li></ol>
     <section class="sec cart-section" aria-labelledby="cartTitle">
 
       <div class="cart-layout">
+        <div class="cart-content">
+        <header class="retail-heading"><h1 id="cartTitle">Your cart</h1><p>Review your sets and quantities before continuing to checkout.</p></header>
+        <ol class="retail-steps" aria-label="Order progress"><li aria-current="step"><span class="retail-step-number" aria-hidden="true">1</span>Cart</li><li><span class="retail-step-number" aria-hidden="true">2</span>Delivery</li><li><span class="retail-step-number" aria-hidden="true">3</span>Card payment</li></ol>
         <article class="card cart-items-card">
           <div class="cart-empty-state" id="cartEmptyState">
             <div>
@@ -85,6 +86,7 @@
             <p class="cart-delivery-status" id="cartDeliveryStatus" role="status"></p>
           </section>
         </article>
+        </div>
 
         <aside class="cart-summary" aria-label="Cart summary">
           <h2>Order summary</h2>

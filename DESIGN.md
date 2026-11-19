@@ -331,7 +331,9 @@ on noon UAE and Amazon UAE on 19 November 2026. Keep PureForm's neutral surfaces
 sage selection, fonts and dark buttons. The cart's second-set chooser is an
 optional, initially collapsed native disclosure. A nonempty mobile cart always
 shows a bottom bar with the total including delivery and Checkout, even while
-that offer is open. Keep the desktop summary beside the items.
+that offer is open. Align the desktop summary with the top of the cart heading,
+in the right column below the breadcrumbs. Keep the heading, progress and items
+in the left column, with the existing stacked order and spacing on mobile.
 
 Checkout has a delivery stage followed by an editable delivery/payment review.
 Continue to payment validates the existing UAE fields and opens the review
