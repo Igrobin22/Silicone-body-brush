@@ -8,24 +8,24 @@
     'pureform-4pc-set-grey': {
       id: 'pureform-4pc-set-grey',
       name: 'Grey 4-Piece Silicone Brush Set',
-      price: 43.89,
-      regularPrice: 87.78,
+      price: 80,
+      regularPrice: 80,
       image: 'assets/products/grey-main.webp',
       meta: 'Grey set / 4 tools'
     },
     'pureform-4pc-set-black': {
       id: 'pureform-4pc-set-black',
       name: 'Black 4-Piece Silicone Brush Set',
-      price: 43.89,
-      regularPrice: 87.78,
+      price: 70,
+      regularPrice: 70,
       image: 'assets/products/black-main.webp',
       meta: 'Black set / 4 tools'
     },
     'pureform-4pc-set-pink': {
       id: 'pureform-4pc-set-pink',
       name: 'Pink 4-Piece Silicone Brush Set',
-      price: 37.80,
-      regularPrice: 42,
+      price: 80,
+      regularPrice: 80,
       image: 'assets/products/pink-main.webp',
       meta: 'Pink set / 4 tools'
     }
